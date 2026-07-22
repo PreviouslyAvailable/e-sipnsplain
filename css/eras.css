@@ -1,0 +1,2446 @@
+/* =========================================================
+   Era theme system — chrome locked to active age/year
+   body[data-era="<year|prologue>"] · body[data-theme-family]
+   body[data-age] · body[data-year] on photo chapters
+   Theme switches only when leaving an age (N → N+1).
+   Years: 1995–2025 (ages 0–30). Homage only.
+   ========================================================= */
+
+.era-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+  opacity: 0;
+  background: #000;
+  mix-blend-mode: normal;
+}
+
+.era-veil.is-flash {
+  animation: eraBoot 520ms ease-out both;
+}
+
+.era-veil.is-morph {
+  animation: eraMorph 640ms ease-in-out both;
+}
+
+.era-veil.is-pageload {
+  animation: eraPageLoad 700ms steps(4, end) both;
+}
+
+.era-veil.is-cart {
+  animation: eraCartInsert 880ms steps(8, end) both;
+}
+
+.era-veil.is-petsite {
+  animation: eraPetSite 760ms ease-out both;
+}
+
+.era-veil.is-island {
+  animation: eraIslandJoin 860ms ease-in-out both;
+}
+
+.era-veil.is-lcd {
+  animation: eraLcdBoot 820ms steps(6, end) both;
+}
+
+.era-veil.is-touch {
+  animation: eraTouchRipple 700ms ease-out both;
+}
+
+.era-veil.is-ghost {
+  animation: eraGhostPop 740ms ease-in-out both;
+}
+
+.era-veil.is-ai {
+  animation: eraAiShift 760ms ease-in-out both;
+}
+
+@keyframes eraBoot {
+  0% { opacity: 0; background: #000; }
+  15% { opacity: 1; background: #000; }
+  40% { opacity: 0.85; background: #0a3d2e; }
+  70% { opacity: 0.4; }
+  100% { opacity: 0; }
+}
+
+@keyframes eraMorph {
+  0% { opacity: 0; backdrop-filter: blur(0); background: rgba(7, 8, 13, 0); }
+  35% { opacity: 1; background: rgba(7, 8, 13, 0.55); }
+  100% { opacity: 0; background: rgba(7, 8, 13, 0); }
+}
+
+@keyframes eraPageLoad {
+  0% { opacity: 1; background: #c0c0c0; }
+  25% { opacity: 1; background: #fff; }
+  50% { opacity: 0.7; background: #ece9d8; }
+  100% { opacity: 0; }
+}
+
+/* Cartridge-insert → GBA screen boot (homage) */
+@keyframes eraCartInsert {
+  0% {
+    opacity: 1;
+    background: #1a1030;
+    clip-path: inset(42% 28% 42% 28%);
+  }
+  18% {
+    opacity: 1;
+    background: #3d2a6b;
+    clip-path: inset(38% 22% 38% 22%);
+  }
+  36% {
+    opacity: 1;
+    background: #000;
+    clip-path: inset(22% 14% 22% 14%);
+  }
+  52% {
+    opacity: 1;
+    background: #0f380f;
+    clip-path: inset(16% 10% 16% 10%);
+  }
+  68% {
+    opacity: 1;
+    background: #8bac0f;
+    clip-path: inset(12% 8% 12% 8%);
+  }
+  84% {
+    opacity: 0.45;
+    background: #9bbc0f;
+    clip-path: inset(0);
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(0);
+  }
+}
+
+@keyframes eraPetSite {
+  0% { opacity: 1; background: #ffce00; }
+  25% { opacity: 1; background: #fff; }
+  45% { opacity: 0.85; background: #8ed35c; }
+  70% { opacity: 0.35; background: #ffce00; }
+  100% { opacity: 0; }
+}
+
+@keyframes eraIslandJoin {
+  0% { opacity: 1; background: #0b3d6e; }
+  20% { opacity: 1; background: #7ec8f0; }
+  45% { opacity: 0.9; background: #e8f6ff; }
+  70% { opacity: 0.4; background: #b8e0f8; }
+  100% { opacity: 0; }
+}
+
+@keyframes eraLcdBoot {
+  0% { opacity: 1; background: #1a1a1a; }
+  20% { opacity: 1; background: #0f1a0f; }
+  40% { opacity: 1; background: #3d5c2e; }
+  60% { opacity: 0.7; background: #8bac0f; }
+  80% { opacity: 0.35; background: #9bbc0f; }
+  100% { opacity: 0; }
+}
+
+@keyframes eraTouchRipple {
+  0% { opacity: 1; background: #000; clip-path: circle(0% at 50% 50%); }
+  45% { opacity: 0.85; background: #111; clip-path: circle(55% at 50% 50%); }
+  100% { opacity: 0; clip-path: circle(120% at 50% 50%); }
+}
+
+@keyframes eraGhostPop {
+  0% { opacity: 1; background: #fffc00; }
+  35% { opacity: 0.9; background: #fff; }
+  70% { opacity: 0.35; background: #fffc00; }
+  100% { opacity: 0; }
+}
+
+@keyframes eraAiShift {
+  0% { opacity: 0; background: rgba(94, 234, 212, 0); }
+  30% { opacity: 1; background: rgba(15, 23, 42, 0.75); }
+  60% { opacity: 0.55; background: rgba(94, 234, 212, 0.25); }
+  100% { opacity: 0; }
+}
+
+.era-badge {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 42;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(7, 8, 13, 0.55);
+  color: rgba(248, 250, 252, 0.75);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 220ms ease, transform 220ms ease;
+  pointer-events: none;
+  max-width: 42cqw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.show-chrome .era-badge,
+body.show-notes .era-badge {
+  opacity: 1;
+}
+
+/* —— Shared era hooks —— */
+body[data-era] .chrome button,
+body[data-era] .choice,
+body[data-era] .progress,
+body[data-era] .frame {
+  transition:
+    background 420ms ease,
+    color 420ms ease,
+    border-color 420ms ease,
+    border-radius 420ms ease,
+    box-shadow 420ms ease,
+    font-family 420ms ease;
+}
+
+/* ===================== PROLOGUE (2026 tease) ===================== */
+body[data-era="prologue"] {
+  --era-surface: rgba(246, 244, 240, 0.96);
+  --era-ink: #12141c;
+  --era-accent: #5eead4;
+  --era-font: "Syne", system-ui, sans-serif;
+  --era-ui: "Figtree", system-ui, sans-serif;
+}
+
+body[data-era="prologue"] .era-badge::before { content: "Era · Prologue "; }
+
+/* ===================== 1995 — scrapbook / early CRT ===================== */
+body[data-era="1995"] {
+  --era-surface: #f0e2c4;
+  --era-ink: #2a1f14;
+  --era-accent: #c45c26;
+  --era-font: "Courier New", "IBM Plex Mono", monospace;
+  --era-ui: "Georgia", "Times New Roman", serif;
+  cursor: auto;
+}
+
+body[data-era="1995"]::before {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(196, 92, 38, 0.18), transparent 50%),
+    linear-gradient(180deg, #3d2b1a, #1a120c 60%, #0f0b08);
+}
+
+body[data-era="1995"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era):not(.mode-win95):not(.mode-google98) {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      rgba(42, 31, 20, 0.06) 28px
+    ),
+    linear-gradient(160deg, #f7ebd2, #e8d4ad);
+  font-family: var(--era-ui);
+}
+
+body[data-era="1995"] .photo-chapter {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(196, 92, 38, 0.12), transparent 40%),
+    linear-gradient(160deg, #f3e4c4, #e5d0a8);
+}
+
+body[data-era="1995"] .display,
+body[data-era="1995"] .prompt,
+body[data-era="1995"] .line,
+body[data-era="1995"] .age-tag,
+body[data-era="1995"] .era-tag {
+  font-family: var(--era-font);
+}
+
+body[data-era="1995"] .frame {
+  border: 4px solid #fff;
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 2px #2a1f14,
+    8px 10px 0 rgba(42, 31, 20, 0.25),
+    inset 0 0 0 1px rgba(42, 31, 20, 0.15);
+  transform: rotate(-1.5deg);
+}
+
+body[data-era="1995"] .frame::before {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  top: 8px;
+  left: 8px;
+  background: radial-gradient(circle at 30% 30%, #eee, #bbb 60%, #888);
+  border-radius: 50%;
+  box-shadow: calc(100% - 30px) 0 0 #bbb, 0 calc(100% - 30px) 0 #bbb, calc(100% - 30px) calc(100% - 30px) 0 #bbb;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+body[data-era="1995"] .choice,
+body[data-era="1995"] .chrome button {
+  font-family: var(--era-font);
+  border-radius: 0;
+  border: 2px solid #2a1f14;
+  background: #f7ebd2;
+  box-shadow: 3px 3px 0 #2a1f14;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.78rem;
+}
+
+body[data-era="1995"] .progress {
+  border-radius: 0;
+  font-family: var(--era-font);
+  background: #2a1f14;
+}
+
+body[data-era="1995"] .chip {
+  border-radius: 0;
+  font-family: var(--era-font);
+  border: 2px solid #2a1f14;
+  box-shadow: 2px 2px 0 #2a1f14;
+}
+
+body[data-era="1995"] .era-badge::before { content: "Era · 1995 scrapbook "; }
+body[data-era="1995"] .era-badge {
+  border-radius: 0;
+  font-family: var(--era-font);
+  background: #f0e2c4;
+  color: #2a1f14;
+  border: 2px solid #2a1f14;
+}
+
+/* Win95 opening chapter — teal lives on the chapter; keep letterbox black */
+body[data-era="1995"]:has(.chapter.mode-win95.active)::before {
+  background: transparent;
+  opacity: 0;
+}
+body[data-era="1995"]:has(.chapter.mode-win95.active) .era-badge::before {
+  content: "Era · Aug 1995 ";
+}
+body[data-era="1995"]:has(.chapter.mode-win95.active) .era-badge {
+  font-family: Tahoma, "MS Sans Serif", "Segoe UI", sans-serif;
+  background: #c0c0c0;
+  color: #000;
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+  box-shadow: none;
+}
+
+/* ===================== 1999 — pet-site / early kid-web homage ===================== */
+body[data-era="1999"] {
+  --era-surface: #ffffff;
+  --era-ink: #111;
+  --era-accent: #ffce00;
+  --era-font: "Fredoka", "Comic Sans MS", "Figtree", sans-serif;
+  --era-ui: "Fredoka", "Comic Sans MS", "Figtree", sans-serif;
+  --neo-yellow: #ffce00;
+  --neo-green: #8ed35c;
+  --neo-star: #ffe566;
+}
+
+body[data-era="1999"]::before {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 206, 0, 0.35), transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(142, 211, 92, 0.25), transparent 30%),
+    linear-gradient(180deg, #1a1040 0 52px, #f4f4f4 52px);
+}
+
+/* Subtle starry header band */
+body[data-era="1999"]::after {
+  opacity: 1;
+  mix-blend-mode: normal;
+  background:
+    radial-gradient(1px 1px at 10% 20%, #fff 0, transparent 100%),
+    radial-gradient(1px 1px at 30% 60%, #ffe566 0, transparent 100%),
+    radial-gradient(1.5px 1.5px at 55% 30%, #fff 0, transparent 100%),
+    radial-gradient(1px 1px at 75% 70%, #ffe566 0, transparent 100%),
+    radial-gradient(1px 1px at 90% 40%, #fff 0, transparent 100%),
+    linear-gradient(#2a1a55, #2a1a55);
+  background-size: auto, auto, auto, auto, auto, 100% 52px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  height: 52px;
+  inset: 0 0 auto 0;
+  pointer-events: none;
+}
+
+body[data-era="1999"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="1999"] .photo-chapter {
+  top: 56px;
+  left: 118px;
+  right: 12px;
+  bottom: 12px;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+  font-family: Verdana, Geneva, sans-serif;
+  color: #111;
+  box-shadow: none;
+}
+
+/* Yellow sidebar strip */
+body[data-era="1999"] .deck::before {
+  content: "";
+  position: fixed;
+  top: 52px;
+  left: 0;
+  bottom: 0;
+  width: 108px;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--neo-yellow);
+  border-right: 2px solid #000;
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.08);
+}
+
+body[data-era="1999"] .chapter::after {
+  inset: 6px;
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body[data-era="1999"] .chapter::before {
+  content: "explore · games · create · stuff";
+  position: absolute;
+  left: -106px;
+  top: 12px;
+  width: 96px;
+  z-index: 3;
+  font-family: var(--era-font);
+  font-size: 0.62rem;
+  line-height: 1.55;
+  color: #111;
+  text-align: left;
+  padding: 0 6px;
+  pointer-events: none;
+  text-transform: lowercase;
+}
+
+body[data-era="1999"] .display,
+body[data-era="1999"] .prompt,
+body[data-era="1999"] .line {
+  font-family: var(--era-font);
+  color: #111;
+}
+
+body[data-era="1999"] .age-tag,
+body[data-era="1999"] .era-tag,
+body[data-era="1999"] .iface-tag,
+body[data-era="1999"] .part-tag,
+body[data-era="1999"] .chip {
+  font-family: var(--era-font);
+  background: var(--neo-green);
+  color: #111;
+  border: 2px solid #000;
+  border-radius: 999px;
+  box-shadow: none;
+  backdrop-filter: none;
+  text-transform: lowercase;
+}
+
+body[data-era="1999"] .frame {
+  border: 2px solid #000;
+  border-radius: 8px;
+  box-shadow: 4px 4px 0 #000;
+  transform: none;
+  background: #fff8d6;
+}
+
+body[data-era="1999"] .choice,
+body[data-era="1999"] .chrome button,
+body[data-era="1999"] .continue-btn {
+  font-family: var(--era-font);
+  border-radius: 999px;
+  border: 2px solid #000;
+  background: var(--neo-yellow);
+  color: #111;
+  box-shadow: 2px 2px 0 #000;
+  text-transform: lowercase;
+}
+
+body[data-era="1999"] .choice:hover,
+body[data-era="1999"] .chrome button:hover {
+  background: var(--neo-green);
+}
+
+body[data-era="1999"] .progress {
+  font-family: var(--era-font);
+  background: var(--neo-green);
+  color: #111;
+  border: 2px solid #000;
+  border-radius: 999px;
+  text-transform: lowercase;
+}
+
+body[data-era="1999"] .chrome {
+  background: var(--neo-yellow);
+  border-top: 2px solid #000;
+  opacity: 1 !important;
+  pointer-events: auto;
+}
+
+body[data-era="1999"] .era-badge::before { content: "Era · ~1999 pet-web "; }
+body[data-era="1999"] .era-badge {
+  top: 10px;
+  left: 10px;
+  font-family: var(--era-font);
+  background: var(--neo-yellow);
+  color: #111;
+  border: 2px solid #000;
+  border-radius: 999px;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 720px) {
+  body[data-era="1999"] .deck::before,
+  body[data-era="1999"] .chapter::before { display: none; }
+  body[data-era="1999"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+  body[data-era="1999"] .photo-chapter {
+    top: 56px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+  }
+}
+
+/* ===================== 2001 — classic desktop OS ===================== */
+body[data-era="2001"] {
+  --era-surface: #ece9d8;
+  --era-ink: #000;
+  --era-accent: #000080;
+  --era-font: "Tahoma", "Segoe UI", system-ui, sans-serif;
+  --era-ui: "Tahoma", "Segoe UI", system-ui, sans-serif;
+}
+
+body[data-era="2001"]::before {
+  background:
+    linear-gradient(180deg, #3a6ea5 0%, #5b8dc7 35%, #7a9ec8 35%, #3a6ea5 35.2%, #245693 100%);
+}
+
+body[data-era="2001"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2001"] .photo-chapter {
+  background: #ece9d8;
+  border-radius: 0;
+  font-family: var(--era-ui);
+}
+
+body[data-era="2001"] .chapter::after {
+  inset: 8px;
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+  border-radius: 0;
+  box-shadow: 1px 1px 0 #000;
+}
+
+body[data-era="2001"] .display,
+body[data-era="2001"] .prompt {
+  font-family: "Trebuchet MS", var(--era-font);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #000080;
+}
+
+body[data-era="2001"] .frame {
+  border-radius: 0;
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+  box-shadow: 2px 2px 0 #000;
+  transform: none;
+  background: #000;
+}
+
+body[data-era="2001"] .photo-chapter .age-tag,
+body[data-era="2001"] .photo-chapter .era-tag,
+body[data-era="2001"] .photo-chapter .iface-tag,
+body[data-era="2001"] .photo-chapter .part-tag {
+  border-radius: 0;
+  font-family: var(--era-font);
+  background: linear-gradient(180deg, #0a246a, #a6caf0);
+  color: #fff;
+  border: 1px solid #000;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+body[data-era="2001"] .choice,
+body[data-era="2001"] .chrome button,
+body[data-era="2001"] .continue-btn {
+  font-family: var(--era-font);
+  border-radius: 0;
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+  background: #c0c0c0;
+  color: #000;
+  box-shadow: none;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+body[data-era="2001"] .choice:hover,
+body[data-era="2001"] .chrome button:hover {
+  background: #d4d0c8;
+  outline: 1px dotted #000;
+}
+
+body[data-era="2001"] .progress {
+  border-radius: 0;
+  font-family: var(--era-font);
+  background: #000080;
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+}
+
+body[data-era="2001"] .chrome {
+  bottom: 0;
+  padding: 4px 8px 6px;
+  background: #c0c0c0;
+  border-top: 2px solid #fff;
+  opacity: 1 !important;
+  pointer-events: auto;
+}
+
+body[data-era="2001"] .chip {
+  border-radius: 0;
+  font-family: var(--era-font);
+  background: #000080;
+  color: #fff;
+  border: none;
+}
+
+body[data-era="2001"] .era-badge::before { content: "Era · ~2002 desktop OS "; }
+body[data-era="2001"] .era-badge {
+  border-radius: 0;
+  font-family: var(--era-font);
+  background: linear-gradient(180deg, #0a246a, #a6caf0);
+  color: #fff;
+  top: 8px;
+  left: 8px;
+}
+
+/* Optional Win-ish cursor when CRT moment not running */
+body[data-era="2001"]:not(.is-crt-live),
+body[data-era="2002"]:not(.is-crt-live) {
+  cursor: default;
+}
+
+/* ===================== 2003 — Game Boy Advance homage ===================== */
+body[data-era="2003"] {
+  --era-surface: #c4d68a;
+  --era-ink: #0f380f;
+  --era-accent: #8b5cf6;
+  --era-font: "Press Start 2P", "IBM Plex Mono", monospace;
+  --era-ui: "Press Start 2P", "IBM Plex Mono", monospace;
+  --gba-chassis: #6b5b95;
+  --gba-chassis-deep: #3d2a6b;
+  --gba-screen: #9bbc0f;
+  --gba-screen-deep: #0f380f;
+  --gba-bezel: #2a2438;
+}
+
+body[data-era="2003"]::before {
+  background: #050508;
+}
+
+body[data-era="2003"]:has(.photo-chapter.layout-gba.active)::after {
+  opacity: 0.08;
+}
+
+body[data-era="2003"] .photo-chapter.layout-gba {
+  background: #050508;
+  color: #c8d4f0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  image-rendering: auto;
+}
+
+body[data-era="2003"] .era-badge::before { content: "Era · 2003 GBA SP "; }
+
+body[data-era="2003"]::after {
+  opacity: 0.2;
+  background-image:
+    linear-gradient(rgba(155, 188, 15, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(155, 188, 15, 0.06) 1px, transparent 1px);
+  background-size: 4px 4px;
+  mix-blend-mode: overlay;
+}
+
+body[data-era="2003"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2003"] .photo-chapter {
+  background:
+    linear-gradient(180deg, #d4e4a0 0%, var(--gba-screen) 40%, #8bac0f 100%);
+  color: var(--gba-screen-deep);
+  border: 14px solid var(--gba-chassis);
+  border-radius: 18px 18px 28px 28px;
+  box-shadow:
+    inset 0 0 0 6px var(--gba-bezel),
+    inset 0 0 0 8px #1a1528,
+    0 0 0 4px var(--gba-chassis-deep),
+    8px 12px 0 rgba(0, 0, 0, 0.35);
+  font-family: var(--era-ui);
+  image-rendering: pixelated;
+}
+
+body[data-era="2003"] .chapter::after {
+  inset: 10px;
+  border: 3px solid #306230;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 24px rgba(15, 56, 15, 0.25),
+    0 0 0 1px rgba(155, 188, 15, 0.4);
+}
+
+/* D-pad + face-button chrome accents (CSS shapes only) */
+body[data-era="2003"] .chapter::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  bottom: 22px;
+  width: 42px;
+  height: 42px;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(#2a2438, #2a2438) center / 14px 42px no-repeat,
+    linear-gradient(#2a2438, #2a2438) center / 42px 14px no-repeat;
+  box-shadow: 0 2px 0 #1a1230;
+  opacity: 0.85;
+}
+
+body[data-era="2003"] .photo-chapter .footer::before {
+  content: "";
+  position: absolute;
+  right: 22px;
+  bottom: 26px;
+  width: 52px;
+  height: 28px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 14px 14px, #c04080 0 9px, transparent 10px),
+    radial-gradient(circle at 38px 14px, #c04080 0 9px, transparent 10px);
+  opacity: 0.9;
+}
+
+body[data-era="2003"] .display,
+body[data-era="2003"] .prompt,
+body[data-era="2003"] .line,
+body[data-era="2003"] .age-tag,
+body[data-era="2003"] .era-tag,
+body[data-era="2003"] .iface-tag,
+body[data-era="2003"] .part-tag {
+  font-family: var(--era-font);
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+}
+
+body[data-era="2003"] .age-tag,
+body[data-era="2003"] .era-tag,
+body[data-era="2003"] .iface-tag,
+body[data-era="2003"] .part-tag {
+  background: var(--gba-screen-deep);
+  color: var(--gba-screen);
+  border: 2px solid #306230;
+  border-radius: 2px;
+  box-shadow: 2px 2px 0 #306230;
+  font-size: 0.55rem;
+  letter-spacing: 0.04em;
+  backdrop-filter: none;
+}
+
+body[data-era="2003"] .frame {
+  border-radius: 4px;
+  border: 4px solid var(--gba-bezel);
+  box-shadow:
+    inset 0 0 0 2px #9bbc0f,
+    4px 4px 0 rgba(15, 56, 15, 0.35);
+  transform: none;
+  background: #0f380f;
+}
+
+body[data-era="2003"] .choice,
+body[data-era="2003"] .chrome button,
+body[data-era="2003"] .continue-btn {
+  font-family: var(--era-font);
+  font-size: 0.55rem;
+  border-radius: 999px;
+  border: 3px solid var(--gba-chassis-deep);
+  background: var(--gba-chassis);
+  color: #f3e8ff;
+  box-shadow: 0 3px 0 var(--gba-chassis-deep);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+body[data-era="2003"] .choice:hover,
+body[data-era="2003"] .chrome button:hover {
+  background: #7c6aad;
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 var(--gba-chassis-deep);
+}
+
+body[data-era="2003"] .progress {
+  border-radius: 2px;
+  font-family: var(--era-font);
+  font-size: 0.5rem;
+  background: var(--gba-screen-deep);
+  color: var(--gba-screen);
+  border: 2px solid #306230;
+  letter-spacing: 0.06em;
+}
+
+body[data-era="2003"] .chrome {
+  bottom: 10px;
+  padding: 6px 10px;
+  background: var(--gba-chassis);
+  border: 3px solid var(--gba-chassis-deep);
+  border-radius: 12px;
+  opacity: 1 !important;
+  pointer-events: auto;
+  box-shadow: 0 4px 0 #1a1230;
+}
+
+body[data-era="2003"] .chip {
+  border-radius: 2px;
+  font-family: var(--era-font);
+  font-size: 0.45rem;
+  background: var(--gba-screen-deep);
+  color: var(--gba-screen);
+  border: 2px solid #306230;
+  box-shadow: none;
+}
+
+body[data-era="2003"] .era-badge::before { content: "Era · ~2003 GBA "; }
+body[data-era="2003"] .era-badge {
+  top: 10px;
+  left: 10px;
+  border-radius: 4px;
+  font-family: var(--era-font);
+  font-size: 0.48rem;
+  background: var(--gba-chassis);
+  color: #efe6ff;
+  border: 2px solid var(--gba-chassis-deep);
+  box-shadow: 0 2px 0 #1a1230;
+  letter-spacing: 0.04em;
+}
+
+body[data-era="2003"] .footer .label {
+  font-family: var(--era-font);
+  font-size: 0.42rem;
+  color: var(--gba-screen-deep);
+  opacity: 0.75;
+}
+
+body[data-era="2003"] .mode-flash {
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 40%, #9bbc0f, #0f380f) !important;
+  color: #0f380f;
+  border-color: var(--gba-chassis);
+}
+
+/* ===================== 2005 — snowball / kids-MMO homage ===================== */
+body[data-era="2005"] {
+  --era-surface: #e8f6ff;
+  --era-ink: #16324f;
+  --era-accent: #3ba3e0;
+  --era-font: "Fredoka", "Figtree", sans-serif;
+  --era-ui: "Fredoka", "Figtree", sans-serif;
+  --ice: #b8e0f8;
+  --ice-deep: #0b3d6e;
+  --snow: #f7fcff;
+}
+
+body[data-era="2005"]::before {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.9), transparent 22%),
+    radial-gradient(circle at 72% 18%, rgba(255, 255, 255, 0.55), transparent 26%),
+    radial-gradient(circle at 40% 80%, rgba(59, 163, 224, 0.25), transparent 40%),
+    linear-gradient(180deg, #7ec8f0 0%, #b8e0f8 38%, #e8f6ff 70%, #fff 100%);
+}
+
+/* Soft snowflake drift (CSS only) */
+body[data-era="2005"]::after {
+  opacity: 0.55;
+  mix-blend-mode: soft-light;
+  background-image:
+    radial-gradient(circle, #fff 0 1.5px, transparent 2px),
+    radial-gradient(circle, #fff 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.8) 0 2px, transparent 2.5px);
+  background-size: 90px 90px, 140px 140px, 70px 70px;
+  background-position: 0 0, 40px 20px, 10px 60px;
+  animation: snowDrift 14s linear infinite;
+}
+
+@keyframes snowDrift {
+  from { background-position: 0 0, 40px 20px, 10px 60px; }
+  to { background-position: 0 180px, 40px 200px, 10px 240px; }
+}
+
+body[data-era="2005"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2005"] .photo-chapter {
+  background:
+    linear-gradient(180deg, #fff 0%, #e8f6ff 100%);
+  color: var(--ice-deep);
+  border: 4px solid #fff;
+  border-radius: 22px;
+  box-shadow:
+    0 0 0 3px #3ba3e0,
+    0 10px 0 rgba(11, 61, 110, 0.15);
+  font-family: var(--era-ui);
+}
+
+body[data-era="2005"] .chapter::after {
+  inset: 10px;
+  border: 2px dashed #7ec8f0;
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+/* Igloo / ticket stamp accents */
+body[data-era="2005"] .chapter::before {
+  content: "";
+  position: absolute;
+  right: 22px;
+  top: 18px;
+  width: 54px;
+  height: 36px;
+  z-index: 2;
+  pointer-events: none;
+  border: 3px solid #3ba3e0;
+  border-radius: 50% 50% 8px 8px;
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: inset 0 -8px 0 rgba(59, 163, 224, 0.15);
+  opacity: 0.85;
+}
+
+body[data-era="2005"] .display,
+body[data-era="2005"] .prompt,
+body[data-era="2005"] .line {
+  font-family: var(--era-font);
+  color: var(--ice-deep);
+}
+
+body[data-era="2005"] .age-tag,
+body[data-era="2005"] .era-tag,
+body[data-era="2005"] .iface-tag,
+body[data-era="2005"] .part-tag,
+body[data-era="2005"] .chip {
+  font-family: var(--era-font);
+  background: #fff;
+  color: var(--ice-deep);
+  border: 2px solid #3ba3e0;
+  border-radius: 12px;
+  box-shadow: 0 3px 0 #7ec8f0;
+  backdrop-filter: none;
+}
+
+body[data-era="2005"] .frame {
+  border: 4px solid #fff;
+  border-radius: 16px;
+  box-shadow: 0 0 0 3px #3ba3e0, 0 8px 0 rgba(11, 61, 110, 0.12);
+  transform: none;
+  background: #dff2fc;
+}
+
+body[data-era="2005"] .choice,
+body[data-era="2005"] .chrome button,
+body[data-era="2005"] .continue-btn {
+  font-family: var(--era-font);
+  border-radius: 14px;
+  border: 3px solid #0b3d6e;
+  background: #fff;
+  color: #0b3d6e;
+  box-shadow: 0 4px 0 #7ec8f0;
+  text-transform: none;
+}
+
+body[data-era="2005"] .choice:hover,
+body[data-era="2005"] .chrome button:hover {
+  background: #e8f6ff;
+  transform: translateY(1px);
+  box-shadow: 0 3px 0 #7ec8f0;
+}
+
+body[data-era="2005"] .progress {
+  font-family: var(--era-font);
+  background: #0b3d6e;
+  color: #e8f6ff;
+  border: 2px solid #fff;
+  border-radius: 12px;
+}
+
+body[data-era="2005"] .chrome {
+  background: rgba(255, 255, 255, 0.92);
+  border: 3px solid #3ba3e0;
+  border-radius: 16px;
+  opacity: 1 !important;
+  pointer-events: auto;
+  box-shadow: 0 4px 0 rgba(11, 61, 110, 0.12);
+}
+
+body[data-era="2005"] .era-badge::before { content: "Era · ~2005 iceberg "; }
+body[data-era="2005"] .era-badge {
+  font-family: var(--era-font);
+  background: #fff;
+  color: #0b3d6e;
+  border: 2px solid #3ba3e0;
+  border-radius: 999px;
+  box-shadow: 0 3px 0 #7ec8f0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-era="2005"]::after { animation: none; }
+}
+
+/* ===================== 2008 — chunky game HUD ===================== */
+body[data-era="2008"] {
+  --era-surface: #1a1510;
+  --era-ink: #f4e4bc;
+  --era-accent: #d4a017;
+  --era-font: "Papyrus", "Trattatello", "Figtree", fantasy;
+  --era-ui: "Figtree", system-ui, sans-serif;
+}
+
+body[data-era="2008"]::before {
+  background:
+    radial-gradient(ellipse 50% 40% at 50% 30%, rgba(212, 160, 23, 0.2), transparent 55%),
+    linear-gradient(180deg, #0d2818, #1a1510 50%, #0a0a08);
+}
+
+body[data-era="2008"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2008"] .photo-chapter {
+  background:
+    linear-gradient(180deg, rgba(40, 28, 12, 0.92), rgba(20, 16, 10, 0.95));
+  color: #f4e4bc;
+  border: 3px solid #5c4018;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.45);
+}
+
+body[data-era="2008"] .chapter::after {
+  border: 2px solid #d4a017;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 4px #2a1c0a;
+}
+
+body[data-era="2008"] .display,
+body[data-era="2008"] .prompt,
+body[data-era="2008"] .line {
+  font-family: "Syne", var(--era-ui);
+  color: #f4e4bc;
+  text-shadow: 0 2px 0 #000, 0 0 18px rgba(212, 160, 23, 0.35);
+}
+
+body[data-era="2008"] .frame {
+  border: 4px solid #5c4018;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 2px #d4a017,
+    0 0 30px rgba(212, 160, 23, 0.25);
+  transform: none;
+}
+
+body[data-era="2008"] .choice,
+body[data-era="2008"] .chrome button {
+  background: linear-gradient(180deg, #3d2a12, #1a1208);
+  color: #f4e4bc;
+  border: 2px solid #d4a017;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 220, 120, 0.25);
+  font-family: var(--era-ui);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+body[data-era="2008"] .progress {
+  background: #1a1208;
+  border: 2px solid #d4a017;
+  border-radius: 6px;
+  color: #f4e4bc;
+}
+
+body[data-era="2008"] .footer .label,
+body[data-era="2008"] .keys-hint,
+body[data-era="2008"] .label {
+  color: rgba(244, 228, 188, 0.45);
+}
+
+body[data-era="2008"] .photo-chapter .age-tag,
+body[data-era="2008"] .photo-chapter .era-tag {
+  background: #1a1208;
+  color: #d4a017;
+  border: 1px solid #d4a017;
+  border-radius: 4px;
+}
+
+body[data-era="2008"] .chip {
+  background: #1a1208;
+  color: #d4a017;
+  border: 1px solid #d4a017;
+  border-radius: 4px;
+}
+
+body[data-era="2008"] .era-badge::before { content: "Era · ~2008 adventure HUD "; }
+body[data-era="2008"] .era-badge {
+  background: #1a1208;
+  color: #d4a017;
+  border: 1px solid #d4a017;
+  border-radius: 4px;
+}
+
+/* ===================== 2010 — early social web ===================== */
+body[data-era="2010"] {
+  --era-surface: #dfeaf7;
+  --era-ink: #1a2744;
+  --era-accent: #6b4f9a;
+  --era-font: "Comic Sans MS", "Chalkboard SE", "Figtree", cursive;
+  --era-ui: "Verdana", "Figtree", sans-serif;
+}
+
+body[data-era="2010"]::before {
+  background:
+    linear-gradient(180deg, #7eb6e8, #c5ddf5 40%, #e8f0fa);
+}
+
+body[data-era="2010"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2010"] .photo-chapter {
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f3e8ff 100%);
+  border: 1px solid #9bb8d9;
+  box-shadow: 0 8px 0 rgba(107, 79, 154, 0.15);
+  font-family: var(--era-ui);
+}
+
+body[data-era="2010"] .display,
+body[data-era="2010"] .prompt {
+  font-family: var(--era-font);
+  color: #6b4f9a;
+  text-shadow: 1px 1px 0 #fff, 2px 2px 0 rgba(107, 79, 154, 0.25);
+}
+
+body[data-era="2010"] .frame {
+  border: 8px solid #fff;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 2px #c4a0e0,
+    0 12px 24px rgba(107, 79, 154, 0.2);
+  transform: rotate(-0.5deg);
+}
+
+body[data-era="2010"] .choice,
+body[data-era="2010"] .chrome button {
+  background: linear-gradient(180deg, #f7e9ff, #e0c4f5);
+  color: #3d2a5c;
+  border: 2px solid #a67bc9;
+  border-radius: 18px;
+  box-shadow: 0 3px 0 #8a5cb0;
+  font-family: var(--era-font);
+}
+
+body[data-era="2010"] .progress {
+  background: linear-gradient(180deg, #8ec5f0, #5a9fd4);
+  border-radius: 12px;
+  border: 2px solid #fff;
+  font-family: var(--era-ui);
+}
+
+body[data-era="2010"] .chip {
+  background: #fff59d;
+  color: #5c3d8a;
+  border: 2px dashed #c4a0e0;
+  border-radius: 12px;
+  font-family: var(--era-font);
+}
+
+body[data-era="2010"] .photo-chapter .age-tag {
+  background: #fff59d;
+  color: #5c3d8a;
+  border: 2px solid #c4a0e0;
+  border-radius: 12px;
+}
+
+body[data-era="2010"] .photo-chapter .era-tag {
+  background: #ff9ecb;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 12px;
+}
+
+body[data-era="2010"] .era-badge::before { content: "Era · ~2010 social page "; }
+body[data-era="2010"] .era-badge {
+  background: #fff59d;
+  color: #5c3d8a;
+  border: 2px dashed #c4a0e0;
+  border-radius: 12px;
+  font-family: var(--era-font);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+/* ===================== 2014 — flat / early career ===================== */
+body[data-era="2014"] {
+  --era-surface: #fafafa;
+  --era-ink: #212121;
+  --era-accent: #2196f3;
+  --era-font: "Roboto", "Figtree", system-ui, sans-serif;
+  --era-ui: "Roboto", "Figtree", system-ui, sans-serif;
+}
+
+body[data-era="2014"]::before {
+  background: #e8eaf0;
+}
+
+body[data-era="2014"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2014"] .photo-chapter {
+  background: #fafafa;
+  font-family: var(--era-ui);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12);
+}
+
+body[data-era="2014"] .chapter::after {
+  border: none;
+  box-shadow: none;
+}
+
+body[data-era="2014"] .display,
+body[data-era="2014"] .prompt {
+  font-family: var(--era-font);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #212121;
+}
+
+body[data-era="2014"] .frame {
+  border: none;
+  border-radius: 2px;
+  box-shadow: 0 8px 10px rgba(0, 0, 0, 0.14), 0 3px 14px rgba(0, 0, 0, 0.12);
+  transform: none;
+}
+
+body[data-era="2014"] .choice,
+body[data-era="2014"] .chrome button,
+body[data-era="2014"] .continue-btn {
+  background: #2196f3;
+  color: #fff;
+  border: none;
+  border-radius: 2px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  font-family: var(--era-ui);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+}
+
+body[data-era="2014"] .choice:hover,
+body[data-era="2014"] .chrome button:hover {
+  background: #1976d2;
+  transform: none;
+}
+
+body[data-era="2014"] .progress {
+  background: #424242;
+  border-radius: 2px;
+  font-family: var(--era-ui);
+}
+
+body[data-era="2014"] .chip {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: none;
+  border-radius: 2px;
+  font-family: var(--era-ui);
+  font-weight: 500;
+}
+
+body[data-era="2014"] .photo-chapter .age-tag,
+body[data-era="2014"] .photo-chapter .era-tag {
+  border-radius: 2px;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  backdrop-filter: none;
+}
+
+body[data-era="2014"] .era-badge::before { content: "Era · ~2014 flat UI "; }
+body[data-era="2014"] .era-badge {
+  background: #212121;
+  color: #fff;
+  border-radius: 2px;
+  font-family: var(--era-ui);
+  letter-spacing: 0.08em;
+}
+
+/* ===================== 2020 — design-tool web ===================== */
+body[data-era="2020"] {
+  --era-surface: #1e1e1e;
+  --era-ink: #f5f5f5;
+  --era-accent: #a259ff;
+  --era-font: "Inter", "Figtree", system-ui, sans-serif;
+  --era-ui: "Inter", "Figtree", system-ui, sans-serif;
+}
+
+body[data-era="2020"]::before {
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 20%, rgba(162, 89, 255, 0.18), transparent 50%),
+    #0d0d0f;
+}
+
+body[data-era="2020"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2020"] .photo-chapter {
+  background: rgba(30, 30, 30, 0.92);
+  color: #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  font-family: var(--era-ui);
+}
+
+body[data-era="2020"] .chapter::after {
+  border: 1px solid rgba(162, 89, 255, 0.25);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+body[data-era="2020"] .display,
+body[data-era="2020"] .prompt,
+body[data-era="2020"] .line {
+  font-family: var(--era-font);
+  color: #f5f5f5;
+  letter-spacing: -0.04em;
+}
+
+body[data-era="2020"] .frame {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+  transform: none;
+  background: #2c2c2c;
+}
+
+body[data-era="2020"] .choice,
+body[data-era="2020"] .chrome button {
+  background: #2c2c2c;
+  color: #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  box-shadow: none;
+  font-family: var(--era-ui);
+  font-weight: 600;
+}
+
+body[data-era="2020"] .choice:hover,
+body[data-era="2020"] .chrome button:hover {
+  border-color: #a259ff;
+  background: #333;
+}
+
+body[data-era="2020"] .chrome button#next,
+body[data-era="2020"] .continue-btn {
+  background: #a259ff;
+  border-color: transparent;
+  color: #fff;
+}
+
+body[data-era="2020"] .progress {
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+body[data-era="2020"] .chip {
+  background: rgba(162, 89, 255, 0.18);
+  color: #e8d4ff;
+  border: 1px solid rgba(162, 89, 255, 0.4);
+  border-radius: 6px;
+}
+
+body[data-era="2020"] .footer .label,
+body[data-era="2020"] .label {
+  color: rgba(245, 245, 245, 0.4);
+}
+
+body[data-era="2020"] .photo-chapter .age-tag,
+body[data-era="2020"] .photo-chapter .era-tag,
+body[data-era="2020"] .photo-chapter .iface-tag {
+  background: rgba(30, 30, 30, 0.9);
+  color: #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+}
+
+body[data-era="2020"] .era-badge::before { content: "Era · ~2020 design tools "; }
+body[data-era="2020"] .era-badge {
+  background: rgba(30, 30, 30, 0.9);
+  color: #e8d4ff;
+  border: 1px solid rgba(162, 89, 255, 0.4);
+  border-radius: 6px;
+}
+
+/* ===================== 2023–2025 — AI-native escalation ===================== */
+body[data-era="2023"],
+body[data-era="2024"],
+body[data-era="2025"] {
+  --era-surface: rgba(246, 244, 240, 0.96);
+  --era-ink: #12141c;
+  --era-accent: #5eead4;
+  --era-font: "Syne", system-ui, sans-serif;
+  --era-ui: "Figtree", system-ui, sans-serif;
+}
+
+body[data-era="2023"]::before {
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 15%, rgba(94, 234, 212, 0.12), transparent 55%),
+    linear-gradient(180deg, #0b0d14, #07080d);
+}
+body[data-era="2024"]::before {
+  background:
+    radial-gradient(ellipse 70% 55% at 18% 12%, rgba(94, 234, 212, 0.18), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 85% 20%, rgba(79, 140, 255, 0.14), transparent 50%),
+    linear-gradient(180deg, #0b0d14, #07080d 55%, #0a1014);
+}
+body[data-era="2025"]::before {
+  background:
+    radial-gradient(ellipse 70% 55% at 18% 12%, rgba(94, 234, 212, 0.22), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 88% 18%, rgba(79, 140, 255, 0.18), transparent 50%),
+    radial-gradient(ellipse 60% 50% at 60% 100%, rgba(255, 90, 61, 0.14), transparent 55%),
+    linear-gradient(180deg, #0b0d14, #07080d 55%, #0a1014);
+}
+
+body[data-era="2023"] .era-badge::before { content: "Era · 2023 AI early "; }
+body[data-era="2024"] .era-badge::before { content: "Era · 2024 AI mid "; }
+body[data-era="2025"] .era-badge::before { content: "Era · 2025/26 AI finale "; }
+body[data-era="2023"] .era-badge,
+body[data-era="2024"] .era-badge,
+body[data-era="2025"] .era-badge {
+  background: rgba(94, 234, 212, 0.16);
+  color: #99f6e4;
+  border: 1px solid rgba(94, 234, 212, 0.35);
+}
+
+body[data-era="2024"] .progress,
+body[data-era="2025"] .progress {
+  box-shadow: 0 0 24px rgba(94, 234, 212, 0.2);
+}
+body[data-era="2025"] .chrome button#next,
+body[data-era="2025"] .continue-btn {
+  box-shadow: 0 0 20px rgba(94, 234, 212, 0.35);
+}
+
+/* =========================================================
+   Per-year themes (ages with no prior full band CSS)
+   Locked while on that age; veil fires on age leave only.
+   ========================================================= */
+
+/* —— 1996 Win95 desktop year (age 1) —— */
+body[data-era="1996"] {
+  --era-surface: #c0c0c0;
+  --era-ink: #000;
+  --era-accent: #000080;
+  --era-font: "Tahoma", "MS Sans Serif", system-ui, sans-serif;
+  --era-ui: "Tahoma", "MS Sans Serif", system-ui, sans-serif;
+}
+body[data-era="1996"]::before {
+  background: #008080;
+  opacity: 1;
+}
+body[data-era="1996"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="1996"] .photo-chapter {
+  background: #c0c0c0;
+  color: #000;
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+  font-family: var(--era-ui);
+  border-radius: 0;
+}
+body[data-era="1996"] .frame {
+  border: 2px solid;
+  border-color: #404040 #fff #fff #404040;
+  border-radius: 0;
+  box-shadow: none;
+  background: #000080;
+}
+body[data-era="1996"] .choice,
+body[data-era="1996"] .chrome button {
+  font-family: var(--era-font);
+  border-radius: 0;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+  color: #000;
+  box-shadow: none;
+}
+body[data-era="1996"] .progress {
+  border-radius: 0;
+  background: #000080;
+  color: #fff;
+  font-family: var(--era-font);
+}
+body[data-era="1996"] .era-badge::before { content: "Era · 1996 Win95 "; }
+body[data-era="1996"] .era-badge {
+  font-family: var(--era-font);
+  background: #c0c0c0;
+  color: #000;
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+  border-radius: 0;
+}
+
+/* —— 1997 early web / GeoCities (age 2) —— */
+body[data-era="1997"] {
+  --era-surface: #ffffcc;
+  --era-ink: #0000cc;
+  --era-accent: #ff00aa;
+  --era-font: "Comic Sans MS", "Figtree", cursive;
+  --era-ui: "Times New Roman", Times, serif;
+}
+body[data-era="1997"]::before {
+  background:
+    repeating-linear-gradient(45deg, #ffccff 0 8px, #ccffff 8px 16px),
+    #ffffee;
+  opacity: 0.55;
+}
+body[data-era="1997"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="1997"] .photo-chapter {
+  background: #ffffee;
+  color: #0000cc;
+  border: 4px ridge #ff00aa;
+  font-family: var(--era-ui);
+}
+body[data-era="1997"] .display,
+body[data-era="1997"] .prompt { font-family: var(--era-font); color: #ff00aa; }
+body[data-era="1997"] .frame {
+  border: 3px solid #0000cc;
+  box-shadow: 6px 6px 0 #ff00aa;
+  border-radius: 0;
+}
+body[data-era="1997"] .choice,
+body[data-era="1997"] .chrome button {
+  font-family: var(--era-font);
+  background: #ccffcc;
+  border: 2px outset #fff;
+  color: #0000cc;
+  border-radius: 0;
+}
+body[data-era="1997"] .progress {
+  background: #0000cc;
+  color: #ffff00;
+  font-family: var(--era-font);
+  border-radius: 0;
+}
+body[data-era="1997"] .era-badge::before { content: "Era · 1997 GeoCities "; }
+body[data-era="1997"] .era-badge {
+  background: #ffff00;
+  color: #ff00aa;
+  border: 2px solid #0000cc;
+  font-family: var(--era-font);
+  border-radius: 0;
+}
+
+/* —— 1998 search (age 3 + google98 chapter) —— */
+body[data-era="1998"] {
+  --era-surface: #ffffff;
+  --era-ink: #000;
+  --era-accent: #0000cc;
+  --era-font: "Times New Roman", Times, serif;
+  --era-ui: "Times New Roman", Times, serif;
+}
+body[data-era="1998"]::before {
+  background: linear-gradient(180deg, #eee 0 72px, #fff 72px);
+  opacity: 1;
+}
+body[data-era="1998"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era):not(.mode-google98),
+body[data-era="1998"] .photo-chapter {
+  background: #fff;
+  color: #000;
+  border: 1px solid #999;
+  font-family: var(--era-ui);
+  border-radius: 0;
+}
+body[data-era="1998"] .frame {
+  border: 1px solid #666;
+  border-radius: 0;
+  box-shadow: none;
+}
+body[data-era="1998"] .choice,
+body[data-era="1998"] .chrome button {
+  font-family: Arial, sans-serif;
+  background: #eee;
+  border: 1px solid #999;
+  border-radius: 0;
+  color: #000;
+}
+body[data-era="1998"] .progress {
+  background: #eee;
+  color: #000;
+  border: 1px solid #999;
+  border-radius: 0;
+  font-family: Arial, sans-serif;
+}
+body[data-era="1998"] .era-badge::before { content: "Era · 1998 search "; }
+body[data-era="1998"] .era-badge {
+  background: #eee;
+  color: #000;
+  border: 1px solid #999;
+  font-family: var(--era-font);
+  border-radius: 0;
+}
+body[data-era="1998"]:has(.chapter.mode-google98.active)::before { opacity: 0; }
+body[data-era="1998"]:has(.chapter.mode-google98.active) .era-badge::before {
+  content: "Era · 1998 Google! ";
+}
+
+/* —— Windows 98 Section 2 hub (not age-3 search) —— */
+body[data-era="win98"] {
+  --era-surface: #008081;
+  --era-ink: #000;
+  --era-accent: #000181;
+  --era-font: "Windows 95", "MS Sans Serif", Tahoma, sans-serif;
+  --era-ui: "Windows 95", "MS Sans Serif", Tahoma, sans-serif;
+}
+body[data-era="win98"]::before {
+  background: transparent;
+  opacity: 0;
+}
+body[data-era="win98"] .era-badge::before { content: "Era · Windows 98 "; }
+body[data-era="win98"] .era-badge {
+  font-family: var(--era-font);
+  background: #c0c0c0;
+  color: #000;
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/* —— Windows XP Section 3 stub —— */
+body[data-era="winxp"] {
+  --era-surface: #245edc;
+  --era-ink: #000;
+  --era-accent: #245edc;
+  --era-font: Tahoma, "Segoe UI", sans-serif;
+  --era-ui: Tahoma, "Segoe UI", sans-serif;
+}
+body[data-era="winxp"]::before {
+  background: transparent;
+  opacity: 0;
+}
+body[data-era="winxp"] .era-badge::before { content: "Era · Windows XP "; }
+body[data-era="winxp"] .era-badge {
+  font-family: var(--era-font);
+  background: linear-gradient(180deg, #0a246a, #245edc);
+  color: #fff;
+  border: 1px solid #003c74;
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+/* —— 2000 Y2K (age 5) —— */
+body[data-era="2000"] {
+  --era-surface: #0a0a18;
+  --era-ink: #e8f0ff;
+  --era-accent: #00ff9c;
+  --era-font: "IBM Plex Mono", "Courier New", monospace;
+  --era-ui: "IBM Plex Mono", "Courier New", monospace;
+}
+body[data-era="2000"]::before {
+  background:
+    radial-gradient(circle at 50% 40%, rgba(0, 255, 156, 0.12), transparent 40%),
+    linear-gradient(180deg, #020208, #0a1020 60%, #000);
+}
+body[data-era="2000"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2000"] .photo-chapter {
+  background: rgba(8, 12, 28, 0.92);
+  color: #e8f0ff;
+  border: 1px solid #00ff9c;
+  font-family: var(--era-ui);
+  box-shadow: 0 0 24px rgba(0, 255, 156, 0.15);
+}
+body[data-era="2000"] .frame {
+  border: 2px solid #00ff9c;
+  border-radius: 2px;
+  box-shadow: 0 0 20px rgba(0, 255, 156, 0.25);
+}
+body[data-era="2000"] .choice,
+body[data-era="2000"] .chrome button {
+  font-family: var(--era-font);
+  background: #0a1020;
+  color: #00ff9c;
+  border: 1px solid #00ff9c;
+  border-radius: 2px;
+}
+body[data-era="2000"] .progress {
+  background: #000;
+  color: #00ff9c;
+  border: 1px solid #00ff9c;
+  font-family: var(--era-font);
+}
+body[data-era="2000"] .era-badge::before { content: "Era · 2000 Y2K "; }
+body[data-era="2000"] .era-badge {
+  background: #000;
+  color: #00ff9c;
+  border: 1px solid #00ff9c;
+  font-family: var(--era-font);
+  border-radius: 2px;
+}
+
+/* —— 2002 broadband messenger (age 7 + CRT) —— */
+body[data-era="2002"] {
+  --era-surface: #d6e8f8;
+  --era-ink: #1a2a3a;
+  --era-accent: #6bb3ff;
+  --era-font: "Tahoma", "Segoe UI", system-ui, sans-serif;
+  --era-ui: "Tahoma", "Segoe UI", system-ui, sans-serif;
+}
+body[data-era="2002"]::before {
+  background:
+    linear-gradient(180deg, #7eb6e8 0 48px, #c5ddf0 48px 52px, #eaf3fb 52px);
+}
+body[data-era="2002"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2002"] .photo-chapter {
+  background: #eaf3fb;
+  color: #1a2a3a;
+  border: 2px solid #6bb3ff;
+  border-radius: 10px 10px 4px 4px;
+  font-family: var(--era-ui);
+}
+body[data-era="2002"] .chapter::before {
+  content: "● Online";
+  position: absolute;
+  top: 10px;
+  right: 72px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #2d8a2d;
+  z-index: 2;
+}
+body[data-era="2002"] .frame {
+  border: 2px solid #6bb3ff;
+  border-radius: 8px;
+  box-shadow: 0 4px 0 #4a8fd4;
+}
+body[data-era="2002"] .choice,
+body[data-era="2002"] .chrome button {
+  font-family: var(--era-font);
+  background: linear-gradient(180deg, #fff, #d6e8f8);
+  border: 1px solid #6bb3ff;
+  border-radius: 8px;
+  color: #1a2a3a;
+}
+body[data-era="2002"] .progress {
+  background: #4a8fd4;
+  color: #fff;
+  font-family: var(--era-font);
+  border-radius: 8px;
+}
+body[data-era="2002"] .era-badge::before { content: "Era · 2002 messenger "; }
+body[data-era="2002"] .era-badge {
+  background: #eaf3fb;
+  color: #1a2a3a;
+  border: 1px solid #6bb3ff;
+  font-family: var(--era-font);
+  border-radius: 8px;
+}
+body[data-era="2002"] .mode-flash { background: #4a8fd4 !important; }
+
+/* —— 2004 Tamagotchi (age 9) — Chris's first pocket pet —— */
+body[data-era="2004"] {
+  --era-surface: #c4d68a;
+  --era-ink: #1a2210;
+  --era-accent: #e85d8a;
+  --era-font: "Press Start 2P", "IBM Plex Mono", monospace;
+  --era-ui: "Press Start 2P", "IBM Plex Mono", monospace;
+}
+body[data-era="2004"]::before {
+  background:
+    radial-gradient(ellipse 42% 48% at 50% 48%, #9bbc0f 0 38%, #3d5c2e 42%, transparent 48%),
+    linear-gradient(180deg, #f5c6d8, #e85d8a 40%, #c44a72);
+}
+body[data-era="2004"]::after {
+  content: "";
+  position: fixed;
+  inset: 12% 28% 12% 28%;
+  border: 10px solid #f2a8c0;
+  border-radius: 48% 48% 42% 42%;
+  box-shadow:
+    inset 0 0 0 4px #3d5c2e,
+    0 12px 0 #c44a72;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+}
+body[data-era="2004"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2004"] .photo-chapter {
+  background: #9bbc0f;
+  color: #0f380f;
+  border: 6px solid #3d5c2e;
+  border-radius: 16px;
+  font-family: var(--era-ui);
+  box-shadow: 0 8px 0 #306230, inset 0 0 0 3px #8bac0f;
+  position: relative;
+  z-index: 1;
+}
+body[data-era="2004"] .display,
+body[data-era="2004"] .prompt,
+body[data-era="2004"] .age-tag,
+body[data-era="2004"] .era-tag,
+body[data-era="2004"] .iface-tag,
+body[data-era="2004"] .part-tag {
+  font-family: var(--era-font);
+  font-size: 0.55rem;
+  letter-spacing: 0.02em;
+}
+body[data-era="2004"] .frame {
+  border: 4px solid #0f380f;
+  border-radius: 4px;
+  background: #8bac0f;
+  box-shadow: inset 0 0 0 2px #306230;
+  image-rendering: pixelated;
+}
+body[data-era="2004"] .choice,
+body[data-era="2004"] .chrome button {
+  font-family: var(--era-font);
+  font-size: 0.45rem;
+  background: #8bac0f;
+  color: #0f380f;
+  border: 3px solid #0f380f;
+  border-radius: 4px;
+  box-shadow: 0 3px 0 #306230;
+}
+body[data-era="2004"] .progress {
+  font-family: var(--era-font);
+  font-size: 0.42rem;
+  background: #0f380f;
+  color: #9bbc0f;
+  border: 3px solid #e85d8a;
+  border-radius: 8px;
+}
+body[data-era="2004"] .era-badge::before { content: "Era · 2004 Tamagotchi "; }
+body[data-era="2004"] .era-badge {
+  font-family: var(--era-font);
+  font-size: 0.4rem;
+  background: #9bbc0f;
+  color: #0f380f;
+  border: 3px solid #e85d8a;
+  border-radius: 999px;
+}
+@media (max-width: 720px) {
+  body[data-era="2004"]::after { inset: 8% 12% 8% 12%; opacity: 0.35; }
+}
+
+/* —— 2006 Bebo profile homage (age 11) —— */
+body[data-era="2006"] {
+  --era-surface: #7cb82e;
+  --era-ink: #111;
+  --era-accent: #c00;
+  --era-font: Arial, Helvetica, sans-serif;
+  --era-ui: Verdana, Arial, Helvetica, sans-serif;
+}
+body[data-era="2006"]::before {
+  background: #6aa822;
+  opacity: 1;
+}
+body[data-era="2006"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2006"] .photo-chapter {
+  background: transparent;
+  color: #111;
+  border: none;
+  border-radius: 0;
+  font-family: var(--era-ui);
+}
+body[data-era="2006"] .display,
+body[data-era="2006"] .prompt { font-family: var(--era-font); color: #fff; }
+body[data-era="2006"] .frame {
+  border: 1px solid #333;
+  border-radius: 0;
+  box-shadow: none;
+}
+body[data-era="2006"] .choice,
+body[data-era="2006"] .chrome button {
+  font-family: var(--era-ui);
+  background: #c0c0c0;
+  border: 1px solid #666;
+  border-radius: 2px;
+  color: #111;
+}
+body[data-era="2006"] .progress {
+  background: #111;
+  color: #9f6;
+  font-family: var(--era-ui);
+  border-radius: 2px;
+}
+body[data-era="2006"] .era-badge::before { content: "Era · 2006 Bebo "; }
+body[data-era="2006"] .era-badge {
+  background: #111;
+  color: #b8f060;
+  border: 1px solid #333;
+  font-family: var(--era-ui);
+}
+
+/* —— 2007 touch announce (age 12) —— */
+body[data-era="2007"] {
+  --era-surface: #111;
+  --era-ink: #f5f5f5;
+  --era-accent: #5ac8fa;
+  --era-font: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --era-ui: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+body[data-era="2007"]::before {
+  background: radial-gradient(circle at 50% 40%, #222 0%, #000 70%);
+}
+body[data-era="2007"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2007"] .photo-chapter {
+  background: #111;
+  color: #f5f5f5;
+  border: 8px solid #222;
+  border-radius: 28px;
+  font-family: var(--era-ui);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+body[data-era="2007"] .frame {
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px #333;
+}
+body[data-era="2007"] .choice,
+body[data-era="2007"] .chrome button {
+  font-family: var(--era-font);
+  background: #1c1c1e;
+  color: #5ac8fa;
+  border: none;
+  border-radius: 12px;
+}
+body[data-era="2007"] .chrome button#next,
+body[data-era="2007"] .continue-btn {
+  background: #5ac8fa;
+  color: #000;
+}
+body[data-era="2007"] .progress {
+  background: #1c1c1e;
+  color: #f5f5f5;
+  border-radius: 999px;
+  font-family: var(--era-font);
+}
+body[data-era="2007"] .era-badge::before { content: "Era · 2007 touch "; }
+body[data-era="2007"] .era-badge {
+  background: #1c1c1e;
+  color: #5ac8fa;
+  border: 1px solid #333;
+  border-radius: 999px;
+  font-family: var(--era-font);
+}
+
+/* —— 2009 early craft web (age 14) — minecraft.net May 2009 homage, no official assets —— */
+body[data-era="2009"] {
+  --era-surface: #151515;
+  --era-ink: #eee;
+  --era-accent: #66aaff;
+  --era-font: Arial, Helvetica, sans-serif;
+  --era-ui: Arial, Helvetica, sans-serif;
+}
+body[data-era="2009"]::before {
+  background-color: #1a1a1a;
+  background-image:
+    linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
+    linear-gradient(-45deg, #222 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
+    linear-gradient(-45deg, transparent 75%, #1f1f1f 75%),
+    linear-gradient(#151515, #151515);
+  background-size: 28px 28px, 28px 28px, 28px 28px, 28px 28px, 56px 56px;
+  background-position: 0 0, 14px 0, 14px -14px, 0 14px, 0 0;
+  opacity: 1;
+}
+body[data-era="2009"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era):not(.mode-paint):not(.mode-bluescreen),
+body[data-era="2009"] .photo-chapter {
+  background: transparent;
+  color: #eee;
+  border: none;
+  border-radius: 0;
+  font-family: var(--era-ui);
+  box-shadow: none;
+}
+body[data-era="2009"] .photo-chapter.is-shell .frame {
+  border: 3px solid #444;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 #000;
+  background: #111;
+}
+body[data-era="2009"] .choice,
+body[data-era="2009"] .chrome button {
+  font-family: var(--era-font);
+  background: linear-gradient(#ddd, #bbb);
+  color: #111;
+  border: 1px solid #555;
+  border-radius: 2px;
+}
+body[data-era="2009"] .chrome button#next,
+body[data-era="2009"] .continue-btn {
+  background: linear-gradient(#c8e0ff, #8ab4e8);
+  color: #111;
+  border-color: #557;
+}
+body[data-era="2009"] .progress {
+  background: #222;
+  color: #9f6;
+  font-family: "Press Start 2P", "IBM Plex Mono", monospace;
+  font-size: 0.55rem;
+  border: 1px solid #555;
+  border-radius: 2px;
+}
+body[data-era="2009"] .era-badge::before { content: "Era · 2009 craft web "; }
+body[data-era="2009"] .era-badge {
+  background: #222;
+  color: #eee;
+  border: 1px solid #555;
+  font-family: "Press Start 2P", "IBM Plex Mono", monospace;
+  font-size: 0.5rem;
+  border-radius: 2px;
+}
+body[data-era="2009"] .mode-era {
+  background: #151515 !important;
+  color: #eee !important;
+}
+
+/* —— 2011 square feed (age 16) —— */
+body[data-era="2011"] {
+  --era-surface: #fafafa;
+  --era-ink: #262626;
+  --era-accent: #e1306c;
+  --era-font: "Figtree", system-ui, sans-serif;
+  --era-ui: "Figtree", system-ui, sans-serif;
+}
+body[data-era="2011"]::before {
+  background: linear-gradient(135deg, #f58529, #dd2a7b 40%, #8134af 70%, #515bd4);
+  opacity: 0.2;
+}
+body[data-era="2011"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2011"] .photo-chapter {
+  background: #fff;
+  color: #262626;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  font-family: var(--era-ui);
+}
+body[data-era="2011"] .frame {
+  border: none;
+  border-radius: 0;
+  aspect-ratio: 1;
+  max-height: min(62cqh, 520px);
+  box-shadow: none;
+  outline: 1px solid #dbdbdb;
+}
+body[data-era="2011"] .choice,
+body[data-era="2011"] .chrome button {
+  background: #fff;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  color: #0095f6;
+  font-weight: 700;
+}
+body[data-era="2011"] .progress {
+  background: #262626;
+  color: #fff;
+  border-radius: 4px;
+}
+body[data-era="2011"] .era-badge::before { content: "Era · 2011 square feed "; }
+body[data-era="2011"] .era-badge {
+  background: #fff;
+  color: #e1306c;
+  border: 1px solid #dbdbdb;
+}
+
+/* —— 2012 six-second loop (age 17) —— */
+body[data-era="2012"] {
+  --era-surface: #00bf8f;
+  --era-ink: #fff;
+  --era-accent: #00bf8f;
+  --era-font: "Figtree", system-ui, sans-serif;
+  --era-ui: "Figtree", system-ui, sans-serif;
+}
+body[data-era="2012"]::before {
+  background: radial-gradient(circle at 50% 30%, #1a1a1a, #000);
+}
+body[data-era="2012"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2012"] .photo-chapter {
+  background: #111;
+  color: #fff;
+  border: 3px solid #00bf8f;
+  border-radius: 12px;
+  font-family: var(--era-ui);
+}
+body[data-era="2012"] .frame {
+  border: 2px solid #00bf8f;
+  border-radius: 8px;
+  box-shadow: 0 0 24px rgba(0, 191, 143, 0.3);
+}
+body[data-era="2012"] .choice,
+body[data-era="2012"] .chrome button {
+  background: #00bf8f;
+  color: #000;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+}
+body[data-era="2012"] .progress {
+  background: #00bf8f;
+  color: #000;
+  border-radius: 999px;
+  font-weight: 700;
+}
+body[data-era="2012"] .era-badge::before { content: "Era · 2012 loop "; }
+body[data-era="2012"] .era-badge {
+  background: #00bf8f;
+  color: #000;
+  border: none;
+  border-radius: 999px;
+}
+
+/* —— 2013 ghost stories (age 18) —— */
+body[data-era="2013"] {
+  --era-surface: #fffc00;
+  --era-ink: #000;
+  --era-accent: #fffc00;
+  --era-font: "Figtree", system-ui, sans-serif;
+  --era-ui: "Figtree", system-ui, sans-serif;
+}
+body[data-era="2013"]::before {
+  background: #fffc00;
+  opacity: 1;
+}
+body[data-era="2013"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2013"] .photo-chapter {
+  background: #000;
+  color: #fffc00;
+  border: 4px solid #fffc00;
+  border-radius: 24px;
+  font-family: var(--era-ui);
+}
+body[data-era="2013"] .frame {
+  border: 3px solid #fffc00;
+  border-radius: 16px;
+  box-shadow: none;
+}
+body[data-era="2013"] .choice,
+body[data-era="2013"] .chrome button {
+  background: #fffc00;
+  color: #000;
+  border: none;
+  border-radius: 999px;
+  font-weight: 800;
+}
+body[data-era="2013"] .progress {
+  background: #000;
+  color: #fffc00;
+  border: 2px solid #fffc00;
+  border-radius: 999px;
+}
+body[data-era="2013"] .era-badge::before { content: "Era · 2013 ghost "; }
+body[data-era="2013"] .era-badge {
+  background: #000;
+  color: #fffc00;
+  border: 2px solid #fffc00;
+  border-radius: 999px;
+}
+
+/* —— 2015 Material bold (age 20) —— */
+body[data-era="2015"] {
+  --era-surface: #fafafa;
+  --era-ink: #212121;
+  --era-accent: #ff4081;
+  --era-font: "Roboto", "Figtree", system-ui, sans-serif;
+  --era-ui: "Roboto", "Figtree", system-ui, sans-serif;
+}
+body[data-era="2015"]::before {
+  background: linear-gradient(180deg, #3f51b5 0 64px, #f5f5f5 64px);
+}
+body[data-era="2015"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2015"] .photo-chapter {
+  background: #fff;
+  color: #212121;
+  border: none;
+  border-radius: 2px;
+  font-family: var(--era-ui);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+body[data-era="2015"] .frame {
+  border: none;
+  border-radius: 2px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19);
+}
+body[data-era="2015"] .choice,
+body[data-era="2015"] .chrome button {
+  font-family: var(--era-font);
+  background: #fff;
+  color: #3f51b5;
+  border: none;
+  border-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+body[data-era="2015"] .chrome button#next,
+body[data-era="2015"] .continue-btn {
+  background: #ff4081;
+  color: #fff;
+}
+body[data-era="2015"] .progress {
+  background: #3f51b5;
+  color: #fff;
+  border-radius: 2px;
+  font-family: var(--era-font);
+}
+body[data-era="2015"] .era-badge::before { content: "Era · 2015 Material "; }
+body[data-era="2015"] .era-badge {
+  background: #3f51b5;
+  color: #fff;
+  border: none;
+  border-radius: 2px;
+  font-family: var(--era-font);
+}
+
+/* —— 2016 workspace chat (age 21) —— */
+body[data-era="2016"] {
+  --era-surface: #1a1d21;
+  --era-ink: #f8f8f8;
+  --era-accent: #611f69;
+  --era-font: "Figtree", system-ui, sans-serif;
+  --era-ui: "Figtree", system-ui, sans-serif;
+}
+body[data-era="2016"]::before {
+  background: linear-gradient(90deg, #19171d 220px, #1a1d21 220px);
+}
+body[data-era="2016"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2016"] .photo-chapter {
+  background: #1a1d21;
+  color: #f8f8f8;
+  border: 1px solid #2c2d30;
+  border-radius: 8px;
+  font-family: var(--era-ui);
+}
+body[data-era="2016"] .frame {
+  border: 1px solid #2c2d30;
+  border-radius: 8px;
+  background: #222529;
+}
+body[data-era="2016"] .choice,
+body[data-era="2016"] .chrome button {
+  background: #222529;
+  color: #f8f8f8;
+  border: 1px solid #2c2d30;
+  border-radius: 6px;
+}
+body[data-era="2016"] .chrome button#next,
+body[data-era="2016"] .continue-btn {
+  background: #611f69;
+  border-color: transparent;
+  color: #fff;
+}
+body[data-era="2016"] .progress {
+  background: #19171d;
+  color: #fff;
+  border: 1px solid #2c2d30;
+  border-radius: 6px;
+}
+body[data-era="2016"] .era-badge::before { content: "Era · 2016 workspace "; }
+body[data-era="2016"] .era-badge {
+  background: #611f69;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+}
+
+/* —— 2017 clean product UI (age 22) —— */
+body[data-era="2017"] {
+  --era-surface: #ffffff;
+  --era-ink: #0f172a;
+  --era-accent: #2563eb;
+  --era-font: "Figtree", system-ui, sans-serif;
+  --era-ui: "Figtree", system-ui, sans-serif;
+}
+body[data-era="2017"]::before {
+  background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+}
+body[data-era="2017"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2017"] .photo-chapter {
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  font-family: var(--era-ui);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+}
+body[data-era="2017"] .frame {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+body[data-era="2017"] .choice,
+body[data-era="2017"] .chrome button {
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-weight: 600;
+}
+body[data-era="2017"] .chrome button#next,
+body[data-era="2017"] .continue-btn {
+  background: #2563eb;
+  color: #fff;
+  border-color: transparent;
+}
+body[data-era="2017"] .progress {
+  background: #0f172a;
+  color: #fff;
+  border-radius: 10px;
+}
+body[data-era="2017"] .era-badge::before { content: "Era · 2017 product "; }
+body[data-era="2017"] .era-badge {
+  background: #fff;
+  color: #2563eb;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+/* —— 2018–2022 design-tool evolution (ages 23–27) —— */
+body[data-era="2018"],
+body[data-era="2019"],
+body[data-era="2021"],
+body[data-era="2022"] {
+  --era-surface: #1e1e1e;
+  --era-ink: #f5f5f5;
+  --era-accent: #a259ff;
+  --era-font: "Inter", "Figtree", system-ui, sans-serif;
+  --era-ui: "Inter", "Figtree", system-ui, sans-serif;
+}
+body[data-era="2018"]::before {
+  background: #0d0d0f;
+}
+body[data-era="2019"]::before {
+  background:
+    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(162, 89, 255, 0.12), transparent 50%),
+    #0d0d0f;
+}
+body[data-era="2021"]::before {
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 20%, rgba(14, 165, 233, 0.14), transparent 50%),
+    #0d0d0f;
+}
+body[data-era="2022"]::before {
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 20%, rgba(162, 89, 255, 0.2), transparent 50%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(14, 165, 233, 0.12), transparent 45%),
+    #0d0d0f;
+}
+body[data-era="2018"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2018"] .photo-chapter,
+body[data-era="2019"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2019"] .photo-chapter,
+body[data-era="2021"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2021"] .photo-chapter,
+body[data-era="2022"] .chapter:not(.mode-flash):not(.mode-void):not(.mode-era),
+body[data-era="2022"] .photo-chapter {
+  background: rgba(30, 30, 30, 0.92);
+  color: #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  font-family: var(--era-ui);
+  border-radius: 12px;
+}
+body[data-era="2018"] .frame,
+body[data-era="2019"] .frame,
+body[data-era="2021"] .frame,
+body[data-era="2022"] .frame {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: #2c2c2c;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+}
+body[data-era="2018"] .choice,
+body[data-era="2018"] .chrome button,
+body[data-era="2019"] .choice,
+body[data-era="2019"] .chrome button,
+body[data-era="2021"] .choice,
+body[data-era="2021"] .chrome button,
+body[data-era="2022"] .choice,
+body[data-era="2022"] .chrome button {
+  background: #2c2c2c;
+  color: #f5f5f5;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+body[data-era="2018"] .chrome button#next,
+body[data-era="2018"] .continue-btn,
+body[data-era="2019"] .chrome button#next,
+body[data-era="2019"] .continue-btn,
+body[data-era="2021"] .chrome button#next,
+body[data-era="2021"] .continue-btn,
+body[data-era="2022"] .chrome button#next,
+body[data-era="2022"] .continue-btn {
+  background: #a259ff;
+  border-color: transparent;
+  color: #fff;
+}
+body[data-era="2021"] .chrome button#next,
+body[data-era="2021"] .continue-btn { background: #0ea5e9; }
+body[data-era="2018"] .progress,
+body[data-era="2019"] .progress,
+body[data-era="2021"] .progress,
+body[data-era="2022"] .progress {
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #f5f5f5;
+}
+body[data-era="2018"] .era-badge::before { content: "Era · 2018 canvas "; }
+body[data-era="2019"] .era-badge::before { content: "Era · 2019 multiplayer "; }
+body[data-era="2021"] .era-badge::before { content: "Era · 2021 tokens "; }
+body[data-era="2022"] .era-badge::before { content: "Era · 2022 tool peak "; }
+body[data-era="2018"] .era-badge,
+body[data-era="2019"] .era-badge,
+body[data-era="2021"] .era-badge,
+body[data-era="2022"] .era-badge {
+  background: rgba(30, 30, 30, 0.9);
+  color: #e8d4ff;
+  border: 1px solid rgba(162, 89, 255, 0.4);
+  border-radius: 6px;
+}
+body[data-era="2021"] .era-badge { color: #7dd3fc; border-color: rgba(14, 165, 233, 0.45); }
+body[data-era="2019"] .photo-chapter .age-tag::after {
+  content: " · live";
+  color: #a259ff;
+  font-size: 0.7em;
+}
+
+/* Mode-era / flash keep their own drama but inherit accent warmth */
+body[data-era="1995"] .mode-era {
+  background: linear-gradient(160deg, #f5c542, #c45c26) !important;
+}
+
+body[data-era="2001"] .mode-flash {
+  background: #000080 !important;
+}
+
+body[data-era="2010"] .mode-era {
+  background: linear-gradient(160deg, #8ec5f0, #6b4f9a) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .era-veil.is-flash,
+  .era-veil.is-morph,
+  .era-veil.is-pageload,
+  .era-veil.is-cart,
+  .era-veil.is-petsite,
+  .era-veil.is-island,
+  .era-veil.is-lcd,
+  .era-veil.is-touch,
+  .era-veil.is-ghost,
+  .era-veil.is-ai {
+    animation: none;
+    opacity: 0;
+  }
+}

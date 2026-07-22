@@ -1,0 +1,44 @@
+{
+  "name": "ui-98",
+  "version": "0.1.5",
+  "description": "Windows 98 UI-Kit",
+  "keywords": [
+    "windows",
+    "react",
+    "ui",
+    "kit",
+    "oldschool"
+  ],
+  "author": {
+    "email": "sempai@yukio.ru",
+    "name": "Andrey Kondalov",
+    "url": "https://yukio.ru"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Yukioru/ui-98.git"
+  },
+  "dependencies": {
+    "classnames": "2.2.5",
+    "patch-version": "0.1.1",
+    "prop-types": "15.6.0",
+    "react": "16.1.0",
+    "react-dom": "16.1.0",
+    "react-scripts": "1.0.17",
+    "react-textarea-autosize": "5.2.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "storybook": "start-storybook -p 9009 -s public",
+    "build-storybook": "build-storybook -s public"
+  },
+  "devDependencies": {
+    "@storybook/addon-actions": "3.2.14",
+    "@storybook/addon-links": "3.2.14",
+    "@storybook/react": "3.2.14"
+  }
+}

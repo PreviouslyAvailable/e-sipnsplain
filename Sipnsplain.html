@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Why I'm hopeful about AI — Sip'n'Splain</title>
+  <link rel="icon" href="/assets/win95/favicon/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" href="/assets/win95/favicon/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="/assets/win95/favicon/favicon-16x16.png" sizes="16x16" />
+  <link rel="apple-touch-icon" href="/assets/win95/favicon/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Fredoka:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@500;600;700&family=Press+Start+2P&family=Roboto:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/deck.css" />
+  <link rel="stylesheet" href="/css/win95-kit.css" />
+  <link rel="stylesheet" href="/css/win98-kit.css" />
+  <link rel="stylesheet" href="/css/eras.css" />
+  <link rel="stylesheet" href="/css/photo-shells.css" />
+</head>
+<body data-era="prologue">
+  <!-- 16:9 fit-contain stage — letterbox/pillarbox on odd TV/browser sizes -->
+  <div class="stage" id="stage">
+    <div class="deck" id="deck"></div>
+
+    <div class="era-badge" id="eraBadge" aria-hidden="true">Prologue</div>
+
+    <div class="hud" aria-hidden="true">
+      <div class="score-pill" id="scorePill">Score <span id="scoreVal">0</span></div>
+      <div class="mute-pill" id="mutePill">Muted</div>
+    </div>
+
+    <div class="chrome" id="chrome">
+      <div class="slide-index" id="slideIndex" aria-hidden="true" title="Press I to toggle · Sipnsplain.slides">Slide ·</div>
+      <button type="button" id="prev">Prev</button>
+      <div class="progress" id="progress">·</div>
+      <button type="button" id="next">Next</button>
+      <button type="button" id="toggleNotes">Notes</button>
+    </div>
+    <aside class="notes" id="notes" aria-live="polite"></aside>
+  </div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

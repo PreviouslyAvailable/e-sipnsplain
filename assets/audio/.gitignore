@@ -1,0 +1,6 @@
+# Microsoft Windows system sounds (© Microsoft).
+# Venue/talk OK to keep locally; do not commit if the repo may go public.
+# Same posture as assets/pinball/ (engine embeds copyrighted game data).
+win95/*.wav
+win98/*.wav
+winxp/*.wav

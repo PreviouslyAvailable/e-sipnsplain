@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0" />
+  <title>SkiFree.js (deck embed)</title>
+  <!--
+    Borderless shell for the Sipnsplain Win98 deck.
+    Upstream: https://github.com/basicallydan/skifree.js (MIT — see license.md)
+    Outer deck window supplies the only title bar the audience sees.
+
+    Deck beat (finish → yeti → Game Over → photo):
+      skifree-finish | skifree-yeti | skifree-gameover | skifree-gameover-photo
+  -->
+  <!-- Absolute asset root — mirrors master css/skifree.css canvas fill without banners. -->
+  <base href="/assets/skifree-js/" />
+  <style>
+    html, body {
+      position: relative;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #fff;
+      font-family: "MS Sans Serif", "Microsoft Sans Serif", Tahoma, sans-serif;
+    }
+
+    #skifree-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      vertical-align: top;
+      outline: none;
+      cursor: crosshair;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      background: #fff;
+    }
+
+    #skifree-gameover {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.35);
+      z-index: 20;
+    }
+
+    #skifree-gameover[hidden] {
+      display: none !important;
+    }
+
+    #skifree-gameover .panel {
+      min-width: min(280px, 86vw);
+      max-width: 340px;
+      padding: 12px 14px 14px;
+      background: #c0c0c0;
+      border: 2px solid;
+      border-color: #fff #000 #000 #fff;
+      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+      color: #000;
+      text-align: center;
+    }
+
+    #skifree-gameover .panel h1 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    #skifree-gameover .panel p {
+      margin: 0 0 12px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    #skifree-gameover-btn {
+      display: inline-block;
+      min-width: 120px;
+      padding: 4px 16px;
+      font: inherit;
+      font-size: 12px;
+      color: #000;
+      background: #c0c0c0;
+      border: 2px solid;
+      border-color: #fff #000 #000 #fff;
+      cursor: pointer;
+    }
+
+    #skifree-gameover-btn:active {
+      border-color: #000 #fff #fff #000;
+    }
+
+    #skifree-gameover-btn:focus-visible {
+      outline: 1px dotted #000;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="skifree-canvas" tabindex="0" aria-label="SkiFree.js — WASD or arrows to ski, mouse to steer, F boost, Space restart"></canvas>
+  <div id="skifree-gameover" hidden role="dialog" aria-labelledby="skifree-gameover-title" aria-modal="true">
+    <div class="panel">
+      <h1 id="skifree-gameover-title">Game Over</h1>
+      <p>The yeti caught you at the finish. Confirm to reveal the era photo.</p>
+      <button type="button" id="skifree-gameover-btn">Game Over</button>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var overlay = document.getElementById("skifree-gameover");
+      var btn = document.getElementById("skifree-gameover-btn");
+
+      function post(type) {
+        try {
+          var target =
+            window.parent && window.parent !== window ? window.parent : window;
+          target.postMessage({ type: type }, window.location.origin);
+        } catch (err) {
+          /* ignore */
+        }
+      }
+
+      window.__skifreeShowGameOver = function () {
+        if (!overlay) return;
+        overlay.hidden = false;
+        try {
+          btn && btn.focus({ preventScroll: true });
+        } catch (e) {
+          /* ignore */
+        }
+      };
+
+      window.__skifreeHideGameOver = function () {
+        if (overlay) overlay.hidden = true;
+      };
+
+      btn &&
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          // Hide panel immediately so the click isn't a no-op visually
+          // while the parent paints the full-bleed reward over the iframe.
+          if (overlay) overlay.hidden = true;
+          post("skifree-gameover-photo");
+        });
+
+      // Esc closes the outer Win98 chrome (parent listens for this message).
+      window.addEventListener(
+        "keydown",
+        function (e) {
+          if (e.key !== "Escape") return;
+          e.preventDefault();
+          e.stopPropagation();
+          post("skifree-esc");
+        },
+        true
+      );
+    })();
+  </script>
+  <!-- Absolute src survives <base href>; keep in sync with moments/skifree.js -->
+  <script src="/assets/skifree-js/skifree.js"></script>
+</body>
+</html>

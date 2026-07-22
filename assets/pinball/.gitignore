@@ -1,0 +1,6 @@
+# Ignore lrusso’s packaged JS — it embeds Microsoft / Full Tilt game data.
+# Keep the borderless deck shell + docs. Drop 3DPinballSpaceCadet.js locally to play.
+*
+!.gitignore
+!README.md
+!index.html

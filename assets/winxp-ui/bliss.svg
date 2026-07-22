@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1200" viewBox="0 0 1920 1200">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5ba3e0"/>
+      <stop offset="45%" stop-color="#7eb8e8"/>
+      <stop offset="100%" stop-color="#a8d4f0"/>
+    </linearGradient>
+    <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6db33f"/>
+      <stop offset="55%" stop-color="#3d8c2a"/>
+      <stop offset="100%" stop-color="#2a6b1c"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="72%" cy="28%" r="18%">
+      <stop offset="0%" stop-color="#fff6c8" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#ffe08a" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ffe08a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1200" fill="url(#sky)"/>
+  <ellipse cx="1380" cy="340" rx="340" ry="260" fill="url(#sun)"/>
+  <path d="M0 720 C 220 620, 480 780, 720 700 C 980 610, 1180 760, 1420 680 C 1620 620, 1780 700, 1920 660 L 1920 1200 L 0 1200 Z" fill="url(#hill)"/>
+  <path d="M0 860 C 300 800, 520 920, 820 840 C 1100 760, 1400 900, 1920 820 L 1920 1200 L 0 1200 Z" fill="#2f7a22" opacity="0.85"/>
+</svg>

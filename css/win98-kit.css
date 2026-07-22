@@ -1,0 +1,1050 @@
+/**
+ * Windows 98 hub theme.
+ *
+ * Primary type + button/field chrome: ui-98 (Microsoft Sans Serif) —
+ * local drop-in `ui-98-master` (fonts + Button/Input CSS patterns only;
+ * no React/Storybook embed).
+ * Window / Start bevel: Themesberg W95 kit lineage (MIT), Bootstrap-free.
+ *
+ * Attribution: /assets/win98-ui/ATTRIBUTION.md
+ * Scoped so Section 1 Win95 skin stays untouched.
+ */
+
+/* ui-98 kit face (Section 2 preferred) */
+@font-face {
+  font-family: "Microsoft Sans Serif";
+  src:
+    url("/assets/win98-ui/fonts/MicrosoftSansSerif.woff2") format("woff2"),
+    url("/assets/win98-ui/fonts/MicrosoftSansSerif.woff") format("woff"),
+    url("/assets/win98-ui/fonts/MicrosoftSansSerif.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Themesberg W95 kit face (fallback / shared classic chrome) */
+@font-face {
+  font-family: "Windows 95";
+  src:
+    url("/assets/win98-ui/fonts/w-95-sans-serif.woff2") format("woff2"),
+    url("/assets/win98-ui/fonts/w-95-sans-serif.woff") format("woff"),
+    url("/assets/win98-ui/fonts/ms-sans-serif.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.chapter.mode-win98,
+.chapter.mode-win98 [data-w98] {
+  --w98-face: #c0c0c0;
+  --w98-face-hi: #ffffff;
+  --w98-face-mid: #dfdfdf;
+  --w98-face-shadow: #808080;
+  --w98-face-dark: #000000;
+  /* ui-98 Button/Input exact edge colors */
+  --w98-ui98-hi: #fcfcfc;
+  --w98-ui98-lo: #4c4c4c;
+  --w98-ui98-disabled: #8d8d8d;
+  --w98-ui98-disabled-shadow: #f7f7f7;
+  --w98-title: #000080;
+  --w98-title-kit: #000181;
+  --w98-desktop: #008080;
+  --w98-desktop-kit: #008081;
+  --w98-ink: #000000;
+  --w98-font: "Microsoft Sans Serif", "Windows 95", "MS Sans Serif", Tahoma, sans-serif;
+  --w98-raised:
+    inset 1px 1px 0 var(--w98-face-hi),
+    inset -1px -1px 0 var(--w98-face-shadow);
+  --w98-raised-border: 2px solid;
+  --w98-raised-colors: var(--w98-face-hi) var(--w98-face-dark) var(--w98-face-dark) var(--w98-face-hi);
+  --w98-sunken-colors: var(--w98-face-shadow) var(--w98-face-hi) var(--w98-face-hi) var(--w98-face-shadow);
+  --w98-ui98-raised: var(--w98-ui98-hi) var(--w98-ui98-lo) var(--w98-ui98-lo) var(--w98-ui98-hi);
+  --w98-ui98-sunken: var(--w98-ui98-lo) var(--w98-ui98-hi) var(--w98-ui98-hi) var(--w98-ui98-lo);
+}
+
+.chapter.mode-win98 {
+  background: var(--w98-desktop-kit);
+  font-family: var(--w98-font);
+}
+
+.w98-desktop {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 42%),
+    var(--w98-desktop-kit);
+  font-family: var(--w98-font);
+  color: var(--w98-ink);
+  image-rendering: auto;
+}
+
+/* —— Kit-style raised / sunken chrome helpers —— */
+.w98-raised {
+  background: var(--w98-face);
+  border: var(--w98-raised-border);
+  border-color: var(--w98-raised-colors);
+  box-shadow: inset 1px 1px 0 var(--w98-face-mid);
+}
+
+.w98-sunken {
+  border: 2px solid;
+  border-color: var(--w98-sunken-colors);
+}
+
+/* —— Desktop icons —— */
+.w98-icons {
+  top: 10px;
+  left: 10px;
+  gap: 12px;
+}
+
+.w98-icon {
+  font-family: var(--w98-font);
+  font-size: 11px;
+  width: 78px;
+}
+
+.w98-icon-glyph {
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+  image-rendering: pixelated;
+}
+
+img.w98-icon-glyph {
+  background: none !important;
+  border: none !important;
+  box-shadow: none;
+  clip-path: none;
+  border-radius: 0;
+  object-fit: contain;
+  display: block;
+}
+
+.w98-icon.is-muted {
+  opacity: 0.92;
+}
+
+.w98-icon.is-muted:hover,
+.w98-icon.is-muted:focus-visible {
+  opacity: 1;
+}
+
+/* —— Welcome / hub window (kit card chrome) —— */
+.w98-welcome.w95-window {
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100cqw - 40px));
+  background: var(--w98-face);
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #393939;
+  border-bottom: 2px solid #393939;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+  z-index: 4;
+  animation: w98WelcomeIn 380ms var(--ease-pop, cubic-bezier(0.2, 0.9, 0.2, 1)) both;
+}
+
+.w98-welcome.w95-window.is-closed {
+  display: none;
+}
+
+@keyframes w98WelcomeIn {
+  0% { transform: translate(-50%, -48%) scale(0.96); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.w98-welcome .w95-titlebar {
+  background: var(--w98-title-kit);
+  font-family: var(--w98-font);
+  font-size: 11px;
+  padding: 3px 3px 3px 4px;
+}
+
+.w98-welcome-body {
+  padding: 10px 10px 8px;
+  border-top: 2px solid #bdbdbd;
+  border-left: 3px solid #bdbdbd;
+  border-right: 3px solid #bdbdbd;
+  border-bottom: 2px solid #bdbdbd;
+  background: var(--w98-face);
+}
+
+.w98-welcome-lead {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.w98-welcome-meta {
+  margin: 0 0 12px;
+  font-size: 11px;
+  color: #222;
+}
+
+.w98-welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ui-98 Button.css pattern (raised + outer shadow) — no React */
+.w98-kit-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  padding: 6px 12px;
+  font-family: var(--w98-font);
+  font-size: 11px;
+  color: inherit;
+  background: var(--w98-face);
+  border: 1px solid;
+  border-color: var(--w98-ui98-raised);
+  border-radius: 0;
+  box-shadow: 1px 1px 0 var(--w98-ui98-lo);
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+}
+
+.w98-kit-btn:hover:not(:disabled) {
+  background: #d4d0c8;
+}
+
+.w98-kit-btn:disabled {
+  color: var(--w98-ui98-disabled);
+  text-shadow: 1px 1px 0 var(--w98-ui98-disabled-shadow);
+  cursor: default;
+}
+
+.w98-kit-btn:disabled:active {
+  border-color: var(--w98-ui98-raised);
+  box-shadow: 1px 1px 0 var(--w98-ui98-lo);
+}
+
+.w98-kit-btn:active:not(:disabled),
+.w98-kit-btn.is-pressed {
+  border-color: var(--w98-ui98-sunken);
+  box-shadow: inset 1px 1px 0 var(--w98-ui98-lo);
+  color: inherit;
+}
+
+.w98-kit-btn:focus-visible {
+  outline: 1px dotted var(--w98-ui98-lo);
+  outline-offset: -4px;
+  box-shadow: 0 0 0 1px var(--w98-ui98-lo);
+}
+
+/* ui-98 Input sunken field helper (for future forms / address bars) */
+.w98-sunken-field {
+  background: #fff;
+  font-family: var(--w98-font);
+  font-size: 11px;
+  border: 1px solid;
+  border-color: var(--w98-ui98-sunken);
+  padding: 4px 6px;
+  outline: none;
+}
+
+.w98-sunken-field:focus {
+  outline: 1px dotted var(--w98-ui98-lo);
+  outline-offset: -2px;
+}
+
+/* —— Start menu / taskbar kit polish —— */
+.w98-start-menu {
+  font-family: var(--w98-font);
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #393939;
+  border-bottom: 2px solid #393939;
+  background: var(--w98-face);
+  box-shadow: inset 1px 1px 0 var(--w98-face-mid), 2px 2px 0 rgba(0, 0, 0, 0.35);
+  min-width: 228px;
+}
+
+.w98-start-banner {
+  width: 24px;
+  flex: 0 0 24px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10px 3px;
+  background: linear-gradient(180deg, var(--w98-title-kit) 0%, #1084d0 55%, #0870b8 100%);
+  color: #c0c0c0;
+  font-family: var(--w98-font);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.w98-start-banner span {
+  color: #fff;
+  font-weight: 400;
+  margin-bottom: 3px;
+  opacity: 1;
+}
+
+.w98-start-list {
+  padding: 3px 2px 3px 3px;
+}
+
+.w98-start-btn {
+  font-family: var(--w98-font);
+  font-size: 11px;
+  padding: 5px 10px 5px 6px;
+  gap: 9px;
+}
+
+.w98-start-btn:hover:not(:disabled),
+.w98-start-item.is-open > .w98-start-btn {
+  background: var(--w98-title-kit);
+  color: #fff;
+}
+
+.w98-start-sep {
+  height: 2px;
+  margin: 4px 6px;
+  background: var(--w98-face-shadow);
+  border-bottom: 1px solid var(--w98-face-hi);
+}
+
+.w98-start-flyout {
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #393939;
+  border-bottom: 2px solid #393939;
+  background: var(--w98-face);
+  box-shadow: inset 1px 1px 0 var(--w98-face-mid), 2px 2px 0 rgba(0, 0, 0, 0.35);
+  min-width: 168px;
+  padding: 2px;
+}
+
+.w98-start-arrow {
+  margin-left: auto;
+  font-size: 9px;
+}
+
+.w98-taskbar {
+  position: relative;
+  margin-top: auto;
+  z-index: 50;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 3px;
+  background: var(--w98-face);
+  border-top: 2px solid #fff;
+  font-family: var(--w98-font);
+  box-shadow: inset 0 1px 0 var(--w98-face-mid);
+}
+
+.w98-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 10px 1px 6px;
+  font-family: var(--w98-font);
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--w98-ink);
+  background: var(--w98-face);
+  border: 1px solid;
+  border-color: var(--w98-ui98-raised);
+  box-shadow: 1px 1px 0 var(--w98-ui98-lo);
+  cursor: pointer;
+  appearance: none;
+}
+
+.w98-start-logo {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  background:
+    linear-gradient(#ff0000 0 50%, #00ff00 50% 100%) 0 0 / 50% 100% no-repeat,
+    linear-gradient(#0000ff 0 50%, #ffff00 50% 100%) 100% 0 / 50% 100% no-repeat;
+  border: 1px solid #000;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.w98-start.is-pressed,
+.w98-start:active {
+  border-color: var(--w98-ui98-sunken);
+  box-shadow: inset 1px 1px 0 var(--w98-ui98-lo);
+  padding: 1px 9px 0 7px;
+}
+
+.w98-task {
+  height: 24px;
+  padding: 0 12px;
+  font-family: var(--w98-font);
+  font-size: 11px;
+  color: var(--w98-ink);
+  background: var(--w98-face);
+  border: 1px solid;
+  border-color: var(--w98-ui98-raised);
+  box-shadow: 1px 1px 0 var(--w98-ui98-lo);
+  cursor: pointer;
+  appearance: none;
+}
+
+.w98-task.is-pressed {
+  border-color: var(--w98-ui98-sunken);
+  box-shadow: inset 1px 1px 0 var(--w98-ui98-lo);
+  background: #b8b8b8;
+}
+
+.w98-tray {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid;
+  border-color: var(--w98-ui98-sunken);
+  background: var(--w98-face);
+  font-family: var(--w98-font);
+  font-size: 11px;
+}
+
+.w98-tray-icon {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--w98-face-shadow);
+  background:
+    linear-gradient(135deg, #fff 0 40%, transparent 41%),
+    #c0c0c0;
+}
+
+.w98-clock {
+  font-family: var(--w98-font);
+  font-size: 11px;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.w98-clock:hover,
+.w98-clock:focus-visible {
+  outline: 1px dotted #000;
+  outline-offset: 1px;
+}
+
+.w98-clock.is-y2k-takeover {
+  color: #000080;
+  font-variant-numeric: tabular-nums;
+}
+
+.w98-clock.is-y2k-rollover,
+.w98-clock.is-y2k-midnight {
+  color: #800000;
+  font-weight: 700;
+}
+
+/* —— Date/Time Properties (tray clock click) —— */
+.w98-datetime.w95-window {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100cqw - 28px));
+  z-index: 12;
+}
+
+.w98-datetime.w95-window.is-closed {
+  display: none;
+}
+
+.w98-datetime-body {
+  padding: 8px 10px 10px;
+  background: var(--w98-face);
+  font-family: var(--w98-font);
+  font-size: 11px;
+  color: #000;
+}
+
+.w98-datetime-tabs {
+  display: flex;
+  gap: 0;
+  margin: 0 0 0 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.w98-datetime-tab {
+  margin: 0 0 -1px;
+  padding: 3px 12px 4px;
+  border: 1px solid;
+  border-color: #fff #808080 #c0c0c0 #fff;
+  background: #c0c0c0;
+  font: inherit;
+  font-size: 11px;
+  color: #000;
+  cursor: default;
+  border-radius: 2px 2px 0 0;
+}
+
+.w98-datetime-tab.is-active {
+  padding-bottom: 5px;
+  border-bottom-color: #c0c0c0;
+  z-index: 2;
+}
+
+.w98-datetime-tab:disabled {
+  color: #808080;
+}
+
+.w98-datetime-panel {
+  display: grid;
+  grid-template-columns: 1.15fr 0.95fr;
+  gap: 10px;
+  padding: 10px 8px 8px;
+  border: 1px solid;
+  border-color: #fff #808080 #808080 #fff;
+  background: #c0c0c0;
+}
+
+.w98-datetime-group {
+  margin: 0;
+  padding: 8px 8px 10px;
+  border: 1px solid;
+  border-color: #808080 #fff #fff #808080;
+  min-width: 0;
+}
+
+.w98-datetime-group legend {
+  padding: 0 4px;
+  font-size: 11px;
+}
+
+.w98-datetime-date-controls {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.w98-datetime-month,
+.w98-datetime-year,
+.w98-datetime-digital {
+  font: inherit;
+  font-size: 11px;
+  color: #000;
+  background: #fff;
+  border: 1px solid;
+  border-color: #808080 #fff #fff #808080;
+  box-shadow: inset 1px 1px 0 #404040;
+  height: 22px;
+  box-sizing: border-box;
+}
+
+.w98-datetime-month {
+  flex: 1;
+  min-width: 0;
+  padding: 0 2px;
+}
+
+.w98-datetime-year-wrap,
+.w98-datetime-digital-wrap {
+  display: flex;
+  align-items: stretch;
+  width: 72px;
+  flex-shrink: 0;
+}
+
+.w98-datetime-year,
+.w98-datetime-digital {
+  width: 100%;
+  padding: 0 4px;
+  text-align: left;
+}
+
+.w98-datetime-spinner {
+  display: flex;
+  flex-direction: column;
+  width: 16px;
+  border: 1px solid;
+  border-color: #fff #808080 #808080 #fff;
+  background: #c0c0c0;
+  flex-shrink: 0;
+}
+
+.w98-datetime-spinner span {
+  flex: 1;
+  position: relative;
+}
+
+.w98-datetime-spinner span::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border: 3px solid transparent;
+  margin-left: -3px;
+}
+
+.w98-datetime-spinner span:first-child::before {
+  border-bottom-color: #000;
+  margin-top: -5px;
+}
+
+.w98-datetime-spinner span:last-child::before {
+  border-top-color: #000;
+  margin-top: 1px;
+}
+
+.w98-datetime-cal {
+  border: 1px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #fff;
+  padding: 4px;
+}
+
+.w98-datetime-cal-head,
+.w98-datetime-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  text-align: center;
+}
+
+.w98-datetime-cal-head {
+  margin-bottom: 2px;
+  color: #000;
+  font-weight: 700;
+}
+
+.w98-datetime-cal-grid button {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 0;
+  min-height: 18px;
+  color: #000;
+  cursor: default;
+}
+
+.w98-datetime-cal-grid button.is-empty {
+  visibility: hidden;
+}
+
+.w98-datetime-cal-grid button.is-selected {
+  background: #000080;
+  color: #fff;
+}
+
+.w98-datetime-analog {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.w98-datetime-face {
+  position: relative;
+  width: 118px;
+  height: 118px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #fff 0 46%, transparent 47%),
+    repeating-conic-gradient(from -1.5deg, #5a8a9a 0 3deg, transparent 3deg 30deg);
+  border: 1px solid #808080;
+  box-shadow: inset 0 0 0 1px #fff;
+}
+
+.w98-datetime-hand {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  transform-origin: 50% 100%;
+  background: #2f6f7a;
+  border-radius: 1px;
+}
+
+.w98-datetime-hand.is-hour {
+  width: 3px;
+  height: 28px;
+  margin-left: -1.5px;
+}
+
+.w98-datetime-hand.is-minute {
+  width: 2px;
+  height: 40px;
+  margin-left: -1px;
+  background: #3a8a96;
+}
+
+.w98-datetime-hand.is-second {
+  width: 1px;
+  height: 44px;
+  margin-left: -0.5px;
+  background: #c00;
+}
+
+.w98-datetime-pivot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: #2f6f7a;
+  border: 1px solid #fff;
+}
+
+.w98-datetime-digital-wrap {
+  width: 100%;
+  max-width: 118px;
+  margin: 0 auto;
+}
+
+.w98-datetime-tz {
+  margin: 10px 2px 0;
+  font-size: 11px;
+}
+
+.w98-datetime-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+/* —— Pinball / photo windows inherit kit title + face inside hub —— */
+.w98-desktop .w95-window {
+  font-family: var(--w98-font);
+  background: var(--w98-face);
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #393939;
+  border-bottom: 2px solid #393939;
+}
+
+.w98-desktop .w95-titlebar {
+  background: var(--w98-title-kit);
+  font-family: var(--w98-font);
+}
+
+.w98-desktop .w95-ctrl,
+.w98-desktop button.w95-ctrl {
+  font-family: Tahoma, "MS Sans Serif", sans-serif;
+  background: var(--w98-face);
+  border: 1px solid;
+  border-color: #fff #000 #000 #fff;
+  box-shadow: inset -1px -1px 0 #808080;
+  position: static;
+  padding: 0;
+  max-height: none;
+  border-radius: 0;
+}
+
+.w98-desktop .w95-ctrl::before,
+.w98-desktop .w95-ctrl::after,
+.w98-desktop button.w95-ctrl::before,
+.w98-desktop button.w95-ctrl::after {
+  content: none !important;
+  display: none !important;
+}
+
+.w98-desktop .w95-btn,
+.w98-desktop .w95-pinball-reveal,
+.w98-desktop .w95-pinball-continue {
+  font-family: var(--w98-font);
+}
+
+/* Hide legacy stub styles if any leftover markup appears */
+.w98-stub {
+  display: none !important;
+}
+
+/* —— Update affordance —— */
+.w98-icon.is-boot-disk[hidden] {
+  display: none !important;
+}
+
+.w98-desktop.has-update .w98-icon.is-boot-disk:not([hidden]) {
+  animation: w98UpdateGlow 1.4s ease-in-out infinite;
+}
+
+.w98-update-badge {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid;
+  border-color: #fff #000 #000 #fff;
+  background: var(--w98-face);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.w98-update-badge:not([hidden]) {
+  animation: w98UpdateGlow 1.4s ease-in-out infinite;
+}
+
+.w98-update-ico {
+  width: 16px;
+  height: 16px;
+  display: block;
+  image-rendering: pixelated;
+  object-fit: contain;
+  background: none;
+  box-shadow: none;
+}
+
+.w98-update-pulse {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff0;
+  border: 1px solid #c00;
+  box-shadow: 0 0 0 1px #fff;
+}
+
+@keyframes w98UpdateGlow {
+  0%, 100% { box-shadow: none; filter: brightness(1); }
+  50% { box-shadow: 0 0 0 1px #ff0; filter: brightness(1.08); }
+}
+
+.w98-start-btn.is-update {
+  font-weight: 700;
+}
+
+/* —— Desktop Themes dialog —— */
+.w98-themes.w95-window {
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100cqw - 36px));
+  z-index: 6;
+}
+
+.w98-themes.w95-window.is-closed {
+  display: none;
+}
+
+.w98-themes-body {
+  padding: 10px;
+  background: var(--w98-face);
+}
+
+.w98-themes-lead {
+  margin: 0 0 6px;
+  font-size: 11px;
+}
+
+.w98-themes-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.w98-themes-list {
+  list-style: none;
+  margin: 0;
+  padding: 2px;
+  min-height: 140px;
+  max-height: 180px;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid;
+  border-color: var(--w98-ui98-sunken);
+}
+
+.w98-themes-item {
+  display: block;
+  width: 100%;
+  padding: 3px 6px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.w98-themes-item:hover {
+  background: #e8e8e8;
+}
+
+.w98-themes-item.is-selected {
+  background: var(--w98-title-kit);
+  color: #fff;
+}
+
+.w98-themes-item.is-odd {
+  font-style: italic;
+}
+
+.w98-themes-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 140px;
+}
+
+.w98-themes-swatch {
+  flex: 1;
+  min-height: 100px;
+  border: 1px solid;
+  border-color: var(--w98-ui98-sunken);
+  background: var(--w98-desktop-kit);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.w98-themes-swatch[data-theme="underwater"] {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(120, 220, 255, 0.35), transparent 45%),
+    radial-gradient(circle at 70% 60%, rgba(0, 180, 120, 0.25) 0 8%, transparent 9%),
+    linear-gradient(180deg, #024b6e, #012a40 55%, #001820);
+}
+
+.w98-themes-swatch[data-theme="dangerous"] {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 200, 80, 0.25), transparent 40%),
+    linear-gradient(160deg, #3d5c1a, #6b4226 50%, #2a1a0a);
+}
+
+.w98-themes-swatch[data-theme="space"] {
+  background:
+    radial-gradient(circle at 20% 30%, #fff 0 1px, transparent 1.5px),
+    radial-gradient(circle at 70% 50%, #fff 0 1px, transparent 1.5px),
+    radial-gradient(circle at 45% 75%, #9cf 0 1px, transparent 1.5px),
+    linear-gradient(180deg, #05051a, #0a1030 60%, #000);
+}
+
+.w98-themes-swatch[data-theme="chris2000"] {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent 40%),
+    linear-gradient(180deg, #5a7a8a, #2a4050);
+}
+
+.w98-themes-preview-label {
+  margin: 0;
+  font-size: 11px;
+  color: #222;
+}
+
+.w98-themes-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.w98-desktop .w95-window.is-chris-reward {
+  z-index: 8;
+}
+
+/* —— Theme re-skins (data-w98-theme on [data-w98]) —— */
+.chapter.mode-win98 [data-w98][data-w98-theme="underwater"] {
+  --w98-desktop: #024b6e;
+  --w98-desktop-kit: #024b6e;
+  --w98-title: #003060;
+  --w98-title-kit: #003060;
+  --w98-face: #b8c8d0;
+  --w98-face-mid: #d0dde4;
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="underwater"],
+.chapter.mode-win98[data-w98-theme="underwater"] {
+  background: #024b6e;
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="underwater"].w98-desktop {
+  background:
+    radial-gradient(ellipse at 28% 18%, rgba(120, 220, 255, 0.28), transparent 42%),
+    radial-gradient(circle at 72% 62%, rgba(0, 200, 140, 0.18) 0 10%, transparent 11%),
+    radial-gradient(circle at 40% 80%, rgba(255, 180, 80, 0.12) 0 6%, transparent 7%),
+    linear-gradient(180deg, #036a8c, #024b6e 45%, #012a40);
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="underwater"] .w98-icon-glyph:not(img) {
+  filter: hue-rotate(160deg) saturate(1.15);
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="dangerous"] {
+  --w98-desktop: #3d5c1a;
+  --w98-desktop-kit: #3d5c1a;
+  --w98-title: #4a2808;
+  --w98-title-kit: #4a2808;
+  --w98-face: #c8b890;
+  --w98-face-mid: #ddd0a8;
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="dangerous"],
+.chapter.mode-win98[data-w98-theme="dangerous"] {
+  background: #3d5c1a;
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="dangerous"].w98-desktop {
+  background:
+    radial-gradient(ellipse at 80% 10%, rgba(255, 120, 40, 0.2), transparent 40%),
+    linear-gradient(165deg, #4a7020 0%, #6b4226 48%, #2a1a0a 100%);
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="dangerous"] .w98-icon-glyph:not(img) {
+  filter: sepia(0.45) saturate(1.2) hue-rotate(-10deg);
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="space"] {
+  --w98-desktop: #05051a;
+  --w98-desktop-kit: #05051a;
+  --w98-title: #1a2060;
+  --w98-title-kit: #1a2060;
+  --w98-face: #a8a8b8;
+  --w98-face-mid: #c4c4d0;
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="space"],
+.chapter.mode-win98[data-w98-theme="space"] {
+  background: #05051a;
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="space"].w98-desktop {
+  background:
+    radial-gradient(circle at 18% 22%, #fff 0 1px, transparent 1.5px),
+    radial-gradient(circle at 62% 38%, #fff 0 1px, transparent 1.5px),
+    radial-gradient(circle at 40% 70%, #9cf 0 1px, transparent 1.5px),
+    radial-gradient(circle at 85% 55%, #fff 0 1px, transparent 1.5px),
+    radial-gradient(ellipse at 50% 120%, rgba(80, 40, 160, 0.45), transparent 55%),
+    linear-gradient(180deg, #05051a, #0a1030 55%, #000);
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="space"] .w98-icon-glyph:not(img) {
+  filter: saturate(0.85) brightness(1.1);
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="chris2000"] {
+  --w98-desktop: #5a7a8a;
+  --w98-desktop-kit: #5a7a8a;
+  --w98-title: #203040;
+  --w98-title-kit: #203040;
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="chris2000"],
+.chapter.mode-win98[data-w98-theme="chris2000"] {
+  background: #5a7a8a;
+}
+
+.chapter.mode-win98 [data-w98][data-w98-theme="chris2000"].w98-desktop {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent 45%),
+    linear-gradient(180deg, #6a8a9a, #3a5060);
+}

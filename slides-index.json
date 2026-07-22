@@ -1,0 +1,62 @@
+{
+  "generated": "2026-07-23",
+  "count": 8,
+  "slides": [
+    {
+      "n": 1,
+      "id": "win95",
+      "label": "Win95 desktop hub",
+      "theme": "Win95 scrapbook",
+      "era": "1995"
+    },
+    {
+      "n": 2,
+      "id": "win98",
+      "label": "Windows 98 hub",
+      "theme": "Windows 98 hub",
+      "era": "win98"
+    },
+    {
+      "n": 3,
+      "id": "continue",
+      "label": "Continue…",
+      "theme": "Prologue",
+      "era": "prologue"
+    },
+    {
+      "n": 4,
+      "id": "age-8",
+      "label": "GBA SP · 2003",
+      "theme": "GBA SP · 2003",
+      "era": "2003"
+    },
+    {
+      "n": 5,
+      "id": "age-11",
+      "label": "Bebo · 2006",
+      "theme": "Bebo · 2006",
+      "era": "2006"
+    },
+    {
+      "n": 6,
+      "id": "age-14",
+      "label": "Minecraft · craft web",
+      "theme": "Early craft web",
+      "era": "2009"
+    },
+    {
+      "n": 7,
+      "id": "make-impossible",
+      "label": "Make something impossible",
+      "theme": "AI-native finale",
+      "era": "2025"
+    },
+    {
+      "n": 8,
+      "id": "source-reveal",
+      "label": "Source reveal",
+      "theme": "AI-native finale",
+      "era": "2025"
+    }
+  ]
+}

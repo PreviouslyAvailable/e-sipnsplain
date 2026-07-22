@@ -1,0 +1,483 @@
+{
+  "title-logo": {
+    "sheet": "title-controls",
+    "x": 2,
+    "y": 3,
+    "w": 91,
+    "h": 70,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "sign-numpad": {
+    "sheet": "title-controls",
+    "x": 100,
+    "y": 8,
+    "w": 92,
+    "h": 30,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "sign-fkeys": {
+    "sheet": "title-controls",
+    "x": 115,
+    "y": 42,
+    "w": 63,
+    "h": 32,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "sign-freestyle": {
+    "sheet": "objects",
+    "x": 130,
+    "y": 95,
+    "w": 40,
+    "h": 35,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "sign-slalom": {
+    "sheet": "objects",
+    "x": 172,
+    "y": 94,
+    "w": 40,
+    "h": 36,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "sign-treeslalom": {
+    "sheet": "objects",
+    "x": 214,
+    "y": 94,
+    "w": 44,
+    "h": 36,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "sign-start": {
+    "sheet": "objects",
+    "x": 260,
+    "y": 103,
+    "w": 42,
+    "h": 27,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "sign-start-l": {
+    "sheet": "objects",
+    "x": 0,
+    "y": 135,
+    "w": 42,
+    "h": 27,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "sign-finish": {
+    "sheet": "objects",
+    "x": 100,
+    "y": 133,
+    "w": 50,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "sign-finish-l": {
+    "sheet": "objects",
+    "x": 152,
+    "y": 133,
+    "w": 50,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "tree": {
+    "sheet": "objects",
+    "x": 0,
+    "y": 31,
+    "w": 28,
+    "h": 32,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "tree-1": {
+    "sheet": "objects",
+    "x": 281,
+    "y": 31,
+    "w": 28,
+    "h": 32,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "tree-2": {
+    "sheet": "objects",
+    "x": 311,
+    "y": 31,
+    "w": 26,
+    "h": 32,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "rock": {
+    "sheet": "objects",
+    "x": 30,
+    "y": 52,
+    "w": 23,
+    "h": 11,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "jump": {
+    "sheet": "objects",
+    "x": 161,
+    "y": 50,
+    "w": 89,
+    "h": 13,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "lift-tower": {
+    "sheet": "objects",
+    "x": 55,
+    "y": 0,
+    "w": 24,
+    "h": 63,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "lift-chair": {
+    "sheet": "objects",
+    "x": 81,
+    "y": 33,
+    "w": 31,
+    "h": 30,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "stump": {
+    "sheet": "objects",
+    "x": 250,
+    "y": 52,
+    "w": 29,
+    "h": 11,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "skier-left-hard": {
+    "sheet": "characters",
+    "x": 0,
+    "y": 8,
+    "w": 23,
+    "h": 26,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "skier-left": {
+    "sheet": "characters",
+    "x": 25,
+    "y": 6,
+    "w": 22,
+    "h": 28,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "skier-down-left": {
+    "sheet": "characters",
+    "x": 49,
+    "y": 3,
+    "w": 16,
+    "h": 31,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "skier-down": {
+    "sheet": "characters",
+    "x": 67,
+    "y": 2,
+    "w": 15,
+    "h": 32,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "skier-jump": {
+    "sheet": "characters",
+    "x": 84,
+    "y": 2,
+    "w": 32,
+    "h": 32,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "skier-flip": {
+    "sheet": "characters",
+    "x": 118,
+    "y": 2,
+    "w": 29,
+    "h": 38,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "skier-down-right": {
+    "sheet": "characters",
+    "x": 149,
+    "y": 10,
+    "w": 27,
+    "h": 24,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "skier-right": {
+    "sheet": "characters",
+    "x": 176,
+    "y": 3,
+    "w": 34,
+    "h": 31,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "skier-right-hard": {
+    "sheet": "characters",
+    "x": 212,
+    "y": 0,
+    "w": 28,
+    "h": 34,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "skier-ouch": {
+    "sheet": "characters",
+    "x": 242,
+    "y": 3,
+    "w": 31,
+    "h": 31,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-scare1": {
+    "sheet": "characters",
+    "x": 0,
+    "y": 76,
+    "w": 20,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-scare2": {
+    "sheet": "characters",
+    "x": 37,
+    "y": 76,
+    "w": 16,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-stand-l": {
+    "sheet": "characters",
+    "x": 64,
+    "y": 76,
+    "w": 15,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-stand-r": {
+    "sheet": "characters",
+    "x": 94,
+    "y": 76,
+    "w": 16,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-grab": {
+    "sheet": "characters",
+    "x": 124,
+    "y": 76,
+    "w": 31,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-eat1": {
+    "sheet": "characters",
+    "x": 159,
+    "y": 76,
+    "w": 25,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-eat2": {
+    "sheet": "characters",
+    "x": 190,
+    "y": 76,
+    "w": 25,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-eat3": {
+    "sheet": "characters",
+    "x": 215,
+    "y": 76,
+    "w": 21,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-pick": {
+    "sheet": "characters",
+    "x": 240,
+    "y": 77,
+    "w": 30,
+    "h": 28,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "dog": {
+    "sheet": "characters",
+    "x": 0,
+    "y": 163,
+    "w": 16,
+    "h": 13,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "dog-1": {
+    "sheet": "characters",
+    "x": 23,
+    "y": 163,
+    "w": 21,
+    "h": 13,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "dog-2": {
+    "sheet": "characters",
+    "x": 48,
+    "y": 163,
+    "w": 14,
+    "h": 13,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "dog-3": {
+    "sheet": "characters",
+    "x": 68,
+    "y": 163,
+    "w": 15,
+    "h": 13,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-run1": {
+    "sheet": "characters",
+    "x": 94,
+    "y": 76,
+    "w": 16,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-run2": {
+    "sheet": "characters",
+    "x": 0,
+    "y": 76,
+    "w": 20,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-walk1": {
+    "sheet": "characters",
+    "x": 64,
+    "y": 76,
+    "w": 15,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti-walk2": {
+    "sheet": "characters",
+    "x": 94,
+    "y": 76,
+    "w": 16,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "skier-crash": {
+    "sheet": "characters",
+    "x": 242,
+    "y": 3,
+    "w": 31,
+    "h": 31,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "yeti": {
+    "sheet": "characters",
+    "x": 94,
+    "y": 76,
+    "w": 16,
+    "h": 29,
+    "scale": 2,
+    "ax": 0.5,
+    "ay": 1.0
+  },
+  "_aliases": {
+    "skier-crash": "skier-ouch",
+    "yeti": "yeti-stand-r",
+    "yeti-walk": "yeti-stand-l",
+    "yeti-eat": "yeti-eat2"
+  },
+  "_sheets": {
+    "title-controls": "sheets/title-controls.png",
+    "characters": "sheets/characters.png",
+    "objects": "sheets/objects.png"
+  }
+}

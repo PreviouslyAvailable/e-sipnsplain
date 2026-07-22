@@ -1,0 +1,230 @@
+/**
+ * Windows 95 hub polish (Section 1).
+ *
+ * Fonts + bevel tokens from Themesberg Windows 95 UI Kit (MIT),
+ * adapted Bootstrap-/jQuery-free for `#win95` / `mode-win95`.
+ *
+ * Does not restyle Paint / Minesweeper clients — only shared
+ * chrome (type, window bevel, Start/taskbar, buttons).
+ *
+ * Attribution: /assets/win95/ATTRIBUTION.md
+ */
+
+@font-face {
+  font-family: "Windows 95";
+  src:
+    url("/assets/win95/fonts/w-95-sans-serif.woff2") format("woff2"),
+    url("/assets/win95/fonts/w-95-sans-serif.woff") format("woff"),
+    url("/assets/win95/fonts/ms-sans-serif.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.chapter.mode-win95,
+.chapter.mode-win95 [data-w95] {
+  --w95-face: #c0c0c0;
+  --w95-face-hi: #ffffff;
+  --w95-face-mid: #dfdfdf;
+  --w95-face-shadow: #808080;
+  --w95-face-dark: #000000;
+  --w95-bevel-mid: #858585;
+  --w95-bevel-outer: #393939;
+  --w95-title: #000181;
+  --w95-desktop: #008081;
+  --w95-ink: #000000;
+  --w95-font: "Windows 95", "MS Sans Serif", Tahoma, sans-serif;
+  --w95-raised-colors: var(--w95-face-hi) var(--w95-face-dark) var(--w95-face-dark) var(--w95-face-hi);
+  --w95-sunken-colors: var(--w95-face-shadow) var(--w95-face-hi) var(--w95-face-hi) var(--w95-face-shadow);
+}
+
+.chapter.mode-win95 {
+  background: var(--w95-desktop);
+  font-family: var(--w95-font);
+  color: var(--w95-ink);
+}
+
+.chapter.mode-win95 .w95-desktop {
+  background: var(--w95-desktop);
+  font-family: var(--w95-font);
+}
+
+/* —— Window chrome (kit card bevel) —— */
+.chapter.mode-win95 .w95-window {
+  background: var(--w95-face);
+  border: 2px solid;
+  border-color: var(--w95-face-hi) var(--w95-bevel-outer) var(--w95-bevel-outer) var(--w95-face-hi);
+  box-shadow: inset 1px 1px 0 var(--w95-face-mid), 2px 2px 0 rgba(0, 0, 0, 0.45);
+  font-family: var(--w95-font);
+}
+
+.chapter.mode-win95 .w95-titlebar {
+  background: var(--w95-title);
+  font-family: var(--w95-font);
+  font-size: 11px;
+  padding: 3px 3px 3px 4px;
+}
+
+.chapter.mode-win95 .w95-menubar,
+.chapter.mode-win95 .w95-statusbar,
+.chapter.mode-win95 .w95-client,
+.chapter.mode-win95 .w95-shutdown-client {
+  font-family: var(--w95-font);
+}
+
+/* Caption buttons: kit face + bevel, but never Themesberg ::before chrome
+   (that fights the tiny 16×14 squares) and never the bitmap kit font
+   (missing _ □ × glyphs). */
+.chapter.mode-win95 .w95-ctrl,
+.chapter.mode-win95 button.w95-ctrl {
+  font-family: Tahoma, "MS Sans Serif", sans-serif;
+  background: var(--w95-face);
+  border: 1px solid;
+  border-color: var(--w95-face-hi) var(--w95-face-dark) var(--w95-face-dark) var(--w95-face-hi);
+  box-shadow: inset -1px -1px 0 var(--w95-face-shadow);
+  position: static;
+  padding: 0;
+  max-height: none;
+  border-radius: 0;
+  letter-spacing: 0;
+  transition: none;
+}
+
+.chapter.mode-win95 .w95-ctrl::before,
+.chapter.mode-win95 .w95-ctrl::after,
+.chapter.mode-win95 button.w95-ctrl::before,
+.chapter.mode-win95 button.w95-ctrl::after {
+  content: none !important;
+  display: none !important;
+  border: 0 !important;
+}
+
+/* Kit-style raised button (::before bevel, no Bootstrap) — dialog .w95-btn only */
+.chapter.mode-win95 .w95-btn {
+  position: relative;
+  font-family: var(--w95-font);
+  background: var(--w95-face);
+  border: 2px solid #0a0a0a;
+  border-color: #0a0a0a;
+  box-shadow: none;
+  padding: 5px 14px 6px;
+}
+
+.chapter.mode-win95 .w95-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: 2px solid var(--w95-face-hi);
+  border-left: 2px solid var(--w95-face-hi);
+  border-right: 2px solid var(--w95-bevel-mid);
+  border-bottom: 2px solid var(--w95-bevel-mid);
+  pointer-events: none;
+}
+
+.chapter.mode-win95 .w95-btn:hover {
+  background: #d4d0c8;
+}
+
+.chapter.mode-win95 .w95-btn:active,
+.chapter.mode-win95 .w95-btn:focus-visible {
+  border-color: #0a0a0a;
+  outline: 1px dotted #000;
+  outline-offset: -5px;
+  padding: 6px 13px 5px 15px;
+}
+
+.chapter.mode-win95 .w95-btn:active::before,
+.chapter.mode-win95 .w95-btn:focus-visible::before {
+  border-color: transparent;
+}
+
+/* —— Start / taskbar —— */
+.chapter.mode-win95 .w95-taskbar {
+  background: var(--w95-face);
+  border-top: 2px solid var(--w95-face-hi);
+  font-family: var(--w95-font);
+  box-shadow: inset 0 1px 0 var(--w95-face-mid);
+}
+
+.chapter.mode-win95 .w95-start {
+  font-family: var(--w95-font);
+  background: var(--w95-face);
+  border: 2px solid;
+  border-color: var(--w95-raised-colors);
+  box-shadow: inset 1px 1px 0 var(--w95-face-mid);
+}
+
+.chapter.mode-win95 .w95-start.is-pressed {
+  border-color: var(--w95-sunken-colors);
+  box-shadow: none;
+  background: #dfdfdf;
+}
+
+.chapter.mode-win95 .w95-start-menu {
+  font-family: var(--w95-font);
+  background: var(--w95-face);
+  border-top: 2px solid var(--w95-face-hi);
+  border-left: 2px solid var(--w95-face-hi);
+  border-right: 2px solid var(--w95-bevel-outer);
+  border-bottom: 2px solid var(--w95-bevel-outer);
+  box-shadow: inset 1px 1px 0 var(--w95-face-mid), 2px 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.chapter.mode-win95 .w95-start-banner {
+  background: linear-gradient(180deg, var(--w95-title), #1084d0);
+  font-family: var(--w95-font);
+}
+
+.chapter.mode-win95 .w95-start-flyout {
+  background: var(--w95-face);
+  border-top: 2px solid var(--w95-face-hi);
+  border-left: 2px solid var(--w95-face-hi);
+  border-right: 2px solid var(--w95-bevel-outer);
+  border-bottom: 2px solid var(--w95-bevel-outer);
+}
+
+.chapter.mode-win95 .w95-start-btn,
+.chapter.mode-win95 .w95-task,
+.chapter.mode-win95 .w95-clock,
+.chapter.mode-win95 .w95-icon {
+  font-family: var(--w95-font);
+}
+
+.chapter.mode-win95 .w95-task {
+  background: var(--w95-face);
+  border-color: var(--w95-raised-colors);
+  box-shadow: inset 1px 1px 0 var(--w95-face-mid);
+}
+
+.chapter.mode-win95 .w95-task.is-pressed {
+  border-color: var(--w95-sunken-colors);
+  box-shadow: none;
+  background: #b8b8b8;
+}
+
+.chapter.mode-win95 .w95-tray {
+  border-color: var(--w95-sunken-colors);
+  background: var(--w95-face);
+  font-family: var(--w95-font);
+}
+
+.chapter.mode-win95 .w95-update-badge {
+  background: var(--w95-face);
+  border-color: var(--w95-face-hi) var(--w95-face-dark) var(--w95-face-dark) var(--w95-face-hi);
+}
+
+/* —— Sunken fields (readme / photo client already use sunken; tighten tokens) —— */
+.chapter.mode-win95 .w95-client.is-white,
+.chapter.mode-win95 .w95-photo-client,
+.chapter.mode-win95 .w95-mine-client {
+  border-color: var(--w95-sunken-colors);
+}
+
+.chapter.mode-win95 .w95-statusbar span {
+  border-color: var(--w95-sunken-colors);
+}
+
+/* Desktop icons are raster PNGs from assets/icons */
+.chapter.mode-win95 .w95-icon-glyph {
+  image-rendering: pixelated;
+}
