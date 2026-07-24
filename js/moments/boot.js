@@ -4,10 +4,13 @@
  * Staged funny lines, then click / key to land on the desktop (no auto-advance).
  *
  * Audio: assets/audio/dialup-handshake.wav (procedural 56k homage).
+ * Plays ~10s after boot overlay starts (cleared if the presenter continues earlier).
  * Autoplay may be blocked until the first user gesture — we retry on pointerdown.
  */
 
 const DIALUP_SRC = "/assets/audio/dialup-handshake.wav";
+/** Delay from boot `run()` before dial-up starts (opening-screen beat). */
+const DIALUP_DELAY_MS = 10000;
 
 /** Staged log under the lead line (lead itself is “Loading Windows 95…”). */
 const BOOT_LINES = [
@@ -196,7 +199,16 @@ export function createBoot(ctx) {
     el.setAttribute("aria-hidden", "false");
     el.classList.add("is-live");
     document.body.classList.add("is-booting");
-    playDialup();
+
+    // Atmosphere: wait on the opening screen, then dial-up (mute / reduced-motion skip in playDialup).
+    if (!reduceMotion) {
+      timers.push(
+        setTimeout(() => {
+          if (!running) return;
+          playDialup();
+        }, DIALUP_DELAY_MS)
+      );
+    }
 
     if (reduceMotion) {
       if (log) log.textContent = BOOT_LINES.join("\n");
