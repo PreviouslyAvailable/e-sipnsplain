@@ -106,6 +106,22 @@ policy as the old alula `.data` bundle). See `.gitignore` in this folder.
 
 Esc closes the Win98 chrome when the desktop shell has focus.
 
+## Talk-deck WASM patches (applied to local `3DPinballSpaceCadet.js`)
+
+Re-run after replacing the engine drop-in:
+
+```bash
+./scripts/patch-pinball-engine.sh
+```
+
+| Patch | Effect |
+|-------|--------|
+| `MaxBallCount` `3` → `1` | One ball, then Game Over |
+| LED string `HIGH SCORE` → `MEMORY UNLOCKED` | Side-panel copy on Game Over |
+
+These patch the embedded WASM inside the JS (same hardlink as
+`3DPinballSpaceCadet-main/`). Do not commit the JS.
+
 ## Black canvas / stuck spinner
 
 **Do not auto-inject the engine on page load.** Upstream only starts after the

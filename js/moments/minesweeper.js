@@ -9,7 +9,8 @@
  */
 
 const SHEET = "/assets/refs/minesweeper/minesweeper-sheet.png";
-const REWARD = "/assets/minesweeper-reward.png";
+/** Bump when swapping the clear photo so browsers don't keep the placeholder. */
+const REWARD = "/assets/minesweeper-reward.png?v=2";
 
 const COLS = 16;
 const ROWS = 16;
@@ -47,8 +48,8 @@ const SPR = {
   quest: [244, 86, TILE, TILE],
   wrong: [253, 86, TILE, TILE],
   num: (n) => {
-    // 1–7 at 208 + (n-1)*9; 8 sits at 262 (sheet edge)
-    const x = n === 8 ? 262 : 208 + (n - 1) * 9;
+    // 1–8 at 199 + (n-1)*9 (under raised@199; empty@208 is digit 2)
+    const x = 199 + (n - 1) * 9;
     return [x, 95, TILE, TILE];
   },
 };
@@ -659,11 +660,20 @@ export function createMinesweeper(canvas, opts = {}) {
     canvas.removeEventListener("contextmenu", onContextMenu);
   }
 
-  async function ensureAssets() {
-    if (ready) return;
-    const [s, r] = await Promise.all([loadImage(SHEET), loadImage(REWARD)]);
-    sheet = s;
-    rewardImg = r;
+  /**
+   * @param {{ reloadReward?: boolean }} [opts]
+   */
+  async function ensureAssets(opts = {}) {
+    const reloadReward = Boolean(opts.reloadReward);
+    if (ready && !reloadReward) return;
+    const needSheet = !sheet;
+    const needReward = reloadReward || !rewardImg || !rewardImg.naturalWidth;
+    const [s, r] = await Promise.all([
+      needSheet ? loadImage(SHEET) : Promise.resolve(sheet),
+      needReward ? loadImage(REWARD) : Promise.resolve(rewardImg),
+    ]);
+    if (needSheet) sheet = s;
+    if (needReward) rewardImg = r;
     ready = Boolean(sheet);
     draw();
   }
@@ -671,7 +681,8 @@ export function createMinesweeper(canvas, opts = {}) {
   function start() {
     active = true;
     bind();
-    ensureAssets().then(() => {
+    // Re-fetch reward on each open so a replaced PNG shows without a full reload.
+    ensureAssets({ reloadReward: true }).then(() => {
       if (status === "ready" && firstClick) resetBoard();
       else draw();
     });

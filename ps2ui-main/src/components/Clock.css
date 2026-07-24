@@ -1,0 +1,51 @@
+.ps2-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ps2-space-3);
+  color: var(--ps2-text);
+}
+
+.ps2-clock__orbs {
+  display: inline-flex;
+  gap: 5px;
+}
+.ps2-clock__orbs span {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--ps2-radius-pill);
+  background: radial-gradient(circle at 35% 30%, var(--ps2-ice), var(--ps2-blue-bright) 70%);
+  box-shadow: var(--ps2-glow-sm);
+  animation: ps2-orb-pulse var(--ps2-dur-breathe) var(--ps2-ease-soft) infinite alternate;
+}
+.ps2-clock__orbs span:nth-child(2) { animation-delay: 0.4s; }
+.ps2-clock__orbs span:nth-child(3) { animation-delay: 0.8s; }
+
+.ps2-clock__readout {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.ps2-clock__date {
+  font-size: var(--ps2-text-caption);
+  letter-spacing: var(--ps2-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ps2-text-secondary);
+}
+.ps2-clock__time {
+  font-family: var(--ps2-font-display);
+  font-size: var(--ps2-text-heading);
+  font-weight: var(--ps2-weight-thin);
+  letter-spacing: var(--ps2-tracking-wide);
+  color: var(--ps2-ice);
+  text-shadow: var(--ps2-glow-text);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes ps2-orb-pulse {
+  from { opacity: 0.4; transform: translateY(1px); }
+  to   { opacity: 1; transform: translateY(-1px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps2-clock__orbs span { animation: none; }
+}

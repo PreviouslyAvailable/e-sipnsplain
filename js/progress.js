@@ -8,6 +8,7 @@
  *   allOf: [...beatIds]  — every listed beat must be complete
  *   oneOf: [...beatIds]  — at least one listed beat must be complete
  * Both may appear on the same section (AND’d together).
+ * Empty allOf + empty oneOf = never unlock (terminal section / no next OS).
  */
 
 export const PROGRESS_KEY = "sipnsplain-progress-v2";
@@ -59,13 +60,14 @@ export const SECTIONS = {
     era: "1995",
     hubChapterId: "win95",
     beats: {
-      paint: { id: "paint", label: "Paint", kind: "OWN" },
+      // Recycle Bin: optional / ungated (tracked but not required for unlock)
       recycle: { id: "recycle", label: "Recycle Bin", kind: "OWN" },
+      atari: { id: "atari", label: "Atari", kind: "OWN" },
       minesweeper: { id: "minesweeper", label: "Minesweeper", kind: "OWN" },
     },
-    // Paint + Recycle Bin + Minesweeper (all required)
+    // Open Atari + Minesweeper windows — Recycle Bin does not gate the Win98 update
     unlock: {
-      allOf: ["paint", "recycle", "minesweeper"],
+      allOf: ["atari", "minesweeper"],
     },
     transition: {
       id: "win95-to-win98",
@@ -76,27 +78,32 @@ export const SECTIONS = {
       nextTheme: "1998",
     },
   },
-  // Section 2 hub — SkiFree 1000m + Pinball score + Chris, 2000 → Y2K → XP
+  // Section 2 hub — Chris, 1999 theme → starts Y2K → XP
   section2: {
     id: "section2",
     label: "Windows 98",
     era: "1998",
     hubChapterId: "win98",
     beats: {
+      // Required for unlock / Y2K
+      chris1999: {
+        id: "chris1999",
+        label: "Chris, 1999",
+        kind: "OWN",
+      },
+      // Optional flavour — tracked but do not gate XP
+      gbc: { id: "gbc", label: "Game Boy Color", kind: "OWN" },
+      gates: { id: "gates", label: "Gates Preview", kind: "OWN" },
       pinball: {
         id: "pinball",
         label: "3D Pinball Space Cadet",
         kind: "EMBED-BB",
       },
       skifree: { id: "skifree", label: "SkiFree", kind: "EMBED-JS" },
-      chris2000: {
-        id: "chris2000",
-        label: "Chris, 2000",
-        kind: "OWN",
-      },
     },
-    // All three required. Chris, 2000 is typically last and arms the Y2K sequence.
-    unlock: { allOf: ["skifree", "pinball", "chris2000"] },
+    // Required: Desktop Themes → Chris, 1999 → starts Y2K.
+    // GBC, SkiFree, Pinball, Gates are optional flavour only.
+    unlock: { allOf: ["chris1999"] },
     transition: {
       id: "win98-to-xp",
       copy: "Installing Windows XP…",
@@ -109,33 +116,46 @@ export const SECTIONS = {
       nextTheme: "winxp",
     },
   },
-  // Stub — Section 3 hub (XP kit not applied yet)
+  // Section 3 hub — terminal era; no further OS update
   section3: {
     id: "section3",
     label: "Windows XP",
     era: "2001",
     hubChapterId: "winxp",
-    beats: {},
-    unlock: { allOf: ["_section3_gate_tbd"] },
+    beats: {
+      // Optional progress only — does not gate a next era
+      gamecube: { id: "gamecube", label: "My Pictures", kind: "OWN" },
+      firefox: {
+        id: "firefox",
+        label: "Mozilla Firefox",
+        kind: "OWN",
+      },
+    },
+    // Terminal era — empty unlock never fires (see evaluateUnlock).
+    unlock: { allOf: [] },
     transition: {
-      id: "xp-to-next",
-      copy: "Preparing next era…",
+      id: "xp-terminal",
+      copy: "",
       progressStyle: "win98-download",
+      // No-op: next section is self — do not advance to another era
       nextSectionId: "section3",
-      nextChapterId: "continue",
-      nextTheme: "2001",
+      nextChapterId: "winxp",
+      nextTheme: "winxp",
     },
   },
 };
 
 /**
  * Evaluate unlock rules against a completed-beat map.
+ * Empty allOf + empty oneOf → false (never unlock). `[].every()` is vacuously
+ * true in JS; that must not arm an update toast / interstitial.
  * @param {UnlockRules} rules
  * @param {Record<string, boolean>} complete
  */
 export function evaluateUnlock(rules, complete = {}) {
   const allOf = rules?.allOf || [];
   const oneOf = rules?.oneOf || [];
+  if (allOf.length === 0 && oneOf.length === 0) return false;
   const allOk = allOf.every((id) => Boolean(complete[id]));
   const oneOk = oneOf.length === 0 || oneOf.some((id) => Boolean(complete[id]));
   return allOk && oneOk;
@@ -182,6 +202,17 @@ export function createProgress(opts = {}) {
     return sections[sectionId];
   }
 
+  /** Migrate legacy chris2000 beat keys → chris1999 (session progress). */
+  function migrateSectionBeats(st) {
+    if (!st || typeof st !== "object") return;
+    for (const mapKey of ["complete", "photos"]) {
+      const map = st[mapKey];
+      if (!map || typeof map !== "object") continue;
+      if (map.chris2000 && !map.chris1999) map.chris1999 = map.chris2000;
+      delete map.chris2000;
+    }
+  }
+
   function load() {
     if (!storage) return;
     try {
@@ -190,6 +221,7 @@ export function createProgress(opts = {}) {
       const parsed = JSON.parse(raw);
       if (parsed?.sections && typeof parsed.sections === "object") {
         sections = parsed.sections;
+        Object.values(sections).forEach(migrateSectionBeats);
       }
       if (typeof parsed?.activeSectionId === "string" && SECTIONS[parsed.activeSectionId]) {
         activeSectionId = parsed.activeSectionId;
@@ -293,6 +325,16 @@ export function createProgress(opts = {}) {
     return emit();
   }
 
+  /** Presenter: re-arm an update so Y2K / install can be jumped to mid-talk. */
+  function rearmUpdate(sectionId = activeSectionId) {
+    if (!SECTIONS[sectionId]) return snapshot();
+    const st = ensureSection(sectionId);
+    st.updateUnlocked = true;
+    st.updateConsumed = false;
+    save();
+    return emit();
+  }
+
   function setActiveSection(sectionId) {
     if (!SECTIONS[sectionId]) return snapshot();
     activeSectionId = sectionId;
@@ -373,6 +415,7 @@ export function createProgress(opts = {}) {
     isUpdateUnlocked,
     isUpdateConsumed,
     consumeUpdate,
+    rearmUpdate,
     setActiveSection,
     getActiveSectionId: () => activeSectionId,
     getSectionDef,

@@ -1,0 +1,53 @@
+.ps2-text {
+  font-family: var(--ps2-font);
+  color: var(--ps2-text);
+  font-weight: var(--ps2-weight-light);
+  line-height: var(--ps2-leading);
+  margin: 0;
+}
+
+.ps2-text--secondary { color: var(--ps2-text-secondary); }
+.ps2-text--tertiary { color: var(--ps2-text-tertiary); }
+.ps2-text--glow { text-shadow: var(--ps2-glow-text); }
+
+.ps2-text--display {
+  font-family: var(--ps2-font-display);
+  font-size: var(--ps2-text-display);
+  font-weight: var(--ps2-weight-thin);
+  letter-spacing: var(--ps2-tracking-mega);
+  text-transform: uppercase;
+}
+
+.ps2-text--title {
+  font-family: var(--ps2-font-display);
+  font-size: var(--ps2-text-title);
+  font-weight: var(--ps2-weight-thin);
+  letter-spacing: var(--ps2-tracking-wide);
+}
+
+.ps2-text--heading {
+  font-size: var(--ps2-text-heading);
+  font-weight: var(--ps2-weight-light);
+  letter-spacing: var(--ps2-tracking);
+}
+
+.ps2-text--body {
+  font-size: var(--ps2-text-body);
+  font-weight: var(--ps2-weight-light);
+  letter-spacing: var(--ps2-tracking-tight);
+}
+
+.ps2-text--label {
+  font-size: var(--ps2-text-label);
+  font-weight: var(--ps2-weight-regular);
+  letter-spacing: var(--ps2-tracking-wide);
+  text-transform: uppercase;
+}
+
+.ps2-text--caption {
+  font-size: var(--ps2-text-caption);
+  font-weight: var(--ps2-weight-regular);
+  letter-spacing: var(--ps2-tracking-wide);
+  color: var(--ps2-text-secondary);
+  text-transform: uppercase;
+}

@@ -1,0 +1,587 @@
+/* Ad moments — Atari strip, GBC collage, XP My Pictures filmstrip */
+
+/* —— Win95 · Atari horizontal ad strip —— */
+.w95-ad-strip {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-behavior: smooth;
+  background: #000;
+}
+
+.w95-ad-strip-track,
+.w95-ad-strip [data-atari-strip-track] {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  height: 100%;
+  width: max-content;
+  min-height: 0;
+}
+
+.w95-ad-strip img {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: none;
+  flex: 0 0 auto;
+  object-fit: contain;
+  object-position: left center;
+  scroll-snap-align: start;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* —— Win98 · GBC scrapbook window (own chrome — not SkiFree) —— */
+.w95-window.w98-gbc {
+  z-index: 5;
+  width: min(1080px, calc(100cqw - 24px));
+  height: min(840px, calc(100cqh - 40px));
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.w95-window.w98-gbc.is-closed {
+  display: none;
+}
+
+.w98-desktop .w95-window.w98-gbc {
+  z-index: 5;
+}
+
+.w98-gbc-client {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin: 2px;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #c0c0c0;
+}
+
+.w98-gbc-actions {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #c0c0c0;
+  border-top: 1px solid #808080;
+}
+
+/* —— Win98 · GBC scrapbook grid —— */
+.w98-gbc-collage {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-content: start;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 6px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  background: #c0c0c0;
+}
+
+.w98-gbc-collage .w98-gbc-card,
+.w98-gbc-collage [data-gbc-card] {
+  position: relative;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.w98-gbc-collage .w98-gbc-card img,
+.w98-gbc-collage [data-gbc-card] img,
+.w98-gbc-collage .w98-gbc-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  background: transparent;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* —— WinXP · My Pictures explorer chrome —— */
+.wxp-explorer {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  width: min(1040px, calc(100cqw - 24px));
+  height: min(760px, calc(100cqh - 40px));
+  display: none;
+  flex-direction: column;
+  background: #ece9d8;
+  border: 1px solid #0054e3;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.35);
+  z-index: 5;
+  overflow: hidden;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  font-size: 11px;
+}
+
+.wxp-explorer.is-closed,
+.wxp-explorer[hidden] {
+  display: none;
+}
+
+.wxp-explorer-menubar {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 12px;
+  padding: 1px 8px;
+  background: #ece9d8;
+  border-bottom: 1px solid #aca899;
+  color: #000;
+}
+
+.wxp-explorer-toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+  background: linear-gradient(180deg, #fff, #ece9d8);
+  border-bottom: 1px solid #aca899;
+}
+
+.wxp-explorer-tool {
+  padding: 1px 7px;
+  border: 1px solid #aca899;
+  background: #fff;
+}
+
+.wxp-explorer-sep {
+  opacity: 0.55;
+}
+
+.wxp-explorer-address {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+  background: #ece9d8;
+  border-bottom: 1px solid #aca899;
+}
+
+.wxp-explorer-path {
+  flex: 1;
+  padding: 2px 6px;
+  border: 1px solid #7f9db9;
+  background: #fff;
+}
+
+.wxp-explorer-go {
+  padding: 2px 8px;
+  border: 1px solid #003c74;
+  background: linear-gradient(180deg, #fff, #c1d2ee);
+}
+
+/* —— WinXP · My Pictures filmstrip (Luna-ish) —— */
+.wxp-pictures {
+  flex: 1 1 auto;
+  display: grid;
+  /* Preview + meta + filmstrip — no empty task pane */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #ece9d8;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  color: #000;
+  font-size: 11px;
+}
+
+/* Empty Picture Tasks pane — hide so preview gets full width */
+.wxp-pictures-pane,
+.wxp-pictures [data-wxp-task-pane] {
+  display: none !important;
+}
+
+.wxp-pictures-stage {
+  grid-column: 1;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 0;
+  background: #fff;
+  border: 1px solid #7f9db9;
+  margin: 6px 8px 0;
+  overflow: hidden;
+}
+
+/* Absolute fill + contain — avoids % max-height failing and cropping portrait ads */
+.wxp-pictures-stage [data-wxp-preview],
+.wxp-pictures [data-wxp-preview] {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  padding: 8px 10px;
+  object-fit: contain;
+  object-position: center;
+  background: #f4f4f0;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.wxp-pictures-meta {
+  grid-column: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 12px 0;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.wxp-pictures-meta [data-wxp-pic-name] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wxp-pictures-strip {
+  grid-column: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+  padding: 4px 8px 6px;
+  background: #ece9d8;
+  border-top: 1px solid #aca899;
+}
+
+.wxp-pictures-nav,
+.wxp-pictures [data-wxp-pic-prev],
+.wxp-pictures [data-wxp-pic-next] {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 60px;
+  border: 1px solid #003c74;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #fff, #c1d2ee 55%, #a0b8de);
+  color: #003c74;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.wxp-pictures-nav:hover,
+.wxp-pictures [data-wxp-pic-prev]:hover,
+.wxp-pictures [data-wxp-pic-next]:hover {
+  background: linear-gradient(180deg, #fff, #d6e4f8 55%, #b8cceb);
+}
+
+.wxp-pictures-thumbs,
+.wxp-pictures [data-wxp-thumbs] {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  padding: 2px;
+  outline: none;
+}
+
+.wxp-pictures-thumbs:focus-visible,
+.wxp-pictures [data-wxp-thumbs]:focus-visible {
+  box-shadow: inset 0 0 0 1px #003c74;
+}
+
+.wxp-pictures-thumb {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 80px;
+  height: 60px;
+  padding: 2px;
+  border: 2px solid #aca899;
+  background: #fff;
+  cursor: pointer;
+}
+
+.wxp-pictures-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  background: #e8e8e4;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.wxp-pictures-thumb.is-selected,
+.wxp-pictures [data-wxp-thumbs] .is-selected {
+  border-color: #0054e3;
+  background: #c1d2ee;
+  box-shadow: 0 0 0 1px #fff inset, 1px 1px 0 #003c74;
+}
+
+/* —— Living room · console windows (PS2 → Xbox → GBA SP) —— */
+.chapter.mode-consoles {
+  background: #0a0c10;
+  container-type: size;
+  -webkit-font-smoothing: antialiased;
+}
+
+.consoles-room {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 18%, rgba(90, 70, 40, 0.35), transparent 60%),
+    radial-gradient(ellipse 100% 70% at 50% 100%, #1a120c 0%, #0a0c10 55%),
+    #0a0c10;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  color: #e8e4dc;
+}
+
+.consoles-glow {
+  position: absolute;
+  inset: 18% 22% 28%;
+  background: radial-gradient(ellipse at center, rgba(120, 160, 220, 0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.consoles-kicker {
+  position: absolute;
+  top: 1.25rem;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(232, 228, 220, 0.45);
+  z-index: 2;
+}
+
+.console-window {
+  position: relative;
+  z-index: 3;
+  width: min(520px, calc(100cqw - 40px));
+  animation: consoleIn 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.console-window.is-closed,
+.console-window[hidden] {
+  display: none !important;
+}
+
+@keyframes consoleIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.console-bezel {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 18px 48px rgba(0, 0, 0, 0.55);
+  background: #141414;
+}
+
+.console-bezel--ps2 {
+  background: linear-gradient(180deg, #1a2744 0%, #0d1424 100%);
+  box-shadow:
+    0 0 0 1px rgba(0, 80, 180, 0.45),
+    0 18px 48px rgba(0, 0, 0, 0.55);
+}
+
+.console-bezel--xbox {
+  background: linear-gradient(180deg, #1a2a1a 0%, #0c140c 100%);
+  box-shadow:
+    0 0 0 1px rgba(16, 124, 16, 0.5),
+    0 18px 48px rgba(0, 0, 0, 0.55);
+}
+
+.console-bezel--gba {
+  background: linear-gradient(180deg, #2a3048 0%, #141824 100%);
+  box-shadow:
+    0 0 0 1px rgba(120, 140, 200, 0.4),
+    0 18px 48px rgba(0, 0, 0, 0.55);
+}
+
+.console-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.console-year {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.console-name {
+  flex: 1 1 auto;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.console-dismiss {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #e8e4dc;
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.console-dismiss:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.console-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.35rem 1.4rem 1.5rem;
+  min-height: 220px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 40%),
+    #0b0d12;
+}
+
+.console-bezel--ps2 .console-screen {
+  background:
+    linear-gradient(180deg, rgba(40, 90, 200, 0.15), transparent 45%),
+    #070b14;
+}
+
+.console-bezel--xbox .console-screen {
+  background:
+    linear-gradient(180deg, rgba(40, 140, 40, 0.18), transparent 45%),
+    #070e07;
+}
+
+.console-bezel--gba .console-screen {
+  background:
+    linear-gradient(180deg, rgba(100, 120, 200, 0.16), transparent 45%),
+    #0a0c14;
+}
+
+.console-mark {
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  opacity: 0.88;
+  line-height: 1;
+}
+
+.console-bezel--ps2 .console-mark { color: #5b9fff; }
+.console-bezel--xbox .console-mark { color: #5fd15f; }
+.console-bezel--gba .console-mark { color: #b0b8e0; }
+
+.console-blurb {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: rgba(232, 228, 220, 0.88);
+}
+
+.console-next {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  padding: 0.55rem 1.1rem;
+  border: 0;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.console-bezel--ps2 .console-next { background: #1e4db8; }
+.console-bezel--xbox .console-next { background: #107c10; }
+.console-bezel--gba .console-next { background: #4a5678; }
+
+.console-next:hover {
+  filter: brightness(1.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .w95-ad-strip,
+  .wxp-pictures-thumbs,
+  .wxp-pictures [data-wxp-thumbs] {
+    scroll-behavior: auto;
+  }
+
+  .w98-gbc-collage .w98-gbc-card,
+  .w98-gbc-collage [data-gbc-card] {
+    transform: none;
+    transition: none;
+  }
+
+  .console-window {
+    animation: none;
+  }
+}

@@ -16,7 +16,7 @@ This folder is a **light offline copy** of the runtime only (bundled JS + sprite
 
 Logic lives in **`skifree.js-master/js/main.js`** (rebuild → sync). Do not reintroduce “yeti alone completes the beat.”
 
-1. **~1000m** — plant a row of finish signs ahead; `postMessage` `{ type: "skifree-finish", phase: "placed" }`
+1. **~200m** — plant a row of finish signs ahead; `postMessage` `{ type: "skifree-finish", phase: "placed" }`
 2. **Cross finish** — force-spawn chasing yeti; `{ type: "skifree-finish", phase: "crossed" }`
 3. **Yeti catch** — `{ type: "skifree-yeti" }` + `{ type: "skifree-gameover" }` + show Game Over overlay (`index.html` / `__skifreeShowGameOver`)
 4. **Game Over button** — `{ type: "skifree-gameover-photo" }` → parent opens `assets/skifree-reward.png` and `completeBeat('skifree')`
@@ -45,7 +45,7 @@ Esc is forwarded from `index.html` as `{ type: "skifree-esc" }`.
 | `skifree-objects.png` | Trees, rocks, jumps, signs |
 | `license.md` | MIT text (required attribution) |
 
-Reward photo (parent Win98 window): `/assets/skifree-reward.png` (placeholder OK).
+Reward photo (parent Win98 window): `/assets/skifree-reward.png` — childhood Compaq CRT photo, full-bleed over the Ski client after Game Over.
 
 ## Controls (upstream)
 

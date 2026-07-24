@@ -12,7 +12,7 @@ const DIALUP_SRC = "/assets/audio/dialup-handshake.wav";
 /** Staged log under the lead line (lead itself is “Loading Windows 95…”). */
 const BOOT_LINES = [
   "Loading presentation…",
-  "Loading “AI makes me hopeful”…",
+  "Loading “Press Start”…",
   "Defragmenting existential dread…",
   "Negotiating dial-up of feelings…",
   "Almost ready…",

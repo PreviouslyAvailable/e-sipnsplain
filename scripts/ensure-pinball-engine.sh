@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Hardlink lrusso Space Cadet JS into assets/pinball/ (same-origin offline play).
 # Source is gitignored (embeds Microsoft table/audio). Safe to re-run.
+# Always re-applies talk-deck WASM patches after link (one ball / MEMORY UNLOCKED).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$ROOT/3DPinballSpaceCadet-main/3DPinballSpaceCadet.js"
@@ -16,11 +17,15 @@ if [[ -f "$DST" ]]; then
   dst_ino=$(stat -f '%i' "$DST" 2>/dev/null || stat -c '%i' "$DST")
   if [[ "$src_ino" == "$dst_ino" ]]; then
     echo "OK hardlink $DST → $SRC (inode $src_ino)"
-    exit 0
+  else
+    echo "Replacing non-hardlinked $DST"
+    rm -f "$DST"
+    ln "$SRC" "$DST"
+    echo "Linked $DST → $SRC"
   fi
-  echo "Replacing non-hardlinked $DST"
-  rm -f "$DST"
+else
+  ln "$SRC" "$DST"
+  echo "Linked $DST → $SRC"
 fi
 
-ln "$SRC" "$DST"
-echo "Linked $DST → $SRC"
+"$ROOT/scripts/patch-pinball-engine.sh"

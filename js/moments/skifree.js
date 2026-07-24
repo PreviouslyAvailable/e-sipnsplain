@@ -75,6 +75,10 @@ export function createSkiFree(root, ui = {}) {
   let active = false;
   /** @type {((e: MessageEvent) => void) | null} */
   let onMessage = null;
+  // Bumped on every load/unload so a stop() mid-load can invalidate the
+  // in-flight load's deferred work (rAF focus) — prevents a stale load from
+  // touching a frame a later start() has already re-loaded or hidden.
+  let loadToken = 0;
 
   const setStatus = (text) => {
     if (statusEl) statusEl.textContent = text;
@@ -101,6 +105,18 @@ export function createSkiFree(root, ui = {}) {
 
   const unloadFrame = () => {
     if (!frame) return;
+    // Invalidate any load in flight so its deferred focus (below) no-ops
+    // instead of racing a subsequent start().
+    loadToken += 1;
+    try {
+      // Point at about:blank before dropping the attribute — this asks the
+      // browser to cleanly abort an in-flight navigation rather than leaving
+      // the old document mid-teardown when we immediately reassign src on
+      // the next start() (the "half-dead" blank frame on rapid Esc/reopen).
+      frame.src = "about:blank";
+    } catch {
+      /* ignore */
+    }
     frame.removeAttribute("src");
     frame.hidden = true;
     frame.setAttribute("aria-hidden", "true");
@@ -110,6 +126,7 @@ export function createSkiFree(root, ui = {}) {
 
   const loadFrame = () => {
     if (!frame) return;
+    const token = (loadToken += 1);
     hideRewardCover();
     client?.classList.add("is-playing");
     frame.hidden = false;
@@ -124,9 +141,11 @@ export function createSkiFree(root, ui = {}) {
       /* ignore */
     }
     frame.src = `${LOCAL_INDEX}?${params.toString()}`;
-    setStatus("WASD / arrows · mouse · F boost · finish @ ~1000m");
+    setStatus("WASD / arrows · mouse · F boost · finish @ ~200m");
     setScore("skifree.js");
     requestAnimationFrame(() => {
+      // A stop()/start() ran since this load began — stale, don't touch it.
+      if (token !== loadToken) return;
       try {
         frame.focus({ preventScroll: true });
       } catch {
@@ -193,7 +212,7 @@ export function createSkiFree(root, ui = {}) {
       onMessage = null;
     }
     unloadFrame();
-    setStatus("↓ Finish @ ~1000m · Esc closes");
+    setStatus("↓ Finish @ ~200m · Esc closes");
     setScore("ready");
   }
 
@@ -274,7 +293,7 @@ export function createSkiFree(root, ui = {}) {
     loadFrame();
   }
 
-  setStatus("↓ Finish @ ~1000m · Esc closes");
+  setStatus("↓ Finish @ ~200m · Esc closes");
   setScore("ready");
 
   return {

@@ -1,0 +1,60 @@
+/*
+ * PS2UI base layer. Bare `.ps2-*` selectors only (side-effect import; see the
+ * Turbopack authoring rule in README). Paints the dashboard field and sets the
+ * BIOS typography defaults on the root scene.
+ */
+
+.ps2-root {
+  position: relative;
+  min-height: 100%;
+  color: var(--ps2-text);
+  font-family: var(--ps2-font);
+  font-weight: var(--ps2-weight-light);
+  letter-spacing: var(--ps2-tracking-tight);
+  line-height: var(--ps2-leading);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
+  /* The volumetric blue space: a radial horizon glow over a vertical
+     navy gradient, with a dark vignette pressing in from the edges. */
+  background-color: var(--ps2-bg-deep);
+  background-image:
+    radial-gradient(
+      120% 80% at 50% 118%,
+      var(--ps2-bg-horizon) 0%,
+      var(--ps2-bg-rise) 26%,
+      var(--ps2-bg) 48%,
+      var(--ps2-bg-deep) 74%,
+      var(--ps2-bg-abyss) 100%
+    ),
+    radial-gradient(
+      100% 100% at 50% 50%,
+      transparent 55%,
+      rgba(2, 3, 13, 0.65) 100%
+    );
+  background-attachment: fixed;
+  overflow: hidden;
+}
+
+/* A faint NTSC scanline veil, off by default; toggled per region. */
+.ps2-root[data-ps2-region="ntsc"]::after,
+.ps2-root[data-ps2-region="pal"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.022) 0px,
+    rgba(255, 255, 255, 0.022) 1px,
+    transparent 2px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.6;
+}
+
+.ps2-root :where(h1, h2, h3, p, ul, ol) {
+  margin: 0;
+}

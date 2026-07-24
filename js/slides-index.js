@@ -11,6 +11,10 @@ export const SLIDE_LABELS = {
   win95: "Win95 desktop hub",
   win98: "Windows 98 hub",
   winxp: "Windows XP",
+  consoles: "Living room · PS2",
+  web20: "Web 2.0 · Mozilla Firefox",
+  timewarp: "Timewarp · Mountain Lion · 2009–2025",
+  // Off default linear path (games-first); labels kept if re-included via Story / photoChaptersFrom
   continue: "Continue…",
   "age-8": "GBA SP · 2003",
   "age-11": "Bebo · 2006",

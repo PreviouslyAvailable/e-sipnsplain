@@ -1,0 +1,797 @@
+/* PS2 system UI — tokens + boot + Browser menu, ported from ps2ui-main (MIT).
+   Homage only: no Sony logos or BIOS assets. */
+
+[data-ps2] {
+  --ps2-bg-abyss: #000814;
+  --ps2-bg-deep: #001428;
+  --ps2-bg: #002b5c;
+  --ps2-bg-rise: #0044a0;
+  --ps2-bg-horizon: #1e5ddb;
+  --ps2-blue: #003087;
+  --ps2-blue-true: #006fcd;
+  --ps2-blue-bright: #1e5ddb;
+  --ps2-cyan: #5cc9fb;
+  --ps2-ice: #cfe4ff;
+  --ps2-btn-triangle: #4fd6a0;
+  --ps2-btn-circle: #ff6b7e;
+  --ps2-btn-cross: #7aa8ff;
+  --ps2-btn-square: #f3a0d6;
+  --ps2-cube-fill: rgba(120, 170, 255, 0.14);
+  --ps2-cube-edge: rgba(190, 220, 255, 0.55);
+  --ps2-cube-core: rgba(225, 240, 255, 0.9);
+  --ps2-text: #e6efff;
+  --ps2-text-secondary: #9db0d8;
+  --ps2-text-tertiary: #5f73a6;
+  --ps2-line: rgba(160, 195, 255, 0.22);
+  --ps2-line-strong: rgba(190, 220, 255, 0.45);
+  --ps2-surface: linear-gradient(
+    180deg,
+    rgba(40, 80, 180, 0.3) 0%,
+    rgba(12, 32, 96, 0.34) 100%
+  );
+  --ps2-sheen: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.04) 18%,
+    rgba(255, 255, 255, 0) 50%
+  );
+  --ps2-glow-sm: 0 0 8px rgba(90, 150, 255, 0.45);
+  --ps2-glow: 0 0 18px rgba(90, 150, 255, 0.55);
+  --ps2-glow-lg: 0 0 42px rgba(90, 150, 255, 0.6);
+  --ps2-glow-text: 0 0 10px rgba(150, 195, 255, 0.7);
+  --ps2-shadow: 0 18px 50px rgba(0, 6, 30, 0.55);
+  --ps2-inset-edge: inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 0 0 1px rgba(150, 190, 255, 0.18);
+  --ps2-font: "Inter", "Roboto", "Helvetica Neue", "Arial", ui-sans-serif, system-ui,
+    sans-serif;
+  --ps2-font-display: "Michroma", "Exo 2", "Eurostile", var(--ps2-font);
+  --ps2-weight-thin: 200;
+  --ps2-tracking-wide: 0.14em;
+  --ps2-tracking-mega: 0.28em;
+  --ps2-space-4: 16px;
+  --ps2-space-5: 24px;
+  --ps2-space-6: 36px;
+  --ps2-radius-sm: 4px;
+  --ps2-radius-lg: 14px;
+  --ps2-radius-pill: 999px;
+  --ps2-ease: cubic-bezier(0.19, 1, 0.22, 1);
+  --ps2-ease-rise: cubic-bezier(0.16, 1, 0.3, 1);
+  --ps2-dur-slow: 800ms;
+  --ps2-dur-boot: 2600ms;
+  --ps2-dur-drift: 14s;
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-ps2] {
+    --ps2-dur-boot: 1ms;
+    --ps2-dur-drift: 0s;
+  }
+}
+
+/* —— Chapter shell —— */
+.chapter.mode-consoles .ps2-hub {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+  font-family: var(--ps2-font);
+  color: var(--ps2-text);
+}
+
+.ps2-phase {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 420ms var(--ps2-ease);
+}
+
+.ps2-phase.is-live {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+/* —— Splash: PS2 logo + Press to start —— */
+.ps2-splash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
+  padding: 0 6vw 10vh;
+  background: #000;
+  cursor: pointer;
+}
+
+.ps2-splash__logo {
+  display: block;
+  width: min(42rem, 58cqw, 720px);
+  max-width: 86%;
+  height: auto;
+  margin: 0;
+  opacity: 0;
+  animation: ps2SplashIn 900ms var(--ps2-ease) 120ms forwards;
+  pointer-events: none;
+  user-select: none;
+  background: #000;
+}
+
+.ps2-splash__cue {
+  margin: 0;
+  font-family: var(--ps2-font-display);
+  font-size: clamp(0.7rem, 1.4cqw, 0.85rem);
+  font-weight: 400;
+  letter-spacing: var(--ps2-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ps2-text-secondary);
+  opacity: 0;
+  animation: ps2SplashIn 900ms var(--ps2-ease) 700ms forwards;
+}
+
+/* XP Space handoff already did the gate — logo only, then boot. */
+.ps2-splash--handoff {
+  cursor: default;
+}
+
+.ps2-splash--handoff .ps2-splash__cue {
+  display: none;
+}
+
+@keyframes ps2SplashIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* —— Ambient sand field —— */
+.ps2-ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ps2-ambient--field {
+  background-image: radial-gradient(
+    120% 80% at 50% 118%,
+    var(--ps2-bg-horizon) 0%,
+    var(--ps2-bg-rise) 26%,
+    var(--ps2-bg) 48%,
+    var(--ps2-bg-deep) 74%,
+    var(--ps2-bg-abyss) 100%
+  );
+}
+
+.ps2-ambient__mote {
+  position: absolute;
+  bottom: -40px;
+  border-radius: var(--ps2-radius-sm);
+  background: var(--ps2-cube-fill);
+  border: 1px solid var(--ps2-cube-edge);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 0 10px rgba(120, 175, 255, 0.25);
+  background-image: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0) 50%
+  );
+  animation: ps2-mote-rise var(--mote-duration, 20s) linear var(--mote-delay, 0s)
+    infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes ps2-mote-rise {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  100% {
+    transform: translate3d(var(--mote-drift, 0px), -108vh, 0) rotate(220deg);
+  }
+}
+
+/* —— Boot towers —— */
+.ps2-boot {
+  overflow: hidden;
+  background: var(--ps2-bg-abyss);
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+}
+
+.ps2-boot__towers {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14%;
+  height: 56%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(8px, 2.4cqw, 26px);
+  z-index: 1;
+  filter: drop-shadow(0 0 30px rgba(90, 160, 255, 0.4));
+}
+
+.ps2-boot__tower {
+  width: clamp(5px, 1.1cqw, 11px);
+  height: 0;
+  border-radius: var(--ps2-radius-pill) var(--ps2-radius-pill) 0 0;
+  background: linear-gradient(
+    to top,
+    rgba(120, 175, 255, 0) 0%,
+    var(--ps2-blue-bright) 40%,
+    var(--ps2-cyan) 86%,
+    var(--ps2-ice) 100%
+  );
+  box-shadow: 0 0 14px rgba(120, 180, 255, 0.7);
+  transition: height var(--ps2-dur-boot) var(--ps2-ease-rise);
+  transition-delay: var(--tower-delay, 0ms);
+}
+
+.ps2-boot--risen .ps2-boot__tower {
+  height: var(--tower-h, 60%);
+}
+
+.ps2-boot__comets {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ps2-boot__comet {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: var(--ps2-radius-pill);
+  top: 30%;
+  left: -10%;
+  opacity: 0;
+}
+
+.ps2-boot--risen .ps2-boot__comet {
+  animation: ps2-comet 2.8s var(--ps2-ease) forwards;
+}
+
+.ps2-boot__comet--a {
+  top: 22%;
+  background: var(--ps2-btn-cross);
+  box-shadow: 0 0 10px var(--ps2-btn-cross);
+  animation-delay: 0.2s;
+}
+.ps2-boot__comet--b {
+  top: 38%;
+  background: var(--ps2-btn-triangle);
+  box-shadow: 0 0 10px var(--ps2-btn-triangle);
+  animation-delay: 0.5s;
+}
+.ps2-boot__comet--c {
+  top: 54%;
+  background: var(--ps2-btn-circle);
+  box-shadow: 0 0 10px var(--ps2-btn-circle);
+  animation-delay: 0.8s;
+}
+.ps2-boot__comet--d {
+  top: 46%;
+  background: var(--ps2-btn-square);
+  box-shadow: 0 0 10px var(--ps2-btn-square);
+  animation-delay: 1.1s;
+}
+
+@keyframes ps2-comet {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(1);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(120vw, -40px) scale(0.6);
+  }
+}
+
+.ps2-boot__wordmark {
+  position: relative;
+  z-index: 3;
+  margin-top: 8%;
+  font-family: var(--ps2-font-display);
+  font-size: clamp(13px, 2.4cqw, 22px);
+  font-weight: var(--ps2-weight-thin);
+  letter-spacing: var(--ps2-tracking-mega);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--ps2-ice);
+  text-shadow: var(--ps2-glow-text);
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.ps2-boot--risen .ps2-boot__wordmark {
+  animation: ps2-wordmark-in var(--ps2-dur-slow) var(--ps2-ease) 1.2s forwards;
+}
+
+@keyframes ps2-wordmark-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ps2-boot__skip {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  z-index: 4;
+  margin: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(207, 228, 255, 0.4);
+  pointer-events: none;
+}
+
+/* —— System Browser menu (screenshot homage) —— */
+.ps2-sys {
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.ps2-sys__stage {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(180px, 34%) minmax(220px, 340px);
+  align-items: center;
+  gap: clamp(1.5rem, 5cqw, 4rem);
+  width: min(820px, 88%);
+}
+
+.ps2-sys__orbs {
+  position: relative;
+  width: min(260px, 100%);
+  aspect-ratio: 1;
+  justify-self: end;
+}
+
+.ps2-sys__orb {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #fff 0%,
+    var(--ps2-cyan) 28%,
+    rgba(30, 93, 219, 0.55) 62%,
+    transparent 72%
+  );
+  box-shadow: 0 0 28px rgba(92, 201, 251, 0.55), 0 0 60px rgba(30, 93, 219, 0.35);
+  filter: blur(0.2px);
+  animation: ps2OrbFloat 7s ease-in-out infinite;
+}
+
+.ps2-sys__orb:nth-child(1) {
+  width: 42%;
+  height: 42%;
+  left: 28%;
+  top: 22%;
+  animation-delay: 0s;
+}
+.ps2-sys__orb:nth-child(2) {
+  width: 28%;
+  height: 28%;
+  left: 12%;
+  top: 48%;
+  animation-delay: -1.2s;
+  opacity: 0.85;
+}
+.ps2-sys__orb:nth-child(3) {
+  width: 22%;
+  height: 22%;
+  left: 58%;
+  top: 58%;
+  animation-delay: -2.1s;
+  opacity: 0.8;
+}
+.ps2-sys__orb:nth-child(4) {
+  width: 18%;
+  height: 18%;
+  left: 62%;
+  top: 18%;
+  animation-delay: -0.6s;
+  opacity: 0.75;
+}
+.ps2-sys__orb:nth-child(5) {
+  width: 14%;
+  height: 14%;
+  left: 38%;
+  top: 68%;
+  animation-delay: -3s;
+  opacity: 0.7;
+}
+.ps2-sys__orb:nth-child(6) {
+  width: 12%;
+  height: 12%;
+  left: 18%;
+  top: 18%;
+  animation-delay: -1.8s;
+  opacity: 0.65;
+}
+.ps2-sys__orb:nth-child(7) {
+  width: 10%;
+  height: 10%;
+  left: 72%;
+  top: 42%;
+  animation-delay: -2.6s;
+  opacity: 0.6;
+}
+
+@keyframes ps2OrbFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.ps2-sys__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  align-items: flex-start;
+}
+
+.ps2-sys__item {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-family: var(--ps2-font);
+  font-size: clamp(1.15rem, 2.6cqw, 1.65rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: rgba(230, 239, 255, 0.42);
+  text-align: left;
+  transition: color 280ms var(--ps2-ease), text-shadow 280ms var(--ps2-ease),
+    transform 280ms var(--ps2-ease);
+}
+
+.ps2-sys__item:hover,
+.ps2-sys__item:focus-visible {
+  outline: none;
+  color: rgba(230, 239, 255, 0.78);
+}
+
+.ps2-sys__item.is-selected {
+  color: var(--ps2-cyan);
+  text-shadow: 0 0 18px rgba(92, 201, 251, 0.65);
+  transform: translateX(4px);
+}
+
+/* —— Shutdown / next-era boot —— */
+.ps2-shutdown {
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  overflow: hidden;
+  background: #000;
+}
+
+.ps2-shutdown__halo {
+  position: absolute;
+  width: min(56vw, 480px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.17) 0%,
+    rgba(255, 255, 255, 0.045) 31%,
+    transparent 69%
+  );
+  opacity: 0;
+  transform: scale(0.52);
+}
+
+.ps2-shutdown__mark {
+  position: relative;
+  z-index: 1;
+  width: clamp(70px, 13cqw, 136px);
+  overflow: visible;
+  fill: #fff;
+  opacity: 0;
+  filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  transform: scale(0.78);
+}
+
+.ps2-shutdown.is-live .ps2-shutdown__halo {
+  animation: ps2-shutdown-halo 3400ms var(--ps2-ease) 2700ms forwards;
+}
+
+.ps2-shutdown.is-live .ps2-shutdown__mark {
+  animation: ps2-shutdown-light 3000ms var(--ps2-ease) 2800ms forwards;
+}
+
+@keyframes ps2-shutdown-halo {
+  0% {
+    opacity: 0;
+    transform: scale(0.52);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.38;
+    transform: scale(1);
+  }
+}
+
+@keyframes ps2-shutdown-light {
+  0% {
+    opacity: 0;
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+    transform: scale(0.78);
+  }
+  58% {
+    opacity: 1;
+    filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.92));
+  }
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.66));
+    transform: scale(1);
+  }
+}
+
+/* —— Browser / print campaigns (near-fullscreen vertical stack) —— */
+.ps2-browser {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+  box-sizing: border-box;
+  background: #000;
+}
+
+.ps2-browser__bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0.85rem 1.4rem;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 10, 28, 0.88) 0%,
+    rgba(0, 10, 28, 0.45) 55%,
+    rgba(0, 10, 28, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.ps2-browser__bar > * {
+  pointer-events: auto;
+}
+
+.ps2-browser__title {
+  margin: 0;
+  font-family: var(--ps2-font-display);
+  font-size: clamp(0.72rem, 1.5cqw, 0.95rem);
+  font-weight: var(--ps2-weight-thin);
+  letter-spacing: var(--ps2-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ps2-ice);
+  text-shadow: var(--ps2-glow-text);
+}
+
+.ps2-browser__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ps2-browser__btn {
+  appearance: none;
+  border: 1px solid var(--ps2-line);
+  background: rgba(8, 24, 72, 0.72);
+  color: var(--ps2-text);
+  font-family: var(--ps2-font);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: var(--ps2-inset-edge);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.ps2-browser__btn:hover,
+.ps2-browser__btn:focus-visible {
+  outline: none;
+  border-color: var(--ps2-cyan);
+  box-shadow: var(--ps2-inset-edge), var(--ps2-glow);
+}
+
+.ps2-browser__panel {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  background: #000;
+  box-shadow: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ps2-browser__panel::before {
+  display: none;
+}
+
+.ps2-browser__strip {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 175, 255, 0.45) transparent;
+  /* Panel size for ad max-width / max-height (cqw / cqh). */
+  container-type: size;
+  container-name: ps2-browser-panel;
+}
+
+/* contents so each card sizes against the strip scrollport (one ad per screen). */
+.ps2-browser__track {
+  display: contents;
+}
+
+.ps2-browser__card {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2.5rem, 8cqh, 4.5rem) clamp(1.25rem, 6cqw, 3.5rem);
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #000;
+}
+
+.ps2-browser__card img {
+  display: block;
+  width: auto;
+  height: auto;
+  /* Landscape → ~75% panel width; portrait → ~80% panel height. */
+  max-width: 75cqw;
+  max-height: 80cqh;
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.ps2-browser__empty {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  text-align: center;
+  color: var(--ps2-text-secondary);
+}
+
+.ps2-browser__empty[hidden],
+.ps2-browser__strip[hidden] {
+  display: none !important;
+}
+
+.ps2-browser__empty p {
+  margin: 0.35rem 0 0;
+  max-width: 36ch;
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+.ps2-browser__empty-kicker {
+  font-family: var(--ps2-font-display);
+  font-size: 0.72rem;
+  letter-spacing: var(--ps2-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ps2-cyan);
+}
+
+@media (max-width: 720px) {
+  .ps2-sys__stage {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .ps2-sys__orbs {
+    justify-self: center;
+    width: min(200px, 55vw);
+  }
+
+  .ps2-sys__list {
+    align-items: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps2-splash__logo,
+  .ps2-splash__cue,
+  .ps2-boot__tower,
+  .ps2-boot__wordmark,
+  .ps2-sys__orb,
+  .ps2-ambient__mote,
+  .ps2-shutdown__halo,
+  .ps2-shutdown__mark,
+  .ps2-phase {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .ps2-boot__tower {
+    height: var(--tower-h, 60%);
+  }
+
+  .ps2-boot__comet {
+    display: none;
+  }
+
+  .ps2-boot__wordmark,
+  .ps2-splash__logo,
+  .ps2-splash__cue {
+    opacity: 1;
+    transform: none;
+  }
+
+  .ps2-shutdown__halo {
+    opacity: 0.38;
+    transform: none;
+  }
+
+  .ps2-shutdown__mark {
+    opacity: 1;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.66));
+    transform: none;
+  }
+
+  .ps2-ambient__mote {
+    bottom: auto;
+    top: 40%;
+  }
+}

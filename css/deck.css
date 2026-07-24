@@ -153,6 +153,9 @@ body::after {
 .chapter.mode-win95,
 .chapter.mode-win98,
 .chapter.mode-winxp,
+.chapter.mode-consoles,
+.chapter.mode-ie,
+.chapter.mode-timewarp,
 .chapter.mode-google98 {
   padding: 0;
   background: #008080;
@@ -166,6 +169,9 @@ body::after {
 .chapter.mode-win95::after,
 .chapter.mode-win98::after,
 .chapter.mode-winxp::after,
+.chapter.mode-consoles::after,
+.chapter.mode-ie::after,
+.chapter.mode-timewarp::after,
 .chapter.mode-google98::after {
   display: none;
 }
@@ -173,6 +179,9 @@ body::after {
 .chapter.mode-win95 .footer,
 .chapter.mode-win98 .footer,
 .chapter.mode-winxp .footer,
+.chapter.mode-consoles .footer,
+.chapter.mode-ie .footer,
+.chapter.mode-timewarp .footer,
 .chapter.mode-google98 .footer {
   display: none;
 }
@@ -951,8 +960,9 @@ img.w98-start-ico {
 /* 3D Pinball — Space Cadet */
 .w95-window.is-pinball {
   z-index: 5;
-  width: min(720px, calc(100cqw - 24px));
-  height: min(560px, calc(100cqh - 52px));
+  /* Large enough for table + LED side panel on a 16:9 stage */
+  width: min(960px, calc(100cqw - 16px));
+  height: min(720px, calc(100cqh - 40px));
   top: 48%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -1345,6 +1355,11 @@ img.w98-start-ico {
 
 .era-transition.is-live {
   display: flex;
+}
+
+/* XP CD install — plain black stage (match .wxp-poweroff); popup stays on top */
+.era-transition[data-interstitial="install-cd"] {
+  background: #000;
 }
 
 .era-transition-panel {
@@ -1787,7 +1802,7 @@ img.w98-start-ico {
   max-width: 120px;
 }
 
-/* —— Section 3 · Windows XP stub hub (Luna kit not applied yet) —— */
+/* —— Section 3 · Windows XP hub (chrome in css/winxp-kit.css) —— */
 .chapter.mode-winxp {
   background: #245edc;
   container-type: size;
@@ -1805,13 +1820,122 @@ img.w98-start-ico {
     radial-gradient(ellipse at 50% 0%, #5b9bd5 0%, #245edc 45%, #1a3a8a 100%);
 }
 
-/* Bliss homage (original SVG — not Microsoft’s wallpaper) */
+/* Bliss — real hills photo (assets/winxp-ui/bliss.jpg) */
 .wxp-desktop.is-bliss {
   background-color: #5ba3e0;
-  background-image: url("/assets/winxp-ui/bliss.svg");
+  background-image: url("/assets/winxp-ui/bliss.jpg");
   background-size: cover;
-  background-position: center bottom;
+  background-position: center;
   background-repeat: no-repeat;
+}
+
+/*
+ * Win10-on-XP gag — curated from WinXP655/Win10UIforXP (MIT).
+ * https://github.com/WinXP655/Win10UIforXP
+ * XP chrome stays; wallpaper / icons / taskbar lean Win10.
+ */
+.wxp-desktop.is-win10pack {
+  background-color: #0b1f4a;
+  background-image: url("/assets/winxp-ui/win10pack/wallpaper-hero.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+.wxp-desktop .wxp-icon--w10,
+.wxp-desktop .wxp-label--w10,
+.wxp-desktop .wxp-meta--w10,
+.wxp-desktop .wxp-path--w10 {
+  display: none;
+}
+
+.wxp-desktop.is-win10pack .wxp-icon--classic,
+.wxp-desktop.is-win10pack .wxp-label--classic,
+.wxp-desktop.is-win10pack .wxp-meta--classic,
+.wxp-desktop.is-win10pack .wxp-path--classic {
+  display: none;
+}
+
+.wxp-desktop.is-win10pack .wxp-icon--w10 {
+  display: block;
+}
+
+.wxp-desktop.is-win10pack .wxp-label--w10,
+.wxp-desktop.is-win10pack .wxp-meta--w10,
+.wxp-desktop.is-win10pack .wxp-path--w10 {
+  display: inline;
+}
+
+.wxp-desktop.is-win10pack .wxp-explorer-path.wxp-path--w10 {
+  display: block;
+}
+
+.wxp-desktop.is-win10pack .wxp-icon {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.75);
+}
+
+.wxp-desktop.is-win10pack .wxp-taskbar {
+  height: 32px;
+  gap: 2px;
+  padding: 0 0 0 0;
+  background: linear-gradient(180deg, #1f4e89 0%, #163a66 18%, #0f2d52 100%);
+  border-top: 1px solid #2b6cb0;
+}
+
+.wxp-desktop.is-win10pack .wxp-start {
+  height: 100%;
+  min-width: 54px;
+  padding: 0 14px 0 8px;
+  border-radius: 0;
+  background: linear-gradient(180deg, #2d8a3e 0%, #1e6b2c 55%, #165522 100%);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+
+.wxp-desktop.is-win10pack .wxp-start-orb {
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  background:
+    linear-gradient(90deg, #f25022 50%, #7fba00 50%) top / 100% 50% no-repeat,
+    linear-gradient(90deg, #00a4ef 50%, #ffb900 50%) bottom / 100% 50% no-repeat;
+  box-shadow: none;
+}
+
+.wxp-desktop.is-win10pack .wxp-task {
+  height: 26px;
+  margin-top: 3px;
+  border: 1px solid #0a2344;
+  border-radius: 0;
+  background: linear-gradient(180deg, #2a5a96, #1a3f6e);
+}
+
+.wxp-desktop.is-win10pack .wxp-task.is-pressed {
+  background: linear-gradient(180deg, #163a60, #0d243f);
+  box-shadow: inset 0 0 0 1px rgba(0, 120, 215, 0.45);
+}
+
+.wxp-desktop.is-win10pack .wxp-tray {
+  height: 26px;
+  margin: 3px 4px 0 auto;
+  border: 0;
+  border-left: 1px solid #0a2344;
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.wxp-desktop.is-win10pack .wxp-titlebar {
+  background: linear-gradient(180deg, #b9d1ea, #99b4d1 40%, #7ba0c4);
+  color: #000;
+  font-weight: 600;
+}
+
+.wxp-desktop.is-win10pack .wxp-ctrl {
+  border-color: #6b8aac;
+  border-radius: 0;
+  background: #e81123;
 }
 
 .wxp-icons {
@@ -1982,6 +2106,312 @@ img.wxp-icon-glyph {
   background: rgba(0, 0, 0, 0.15);
   color: #fff;
   font-size: 11px;
+}
+
+/* XP Start menu + Shut Down (path to #consoles) */
+.wxp-start-menu {
+  position: absolute;
+  left: 2px;
+  bottom: 32px;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  max-width: min(260px, calc(100cqw - 16px));
+  background: #fff;
+  border: 1px solid #003c74;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.35);
+  font-family: Tahoma, "Segoe UI", sans-serif;
+}
+
+.wxp-start-menu[hidden] {
+  display: none !important;
+}
+
+.wxp-start-banner {
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #0a246a 0%, #3a6ea5 55%, #245edc 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.wxp-start-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+}
+
+.wxp-start-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: #b0c4de;
+  border: 0;
+}
+
+.wxp-start-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  color: #000;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wxp-start-btn:hover,
+.wxp-start-btn:focus-visible {
+  background: #316ac5;
+  color: #fff;
+  outline: none;
+}
+
+.wxp-start-btn.is-nudge {
+  animation: w95Nudge 0.55s ease;
+}
+
+.wxp-start-ico {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border-radius: 3px;
+  background: #c1d2ee;
+  box-shadow: inset 0 0 0 1px #7f9db9;
+}
+
+.wxp-start-ico--pics {
+  background:
+    linear-gradient(135deg, #9ec9f0 40%, #3d8b40 40%),
+    #fff;
+}
+
+.wxp-start-ico--power {
+  background:
+    radial-gradient(circle at 50% 55%, #fff 0 28%, transparent 29%),
+    linear-gradient(180deg, #e85d04, #c1121f);
+}
+
+.wxp-window.is-shutdown {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  z-index: 80;
+  width: min(340px, calc(100cqw - 36px));
+  display: flex;
+  flex-direction: column;
+  background: #ece9d8;
+  border: 1px solid #0054e3;
+  box-shadow: 0 0 0 1px #003c74, 3px 3px 12px rgba(0, 0, 0, 0.4);
+}
+
+.wxp-window.is-shutdown.is-closed,
+.wxp-window.is-shutdown[hidden] {
+  display: none !important;
+}
+
+.wxp-shutdown-client {
+  padding: 14px 16px 12px;
+  font-size: 12px;
+  color: #000;
+  background: #ece9d8;
+}
+
+.wxp-shutdown-lead {
+  margin: 0 0 0.75em;
+  font-weight: 700;
+}
+
+.wxp-shutdown-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0.5em;
+  padding: 6px 8px;
+  border: 1px solid #7f9db9;
+  background: #fff;
+  cursor: default;
+}
+
+.wxp-shutdown-option.is-selected {
+  border-color: #0054e3;
+  background: #c1d2ee;
+}
+
+.wxp-shutdown-hint {
+  margin: 0 0 1em;
+  color: #003c74;
+  font-size: 11px;
+}
+
+.wxp-shutdown-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.wxp-btn {
+  min-width: 72px;
+  padding: 4px 12px;
+  border: 1px solid #003c74;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #fff, #ece9d8);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.wxp-btn:hover {
+  background: linear-gradient(180deg, #fff, #c1d2ee);
+}
+
+.wxp-btn:focus-visible {
+  outline: 1px dotted #000;
+  outline-offset: -3px;
+}
+
+.wxp-poweroff {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: block;
+  background: #000;
+  color: #f4f4f4;
+  cursor: default;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.wxp-poweroff[hidden] {
+  display: none !important;
+}
+
+/* Kill Bliss wallpaper bleed — pure black shell under the power-off overlay */
+.wxp-desktop.is-powering-off {
+  background: #000 !important;
+  background-image: none !important;
+}
+
+.wxp-desktop.is-powering-off .wxp-icons,
+.wxp-desktop.is-powering-off .wxp-welcome,
+.wxp-desktop.is-powering-off .wxp-explorer,
+.wxp-desktop.is-powering-off .wxp-firefox,
+.wxp-desktop.is-powering-off .wxp-start-menu,
+.wxp-desktop.is-powering-off .wxp-window,
+.wxp-desktop.is-powering-off .wxp-taskbar {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Old CRT / living-room tune-in — fades in after pure black hold */
+.wxp-tv-static {
+  position: absolute;
+  inset: -8%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 2.2s ease;
+}
+
+.wxp-poweroff.is-static-in .wxp-tv-static {
+  opacity: 1;
+}
+
+.wxp-tv-static-noise {
+  position: absolute;
+  inset: 0;
+  background-color: #111;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  filter: contrast(1.55) brightness(1.15);
+  opacity: 0.92;
+  animation: wxpTvStatic 0.14s steps(3) infinite;
+  mix-blend-mode: screen;
+}
+
+.wxp-tv-static-noise::before,
+.wxp-tv-static-noise::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  opacity: 0.55;
+  mix-blend-mode: overlay;
+  animation: wxpTvStatic 0.11s steps(2) infinite reverse;
+}
+
+.wxp-tv-static-scan {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.045) 0 1px,
+      transparent 1px 3px
+    );
+  opacity: 0.7;
+  mix-blend-mode: soft-light;
+}
+
+.wxp-tv-static-roll {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 46%,
+    rgba(0, 0, 0, 0.35) 52%,
+    transparent 58%
+  );
+  background-size: 100% 220%;
+  animation: wxpTvRoll 2.4s linear infinite;
+  opacity: 0.55;
+  mix-blend-mode: soft-light;
+}
+
+.wxp-tv-static-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.55) 78%, #000 100%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.35), transparent 12%, transparent 88%, rgba(0, 0, 0, 0.35));
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.75);
+}
+
+@keyframes wxpTvStatic {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-3%, 2%); }
+  50% { transform: translate(2%, -4%); }
+  75% { transform: translate(-1%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes wxpTvRoll {
+  0% { background-position: 0 -40%; }
+  100% { background-position: 0 140%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wxp-tv-static {
+    transition: none;
+  }
+
+  .wxp-tv-static-noise,
+  .wxp-tv-static-noise::before,
+  .wxp-tv-static-noise::after,
+  .wxp-tv-static-roll {
+    animation: none;
+  }
 }
 
 .g98-desktop .w95-icons {
@@ -2386,6 +2816,10 @@ img.wxp-icon-glyph {
   display: block;
 }
 
+.y2k-theatre.is-gated {
+  cursor: pointer;
+}
+
 .y2k-bsod {
   position: absolute;
   inset: 0;
@@ -2456,6 +2890,21 @@ img.wxp-icon-glyph {
   white-space: pre-wrap;
 }
 
+.y2k-reboot-wait {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(1.5rem, 5vh, 3rem);
+  margin: 0;
+  text-align: center;
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  color: #c0c0c0;
+}
+
+.y2k-reboot-wait[hidden] {
+  display: none !important;
+}
+
 .y2k-date-flash {
   position: absolute;
   left: 50%;
@@ -2500,7 +2949,8 @@ body.is-booting .chrome,
 body.is-booting .hud,
 body.is-booting .slide-index,
 body.is-booting .era-badge,
-body.is-booting .notes {
+body.is-booting .notes,
+body.is-booting .story-menu {
   visibility: hidden;
 }
 
@@ -3293,8 +3743,15 @@ body:has(.chapter.mode-paint.active) .chrome,
 body:has(.chapter.mode-win95.active) .chrome,
 body:has(.chapter.mode-win98.active) .chrome,
 body:has(.chapter.mode-winxp.active) .chrome,
+body:has(.chapter.mode-consoles.active) .chrome,
+body:has(.chapter.mode-ie.active) .chrome,
 body:has(.chapter.mode-google98.active) .chrome {
   bottom: 36px;
+}
+
+/* Mountain Lion shell owns its chrome (menu bar + dock). */
+body:has(.chapter.mode-timewarp.active) .chrome {
+  display: none;
 }
 
 @media (max-width: 640px) {
@@ -4144,6 +4601,116 @@ body:has(.w95-window.is-paint:not(.is-closed)) .chrome button {
 
 body.show-notes .notes { display: block; }
 
+/* Presenter Story jump menu — G / ` · sits above bottom chrome */
+.story-menu {
+  position: absolute;
+  left: 50%;
+  bottom: 64px;
+  transform: translateX(-50%);
+  z-index: 42;
+  min-width: min(320px, calc(100cqw - 24px));
+  max-width: min(420px, calc(100cqw - 24px));
+  padding: 0.65rem 0.7rem 0.75rem;
+  border-radius: 14px;
+  background: rgba(7, 8, 13, 0.92);
+  border: 1px solid rgba(94, 234, 212, 0.4);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  color: #e2e8f0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  pointer-events: auto;
+}
+
+.story-menu[hidden] {
+  display: none !important;
+}
+
+body:has(.chapter.mode-win95.active) .story-menu,
+body:has(.chapter.mode-win98.active) .story-menu,
+body:has(.chapter.mode-winxp.active) .story-menu {
+  bottom: 86px;
+}
+
+.story-menu-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.45rem;
+  padding: 0 0.2rem 0.4rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.story-menu-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #5eead4;
+}
+
+.story-menu-keys {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(226, 232, 240, 0.55);
+  white-space: nowrap;
+}
+
+.story-menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.story-menu-item {
+  appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #f1f5f9;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.story-menu-item:hover,
+.story-menu-item:focus-visible {
+  background: rgba(94, 234, 212, 0.12);
+  border-color: rgba(94, 234, 212, 0.35);
+  outline: none;
+}
+
+.story-menu-item.is-active {
+  background: rgba(94, 234, 212, 0.18);
+  border-color: rgba(94, 234, 212, 0.55);
+  color: #ccfbf1;
+}
+
+.story-menu-item kbd {
+  flex: 0 0 auto;
+  min-width: 1.35rem;
+  padding: 0.12rem 0.35rem;
+  border-radius: 5px;
+  background: rgba(248, 250, 252, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 .keys-hint {
   font-size: 0.66rem;
   font-weight: 700;
@@ -4455,6 +5022,61 @@ body.is-crt-live { cursor: none; }
   animation: chapterSlam 0.85s var(--ease-slam) both;
 }
 
+/* Switch 2 cue — BSOD / source-peel bridge into the credits */
+.finale-void.finale-cue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 6vw, 4rem);
+  background: #0000aa !important;
+  color: #c0c0c0;
+  -webkit-font-smoothing: none;
+}
+
+.finale-cue__panel {
+  width: min(46rem, 100%);
+  font-family: "IBM Plex Mono", "Lucida Console", "Courier New", monospace;
+  font-size: clamp(0.95rem, 1.85vw, 1.2rem);
+  line-height: 1.55;
+  text-align: left;
+  animation: finaleCueIn 0.55s ease both;
+}
+
+.finale-cue__meta {
+  margin: 0 0 1.4em;
+  color: #aaaaaa;
+  font-size: 0.92em;
+}
+
+.finale-cue__line {
+  margin: 0 0 0.35em;
+  max-width: 42ch;
+  color: #e8e8e8;
+}
+
+.finale-cue__prompt {
+  margin: 1.8em 0 0;
+  color: #aaaaaa;
+  font-size: 0.92em;
+}
+
+.finale-cue__cursor {
+  display: inline-block;
+  margin-left: 0.15em;
+  animation: bsodBlink 1s steps(1, end) infinite;
+}
+
+@keyframes finaleCueIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .source-peel {
   position: absolute;
   inset: 0;
@@ -4494,61 +5116,36 @@ body.is-crt-live { cursor: none; }
     );
 }
 
-.source-scroll pre {
-  white-space: pre-wrap;
-  animation: sourceRise 28s linear infinite;
+.source-scroll__track {
   max-width: 72ch;
   margin: 0 auto;
+  animation: sourceRise 36s linear infinite;
+  will-change: transform;
+}
+
+.source-scroll pre {
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.source-scroll__photo {
+  margin: 2.8rem 0 12vh;
+  padding: 0;
+  max-width: min(28rem, 100%);
+}
+
+.source-scroll__photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(167, 243, 208, 0.22);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  background: #0b0d12;
 }
 
 @keyframes sourceRise {
-  from { transform: translateY(30%); }
-  to { transform: translateY(-55%); }
-}
-
-.source-meta {
-  position: absolute;
-  left: 50%;
-  bottom: 12%;
-  transform: translateX(-50%);
-  z-index: 3;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  align-items: center;
-  opacity: 0;
-}
-
-.source-peel.is-open .source-meta {
-  animation: fadeUp 0.6s ease 1.2s both;
-}
-
-.source-meta .display {
-  font-size: clamp(1.4rem, 3vw, 2.2rem);
-  max-width: 20ch;
-  color: #f8fafc;
-}
-
-.play-again {
-  appearance: none;
-  font-family: var(--font-body);
-  font-weight: 800;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink);
-  background: var(--amber);
-  border: none;
-  border-radius: 999px;
-  padding: 0.7rem 1.2rem;
-  cursor: pointer;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-}
-
-.play-again:hover {
-  background: var(--glow);
-  transform: translateY(-2px);
+  from { transform: translateY(28vh); }
+  to { transform: translateY(calc(-100% + 55vh)); }
 }
 
 /* Adaptive designer branch cue */
@@ -4578,6 +5175,8 @@ body:not([data-audience="designer"]) .adaptive-copy-designer { display: none; }
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .source-scroll pre { animation: none; }
+  .source-scroll__track { animation: none; transform: translateY(8vh); }
   .boot-bsod.is-live { animation: none; }
+  .finale-cue__panel { animation: none; }
+  .finale-cue__cursor { animation: none; }
 }

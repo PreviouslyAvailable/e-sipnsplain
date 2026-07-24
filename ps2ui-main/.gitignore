@@ -1,0 +1,36 @@
+# dependencies
+/node_modules
+
+# builds
+/dist
+/.next
+/out
+*.tsbuildinfo
+next-env.d.ts
+
+# env / local
+.env*.local
+*.pem
+*.key
+
+# os / editor
+.DS_Store
+*.log
+
+# browser QA artifacts
+/.playwright-mcp
+*.playwright-mcp
+
+# --- research tooling (bad-research) — keep curated evidence, drop the machinery ---
+/.hyperresearch
+/.bad-research
+/.claude/skills/bad-research-*
+/research/temp
+/research/runs
+/research/scaffold.md
+/research/prompt-decomposition.json
+/research/query-*.md
+/research/clarify.json
+/research/*.json
+/research/*-gaps.md
+# kept on purpose: research/DESIGN.md + research/notes/*.md (the RE evidence)

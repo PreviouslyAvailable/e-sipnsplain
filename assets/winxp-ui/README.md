@@ -1,62 +1,65 @@
-# Windows XP UI Kit — staged (not active)
+# Windows XP UI — Luna hub (live) + Win10 gag
 
-**Do not apply the full Luna/Figma kit as the live Section 3 skin yet.**
-Section 2 unlocks `#winxp` via the Y2K sequence (SkiFree + Pinball + Chris, 2000
-→ clock takeover → cosmetic BSOD → CD install). Live hub uses a Bliss-*homage*
-wallpaper (`bliss.svg`) + XP startup chime; full Luna kit activation still
-follows the checklist below.
+Section 3 `#winxp` uses a **CSS Luna Blue** skin (`css/winxp-kit.css`) with the
+Bliss hills photo wallpaper and curated desktop icons. Lands from Section 2 Y2K
+(clock → BSOD → CD install) and stays classic XP until Shut Down → `#consoles`.
 
 ## Paths
 
 | Location | Role |
 |----------|------|
-| `/Users/chrisedwards/sns/Windows-XP-UI-Kit-main/` | Chris’s drop-in (source of truth) |
-| `vendor/windows-xp-ui-kit` | Symlink → drop-in |
-| `assets/winxp-ui/` | Runtime staging notes + LICENSE (this folder) |
+| `css/winxp-kit.css` | **Live** Luna chrome (taskbar, Start, titlebars, Start menu) |
+| `assets/winxp-ui/bliss.jpg` | Bliss hills photo wallpaper (`.wxp-desktop.is-bliss`) |
+| `assets/winxp-ui/icons/` | Served desktop + Start glyphs |
+| `assets/icons/wxp/` | Same icons (export script / shared with shell set) |
+| `assets/winxp-ui/win10pack/` | Optional Win10-on-XP gag (MIT) |
+| `Windows-XP-UI-Kit-main/` | Chris’s Figma Luna kit (reference only) |
+| `vendor/windows-xp-ui-kit` | Symlink → Figma drop-in |
 
-## What’s in the Figma kit
+## Live assets (web-usable)
 
-Upstream: local drop-in `Windows-XP-UI-Kit-main` (Figma Luna-style kit; CC-BY-NC-ND-4.0)  
-License: **CC-BY-NC-ND-4.0** (see `LICENSE`) — non-commercial, no derivatives without care.
+| Path | Notes |
+|------|-------|
+| `bliss.jpg` | Bliss hills photo for desktop background |
+| `icons/my-computer.png` | From `wxp_16.ico` (trapd00r) |
+| `icons/recycle-empty.png` | From `wxp_32.ico` |
+| `icons/my-pictures.png` | Folder + Bliss peek (XP My Pictures style) |
+| `icons/start-flag.png` / `start-flag-22.png` | From `wxp_239.ico` (XP flag) |
+| `win10pack/*` | Optional gag wallpaper / icons / notify.wav |
 
-| Path | Size / notes |
-|------|----------------|
-| `src/Windows XP UI Kit.fig` | ~36 MB Figma source — **design system, not web CSS** |
-| `public/Cover.jpg` | Marketing cover (~2 MB) |
-| `public/{behance,dribbble,linkedin}/` | Portfolio metadata YAML only |
-| `README.md` | Upstream blurb (Luna-style windows & frames) |
-| `LICENSE` | Copied here |
+## Figma kit (still not web CSS)
 
-### Surfaces the `.fig` is built for (from upstream README)
+Upstream: `Windows-XP-UI-Kit-main` · **CC-BY-NC-ND-4.0**
 
-- Iconic **Windows XP / Luna** controls and UI elements (Assets Library)
-- Vector-scaled commons icons
-- Window **templates & examples**
-- **Desktop + Start Menu** showcase frames for mockups
+| Path | Notes |
+|------|-------|
+| `src/Windows XP UI Kit.fig` | ~36 MB Figma source — design reference, not runtime |
+| `public/Cover.jpg` | Marketing cover (Luna + Bliss mockup) |
 
-There is **no** shipped CSS, WOFF, or PNG icon sheet for the web — only the Figma file.
+There is **no** shipped CSS/WOFF from the Figma kit. Luna chrome is rebuilt in
+`css/winxp-kit.css` from XP visual tokens (same approach as Win95/98 kits).
 
-## What we’ll need for web later (Section 3)
+### If you want pixel-perfect kit chrome later
 
-Before activating an XP hub, extract / vendor:
+Drop or export any of:
 
-1. **Tokens** — Luna blue titlebar gradient, olive/silver taskbar, button bevels, selection blue, desktop Bliss-adjacent teal (or custom photo wallpaper).
-2. **Type** — Tahoma / Franklin Gothic homage faces (self-hosted WOFF2), scoped under `.mode-winxp`.
-3. **Chrome sprites or CSS** — Start orb, taskbar grips, window controls (min/max/close), XP-style buttons — export from `.fig` or redraw as CSS.
-4. **Icons** — My Computer, Recycle, folder, Start menu glyphs as PNG/SVG under `assets/winxp-ui/icons/` (offline-safe).
-5. **CSS module** — `css/winxp-kit.css` mirroring `win95-kit.css` / `win98-kit.css`, Bootstrap-free, no Figma runtime.
-6. **License check** — CC-BY-NC-ND may restrict derivative web chrome for a public talk site; confirm attribution + allowed use before shipping, or redraw from public-domain references.
+1. **PNG slices** from the `.fig`: Start button, titlebar caps, close/min/max, Start menu header
+2. **Tahoma / Franklin Gothic** WOFF2 under `assets/winxp-ui/fonts/` (optional — stack already uses Tahoma)
 
-### Activation checklist (when Section 3 starts)
+## Win10-on-XP gag (optional)
 
-1. Export needed surfaces from the `.fig` (or use Figma MCP / Code Connect).
-2. Vendor lightweight CSS/fonts/icons under `assets/winxp-ui/` (served, offline-safe).
-3. Scope to `.mode-winxp` / `#winxp` the same way Win98 uses `.mode-win98`.
-4. Leave `#win98` on the ui-98 + classic chrome stack.
-5. Do **not** load XP skins on Win95/Win98 hubs.
+Upstream: [WinXP655/Win10UIforXP](https://github.com/WinXP655/Win10UIforXP) · MIT  
+Presenter: `Sipnsplain.applyWin10Pack()` / `.resetWin10Pack()` — not auto-applied after Y2K.
 
-## Attribution stub
+## Activation notes
 
-When live: credit the Figma kit author + CC-BY-NC-ND-4.0 link in an
-`assets/winxp-ui/ATTRIBUTION.md` (create at activation time). Until then this
-folder only holds staging docs + LICENSE.
+- Scoped to `.mode-winxp` / `#winxp` only — Win95/Win98 hubs untouched
+- Y2K → `#winxp` path unchanged
+- Load order: `winxp-kit.css` after `ad-moments.css` so Luna overrides stub chrome
+
+## Attribution
+
+- Shell icons: trapd00r `win95-winxp_icons` (see `assets/icons/README.md`)
+- Win10 pack: WinXP655 · MIT
+- Figma Luna kit: CC-BY-NC-ND-4.0 (reference; see `LICENSE`) — not redistributed as web chrome
+- Bliss wallpaper: classic hills photograph (`bliss.jpg`)

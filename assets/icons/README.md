@@ -14,9 +14,12 @@ Curated PNGs converted from [`win95-winxp_icons-master`](../../win95-winxp_icons
 | `w98/recycle-empty.png` | `w98_recycle_bin_empty.ico` |
 | `w98/control-panel.png` | `w98_directory_control_panel.ico` |
 | `w98/floppy.png` | `w98_floppy_drive_3-5.ico` |
+| `w98/cd-drive.png` | `w98_cd_drive.ico` |
 | `w98/start-*.png` / `tray-update.png` | joystick / settings / themes / update / mydocs |
 | `wxp/my-computer.png` | `wxp_16.ico` |
 | `wxp/recycle-*.png` | `wxp_32.ico` / `wxp_33.ico` |
+| `wxp/my-pictures.png` | Hand-drawn XP My Pictures–style folder (also `assets/winxp-ui/icons/`) |
+| `wxp/start-flag*.png` | `wxp_239.ico` |
 
 | `w98/pinball.png` / `start-pinball.png` | Cleaned Space Cadet splash (ship crop) |
 | `w98/ski.png` / `start-ski.png` | Classic SkiFree face icon |

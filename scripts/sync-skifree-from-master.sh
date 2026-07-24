@@ -4,7 +4,7 @@
 #   · Verify deck beat hooks (finish → yeti → gameover) from master main.js
 #
 # Deck beat flow (keep in master js/main.js — do not regress on sync):
-#   1. ~1000m → place finish signs → postMessage skifree-finish (phase: placed)
+#   1. ~200m → place finish signs → postMessage skifree-finish (phase: placed)
 #   2. Cross finish → force-spawn yeti → skifree-finish (phase: crossed)
 #   3. Yeti catch → skifree-yeti + skifree-gameover (+ __skifreeShowGameOver)
 #   4. Game Over button in index.html → skifree-gameover-photo → parent opens photo

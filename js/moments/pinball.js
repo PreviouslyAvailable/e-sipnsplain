@@ -105,6 +105,45 @@ export function createPinball(root, ui = {}) {
 
   const revealHandler = ui.onPinballReveal ?? onPinballReveal;
 
+  const syncDeckMute = () => {
+    try {
+      frame?.contentWindow?.postMessage(
+        {
+          type: "sipnsplain:pinball-mute",
+          muted: document.body.classList.contains("is-muted"),
+        },
+        window.location.origin
+      );
+    } catch {
+      /* iframe is not ready */
+    }
+  };
+
+  const onDeckMuteChange = () => syncDeckMute();
+  window.addEventListener("sipnsplain:mutechange", onDeckMuteChange);
+
+  // Key events inside an iframe do not bubble to the deck. Relay M from the
+  // shell so the presentation-wide mute shortcut still controls pinball.
+  const onFrameMessage = (event) => {
+    if (
+      event.origin !== window.location.origin ||
+      event.source !== frame?.contentWindow ||
+      event.data?.type !== "sipnsplain:pinball-togglemute" ||
+      !active
+    ) {
+      return;
+    }
+    window.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "m",
+        code: "KeyM",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+  };
+  window.addEventListener("message", onFrameMessage);
+
   const setStatus = (text) => {
     if (statusEl) statusEl.textContent = text;
   };
@@ -310,6 +349,7 @@ export function createPinball(root, ui = {}) {
     const onLoad = () => {
       frame.removeEventListener("load", onLoad);
       attachIframeKeys();
+      syncDeckMute();
       requestAnimationFrame(() => {
         try {
           frame.focus({ preventScroll: true });

@@ -357,6 +357,9 @@ const CHAPTER_ERA = {
   win95: "1995",
   win98: "win98",
   winxp: "winxp",
+  consoles: "consoles",
+  web20: "web20",
+  timewarp: "timewarp",
   continue: "prologue",
   "make-impossible": "2025",
   "source-reveal": "2025",
@@ -390,7 +393,7 @@ export function bandMeta(eraId) {
       era: "win98",
       years: "1998",
       label: "Windows 98 hub",
-      evoke: "Section 2 desktop hub — Desktop Themes + Space Cadet.",
+      evoke: "Section 2 hub — play optional, then Themes → Chris, 1999 → Y2K.",
       family: "win98",
       veil: "flash",
       year: 1998,
@@ -402,11 +405,47 @@ export function bandMeta(eraId) {
       era: "winxp",
       years: "2001",
       label: "Windows XP hub",
-      evoke: "Section 3 stub desktop — Luna kit staged, not applied yet.",
+      evoke: "Section 3 · Bliss + Luna · Mozilla Firefox (Web 2.0 tabs).",
       family: "winxp",
       veil: "flash",
       year: 2001,
-      note: "ERA · Windows XP stub hub (Section 3) — full kit later.",
+      note: "ERA · Windows XP hub (Section 3) — Luna skin · Firefox hosts Neopets→Moshi Monsters.",
+    };
+  }
+  if (eraId === "consoles") {
+    return {
+      era: "consoles",
+      years: "2001",
+      label: "Living room · PS2",
+      evoke: "PlayStation 2 system software — boot, Browser, print campaigns.",
+      family: "consoles",
+      veil: "flash",
+      year: 2001,
+      note: "ERA · PS2 living-room beat between XP and Timewarp (Web 2.0 is on XP Firefox).",
+    };
+  }
+  if (eraId === "web20") {
+    return {
+      era: "web20",
+      years: "2004–2007",
+      label: "Web 2.0 · Mozilla Firefox",
+      evoke: "XP desktop — Firefox 1.0 with year-tabbed kid-web ad collections.",
+      family: "firefox",
+      veil: "flash",
+      year: 2004,
+      note: "ERA · Web 2.0 browser years on #winxp Firefox (Neopets→Moshi Monsters).",
+    };
+  }
+  if (eraId === "timewarp") {
+    return {
+      era: "timewarp",
+      years: "2009–2025",
+      label: "Timewarp · OS X Lion",
+      evoke: "mac-osx-lion-theme-master — Andromeda desktop, Aqua windows, glass dock timeline.",
+      family: "timewarp",
+      veil: "flash",
+      year: 2009,
+      note: "ERA · Timewarp (OS X Lion theme) after PS2 Apple handoff — idle desktop until a dock year opens the timeline.",
     };
   }
   const t = BY_ID.get(eraId);

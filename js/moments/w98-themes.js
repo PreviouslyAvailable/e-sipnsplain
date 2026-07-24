@@ -2,7 +2,7 @@
  * Windows 98 Desktop Themes — foreshadows app re-skins.
  * Presented as “Desktop Themes” (not “Plus! for Windows 95”).
  *
- * Chris photo swap: replace `/assets/chris-2000.png` (see assets/README note).
+ * Chris photo swap: replace `/assets/chris-1999.png` (see assets/chris-1999.README.md).
  */
 
 /** @typedef {{
@@ -41,16 +41,16 @@ export const W98_THEMES = [
     sfx: "beat",
   },
   {
-    id: "chris2000",
-    label: "Chris, 2000",
-    preview: "Not a real theme…",
+    id: "chris1999",
+    label: "Chris, 1999",
+    preview: "Happy New Year…?",
     sfx: "photo",
     exitReveal: true,
   },
 ];
 
-/** Era photo for the Chris, 2000 exit reveal — Chris can swap this file. */
-export const CHRIS_2000_PHOTO = "/assets/chris-2000.png";
+/** Era photo for Chris, 1999 wallpaper + exit reveal — Chris can swap this file. */
+export const CHRIS_1999_PHOTO = "/assets/chris-1999.png";
 
 /**
  * @param {string} id

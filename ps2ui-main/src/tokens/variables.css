@@ -1,0 +1,175 @@
+/*
+ * PS2UI design tokens — the PlayStation 2 system dashboard, as CSS custom
+ * properties. Zero runtime, SSR-safe, portable to any React/CSS setup.
+ *
+ * Sourced from a teardown of the PS2 BIOS dashboard ("Browser" / System
+ * Configuration), the boot sequence, and the memory-card browser.
+ * See research/tokens/* for the derivations. Every value below is a deliberate
+ * approximation of an on-screen PS2 element, not a guess.
+ *
+ * All names are prefixed `--ps2-`. Override any of them on `:root` (or a
+ * scoped ancestor) to retheme.
+ */
+
+:root,
+[data-ps2] {
+  /* ----------------------------------------------------------------------
+   * COLOR — the deep navy → royal-blue field of the dashboard.
+   * The PS2 dashboard is a single dark-blue volumetric space; everything
+   * else is light emitted into it (cubes, towers, glow).
+   * -------------------------------------------------------------------- */
+
+  /* Background field, darkest (screen edges / top) → lightest (horizon glow).
+     Sourced from the boot-screen gradient teardown (research/DESIGN.md §1–2):
+     #000814 → #001428 → #002B5C → #0044A0, extended with a brighter horizon. */
+  --ps2-bg-abyss: #000814;     /* near-black navy zenith, the vignette */
+  --ps2-bg-deep: #001428;      /* the body of the space */
+  --ps2-bg: #002b5c;           /* mid field — the canonical PS2 blue */
+  --ps2-bg-rise: #0044a0;      /* rising toward the horizon */
+  --ps2-bg-horizon: #1e5ddb;   /* the bright band where the towers stand */
+
+  /* PlayStation brand / accent blues (sourced — see research/DESIGN.md §2) */
+  --ps2-blue: #003087;         /* Resolution Blue — the PlayStation logo blue */
+  --ps2-blue-true: #006fcd;    /* True Blue (Pantone 285 C) — primary brand */
+  --ps2-blue-bright: #1e5ddb;  /* Sony-UI royal — active / selected accent */
+  --ps2-cyan: #5cc9fb;         /* Sony-UI sky — edge light on glass */
+  --ps2-ice: #cfe4ff;          /* highlight */
+
+  /* The four boot "comets" = DualShock face-button colors (sourced) */
+  --ps2-btn-triangle: #4fd6a0; /* △ green */
+  --ps2-btn-circle: #ff6b7e;   /* ○ red/pink */
+  --ps2-btn-cross: #7aa8ff;    /* ✕ blue */
+  --ps2-btn-square: #f3a0d6;   /* □ pink */
+
+  /* The translucent "data cube" — the floating save-icons / boot particles */
+  --ps2-cube-fill: rgba(120, 170, 255, 0.14);
+  --ps2-cube-edge: rgba(190, 220, 255, 0.55);
+  --ps2-cube-core: rgba(225, 240, 255, 0.9);
+
+  /* Text — cool whites on the blue field */
+  --ps2-text: #e6efff;
+  --ps2-text-secondary: #9db0d8;
+  --ps2-text-tertiary: #5f73a6;
+  --ps2-text-on-light: #061238;
+
+  /* Hairline / separators — the thin bright lines of the BIOS UI */
+  --ps2-line: rgba(160, 195, 255, 0.22);
+  --ps2-line-strong: rgba(190, 220, 255, 0.45);
+
+  /* ----------------------------------------------------------------------
+   * SURFACES — the glassy translucent panels of the menu chrome.
+   * -------------------------------------------------------------------- */
+  --ps2-surface: linear-gradient(
+    180deg,
+    rgba(40, 80, 180, 0.30) 0%,
+    rgba(12, 32, 96, 0.34) 100%
+  );
+  --ps2-surface-raised: linear-gradient(
+    180deg,
+    rgba(70, 120, 230, 0.42) 0%,
+    rgba(18, 44, 120, 0.46) 100%
+  );
+  --ps2-surface-sunken: rgba(4, 12, 44, 0.55);
+  --ps2-surface-blur: 14px;
+
+  /* The signature top "sheen" gradient laid over glass */
+  --ps2-sheen: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.04) 18%,
+    rgba(255, 255, 255, 0) 50%
+  );
+
+  /* ----------------------------------------------------------------------
+   * GLOW & SHADOW — light bleeds; the UI never has a hard drop shadow,
+   * it has a bloom.
+   * -------------------------------------------------------------------- */
+  --ps2-glow-sm: 0 0 8px rgba(90, 150, 255, 0.45);
+  --ps2-glow: 0 0 18px rgba(90, 150, 255, 0.55);
+  --ps2-glow-lg: 0 0 42px rgba(90, 150, 255, 0.6);
+  --ps2-glow-text: 0 0 10px rgba(150, 195, 255, 0.7);
+  --ps2-shadow: 0 18px 50px rgba(0, 6, 30, 0.55);
+  --ps2-inset-edge: inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 0 0 1px rgba(150, 190, 255, 0.18);
+
+  /* ----------------------------------------------------------------------
+   * TYPOGRAPHY — the PS2 BIOS set type in Sony's corporate neo-grotesque
+   * (essentially Helvetica, rendered as a wide-tracked bitmap; the open
+   * OSDSYS replacement project substitutes Roboto). So the BODY font is a
+   * clean neo-grotesque/humanist sans; the DISPLAY font (boot wordmark,
+   * menu-tile labels) is a wide geometric — Michroma / Exo 2. The demo
+   * loads Inter + Exo 2 from Google Fonts; the kit falls back gracefully.
+   * Sourced — research/DESIGN.md §3.
+   * -------------------------------------------------------------------- */
+  --ps2-font: "Inter", "Roboto", "Helvetica Neue", "Arial", ui-sans-serif,
+    system-ui, sans-serif;
+  --ps2-font-display: "Michroma", "Exo 2", "Eurostile", var(--ps2-font);
+  --ps2-font-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, monospace;
+
+  --ps2-weight-thin: 200;
+  --ps2-weight-light: 300;
+  --ps2-weight-regular: 400;
+  --ps2-weight-medium: 500;
+
+  /* Type ramp (px) */
+  --ps2-text-display: 64px;  /* boot wordmark */
+  --ps2-text-title: 34px;    /* menu icon labels */
+  --ps2-text-heading: 22px;
+  --ps2-text-body: 16px;
+  --ps2-text-label: 13px;    /* row labels, uppercase */
+  --ps2-text-caption: 11px;  /* version strings, clock */
+
+  --ps2-tracking-tight: 0.01em;
+  --ps2-tracking: 0.06em;
+  --ps2-tracking-wide: 0.14em;
+  --ps2-tracking-mega: 0.28em; /* the boot wordmark */
+
+  --ps2-leading: 1.45;
+
+  /* ----------------------------------------------------------------------
+   * SPACE & RADII
+   * -------------------------------------------------------------------- */
+  --ps2-space-1: 4px;
+  --ps2-space-2: 8px;
+  --ps2-space-3: 12px;
+  --ps2-space-4: 16px;
+  --ps2-space-5: 24px;
+  --ps2-space-6: 36px;
+  --ps2-space-7: 56px;
+  --ps2-space-8: 84px;
+
+  --ps2-radius-sm: 4px;
+  --ps2-radius: 8px;
+  --ps2-radius-lg: 14px;
+  --ps2-radius-cube: 12px;  /* the rounded-square data cube */
+  --ps2-radius-pill: 999px;
+
+  /* ----------------------------------------------------------------------
+   * MOTION — the PS2 dashboard is slow, weighty, and breathing. Selection
+   * glides; the ambient cube-field drifts for tens of seconds.
+   * -------------------------------------------------------------------- */
+  --ps2-ease: cubic-bezier(0.19, 1, 0.22, 1);       /* ease-out-expo — the signature glide */
+  --ps2-ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --ps2-ease-rise: cubic-bezier(0.16, 1, 0.3, 1);   /* towers rising on boot */
+
+  /* The dashboard is slow and weighted — scene transitions land near ~800ms
+     ease-out-expo; the ambient cube field drifts on a ~14s loop (sourced
+     ~12s), the brightness breathes over ~6s. research/DESIGN.md §4. */
+  --ps2-dur-fast: 180ms;
+  --ps2-dur: 320ms;
+  --ps2-dur-slow: 800ms;      /* scene glide */
+  --ps2-dur-boot: 2600ms;     /* the tower-rise on boot */
+  --ps2-dur-drift: 14s;       /* one loop of the ambient cube drift */
+  --ps2-dur-breathe: 6s;      /* the slow brightness breathing */
+
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  [data-ps2] {
+    --ps2-dur-boot: 1ms;
+    --ps2-dur-drift: 0s;
+    --ps2-dur-breathe: 0s;
+  }
+}

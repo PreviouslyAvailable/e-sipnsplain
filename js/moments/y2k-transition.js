@@ -2,14 +2,17 @@
  * Y2K theatre — Win98 → XP (cosmetic only).
  *
  * Clock takeover (3 stages) → date rollover to 1 Jan 2000 → midnight →
- * scripted BSOD (no lives/checkpoint reset) → brief reboot → hands off to
- * the CD-install interstitial.
+ * scripted BSOD (wait for click/key) → POST/CD reboot (wait for click/key) →
+ * hands off to the CD-install interstitial.
+ *
+ * After midnight there are two presenter gates so pacing stays in your hands.
+ * Next / Space / Enter / click advances one gate; Esc aborts (cosmetic only).
  *
  * Separate from cold-open boot.js (funny load lines, not a crash).
  */
 
 const XP_PRELOAD = [
-  "/assets/winxp-ui/bliss.svg",
+  "/assets/winxp-ui/bliss.jpg",
   "/assets/audio/winxp/startup.wav",
   "/assets/icons/wxp/my-computer.png",
   "/assets/icons/wxp/recycle-empty.png",
@@ -54,6 +57,16 @@ export function createY2kTransition(ctx = {}) {
   let tickOsc = null;
   /** @type {GainNode | null} */
   let bedGain = null;
+  /** Resolves the current click/key gate (BSOD or reboot). */
+  /** @type {(() => void) | null} */
+  let gateResolve = null;
+  /** @type {((e: Event) => void) | null} */
+  let overlayClickHandler = null;
+  /** Resolvers for in-flight wait()/animateClock — flushed by clearTimers(). */
+  /** @type {Set<() => void>} */
+  const pendingWaits = new Set();
+  /** Bumped to abandon an in-flight runSequence when jumping to a gate. */
+  let seqId = 0;
 
   function clearTimers() {
     timers.forEach((t) => clearTimeout(t));
@@ -62,6 +75,10 @@ export function createY2kTransition(ctx = {}) {
       cancelAnimationFrame(rafId);
       rafId = null;
     }
+    // Unblock awaited wait()/animateClock so runSequence can exit cleanly.
+    const blocked = [...pendingWaits];
+    pendingWaits.clear();
+    blocked.forEach((resolve) => resolve());
   }
 
   function wait(ms) {
@@ -70,8 +87,45 @@ export function createY2kTransition(ctx = {}) {
         resolve();
         return;
       }
-      timers.push(setTimeout(resolve, ms));
+      const done = () => {
+        pendingWaits.delete(done);
+        resolve();
+      };
+      pendingWaits.add(done);
+      timers.push(
+        setTimeout(() => {
+          pendingWaits.delete(done);
+          resolve();
+        }, ms)
+      );
     });
+  }
+
+  /** Pause until presenter click / key / Next via advance(). */
+  function waitForGate() {
+    return new Promise((resolve) => {
+      if (!running) {
+        resolve();
+        return;
+      }
+      if (gateResolve) {
+        const prev = gateResolve;
+        gateResolve = null;
+        prev();
+      }
+      gateResolve = () => {
+        gateResolve = null;
+        resolve();
+      };
+    });
+  }
+
+  function releaseGate() {
+    if (!gateResolve) return false;
+    const done = gateResolve;
+    gateResolve = null;
+    done();
+    return true;
   }
 
   function formatClock(d) {
@@ -141,8 +195,17 @@ export function createY2kTransition(ctx = {}) {
       </div>
       <div class="y2k-reboot" data-y2k-reboot hidden>
         <pre class="y2k-post" data-y2k-post></pre>
+        <p class="y2k-reboot-wait" data-y2k-reboot-wait hidden>
+          Press any key to continue <span class="y2k-bsod-cursor">_</span>
+        </p>
       </div>
     `;
+    overlayClickHandler = (e) => {
+      e.preventDefault();
+      advance();
+    };
+    // pointerdown only — click would fire after and skip both gates in one press
+    overlay.addEventListener("pointerdown", overlayClickHandler);
     mountRoot.appendChild(overlay);
     return overlay;
   }
@@ -207,9 +270,10 @@ export function createY2kTransition(ctx = {}) {
       tickOsc.start();
 
       const now = ac.currentTime;
-      bedGain.gain.linearRampToValueAtTime(0.04, now + 1.2);
-      bedGain.gain.linearRampToValueAtTime(0.09, now + 5);
-      bedGain.gain.linearRampToValueAtTime(0.14, now + 9);
+      // Stretched to match longer drift→sprint (~14s post-arm)
+      bedGain.gain.linearRampToValueAtTime(0.04, now + 1.5);
+      bedGain.gain.linearRampToValueAtTime(0.09, now + 8);
+      bedGain.gain.linearRampToValueAtTime(0.14, now + 14);
 
       // Pulse ticks via gain
       let beat = 0;
@@ -221,7 +285,8 @@ export function createY2kTransition(ctx = {}) {
         tickGain.gain.linearRampToValueAtTime(0.05, t + 0.01);
         tickGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
         beat += 1;
-        const gap = beat < 8 ? 420 : beat < 16 ? 220 : 90;
+        // Slow → medium → frantic across the longer run-up
+        const gap = beat < 12 ? 420 : beat < 28 ? 220 : 90;
         timers.push(setTimeout(pulse, gap));
       };
       pulse();
@@ -252,9 +317,16 @@ export function createY2kTransition(ctx = {}) {
       }
       const started = performance.now();
       const startMs = from.getTime();
+      const finish = (d) => {
+        pendingWaits.delete(cancel);
+        rafId = null;
+        resolve(d);
+      };
+      const cancel = () => finish(from);
+      pendingWaits.add(cancel);
       const step = (now) => {
-        if (!running) {
-          resolve(from);
+        if (!running || !pendingWaits.has(cancel)) {
+          finish(from);
           return;
         }
         const t = Math.min(1, (now - started) / durationMs);
@@ -264,8 +336,7 @@ export function createY2kTransition(ctx = {}) {
         setClock(d);
         hooks.onFrame?.(d, t);
         if (t >= 1) {
-          rafId = null;
-          resolve(d);
+          finish(d);
           return;
         }
         rafId = requestAnimationFrame(step);
@@ -276,23 +347,27 @@ export function createY2kTransition(ctx = {}) {
 
   function showBsod() {
     const node = ensureOverlay();
-    node.classList.add("is-live");
+    node.classList.add("is-live", "is-gated");
     node.setAttribute("aria-hidden", "false");
     node.setAttribute("role", "alertdialog");
     node.setAttribute("aria-label", "Windows — scripted Y2K blue screen (cosmetic)");
     const bsod = node.querySelector("[data-y2k-bsod]");
     const reboot = node.querySelector("[data-y2k-reboot]");
+    const rebootWait = node.querySelector("[data-y2k-reboot-wait]");
     if (bsod instanceof HTMLElement) bsod.hidden = false;
     if (reboot instanceof HTMLElement) reboot.hidden = true;
-    stage = "bsod";
+    if (rebootWait instanceof HTMLElement) rebootWait.hidden = true;
+    stage = "bsod-gate";
     ctx.blip?.("error");
   }
 
   function showReboot() {
     const node = ensureOverlay();
+    node.classList.add("is-live", "is-gated");
     const bsod = node.querySelector("[data-y2k-bsod]");
     const reboot = node.querySelector("[data-y2k-reboot]");
     const post = node.querySelector("[data-y2k-post]");
+    const rebootWait = node.querySelector("[data-y2k-reboot-wait]");
     if (bsod instanceof HTMLElement) bsod.hidden = true;
     if (reboot instanceof HTMLElement) reboot.hidden = false;
     if (post) {
@@ -306,18 +381,21 @@ export function createY2kTransition(ctx = {}) {
         "Booting from CD-ROM...",
       ].join("\n");
     }
-    stage = "reboot";
+    if (rebootWait instanceof HTMLElement) rebootWait.hidden = false;
+    stage = "reboot-gate";
     ctx.blip?.("press");
   }
 
   function hideTheatre() {
     if (!overlay) return;
-    overlay.classList.remove("is-live");
+    overlay.classList.remove("is-live", "is-gated");
     overlay.setAttribute("aria-hidden", "true");
     const bsod = overlay.querySelector("[data-y2k-bsod]");
     const reboot = overlay.querySelector("[data-y2k-reboot]");
+    const rebootWait = overlay.querySelector("[data-y2k-reboot-wait]");
     if (bsod instanceof HTMLElement) bsod.hidden = true;
     if (reboot instanceof HTMLElement) reboot.hidden = true;
+    if (rebootWait instanceof HTMLElement) rebootWait.hidden = true;
   }
 
   /** Preload XP assets during install interstitial (and kick early here). */
@@ -338,18 +416,68 @@ export function createY2kTransition(ctx = {}) {
     return Promise.all(jobs);
   }
 
-  async function runSequence() {
+  function snapToMidnight() {
+    const midnight = new Date(2000, 0, 1, 0, 0, 0, 0);
+    setClock(midnight);
+    if (clockEl) {
+      clockEl.textContent = "12:00:00 AM";
+      clockEl.title = "Sat Jan 1, 2000";
+      clockEl.classList.add(
+        "is-y2k-takeover",
+        "is-y2k-rollover",
+        "is-y2k-midnight"
+      );
+    }
+    onTick?.(midnight);
+    return midnight;
+  }
+
+  function handOffInstall() {
+    hideTheatre();
+    const cb = onInstallCb;
+    onInstallCb = null;
+    onTick = null;
+    running = false;
+    stage = "idle";
+    cb?.();
+  }
+
+  /** Shared post-midnight gates — used by the natural sequence and by advance(). */
+  async function runPostMidnightGates(mySeq) {
     const reduce = Boolean(ctx.reduceMotion);
-    const armMs = reduce ? 200 : 1100;
-    const s1 = reduce ? 200 : 2500;
-    const s2 = reduce ? 200 : 2500;
-    const s3 = reduce ? 300 : 3200;
-    const bsodHold = reduce ? 400 : 2400;
-    const rebootHold = reduce ? 350 : 1400;
+    stopAudioBed();
+    snapToMidnight();
+    // Strike midnight — glass/impact crash, not a celebratory unlock chime.
+    ctx.blip?.("crash");
+    showDateFlash("12:00 AM  ·  January 1, 2000");
+    await wait(reduce ? 120 : 450);
+    if (!running || mySeq !== seqId) return;
+
+    // Gate 1 — scripted BSOD (cosmetic; never resets progress). Hold for talk.
+    showBsod();
+    await waitForGate();
+    if (!running || mySeq !== seqId) return;
+
+    // Gate 2 — POST / boot from CD. Hold again for pacing.
+    showReboot();
+    await waitForGate();
+    if (!running || mySeq !== seqId) return;
+
+    handOffInstall();
+  }
+
+  async function runSequence(mySeq) {
+    const reduce = Boolean(ctx.reduceMotion);
+    // Pre-midnight run-up (~1.8× prior wall time). Arm/drift longest for
+    // sound recognition, talk, and tray clock / Date-Time open.
+    const armMs = reduce ? 200 : 2800;
+    const s1 = reduce ? 200 : 5500; // drift
+    const s2 = reduce ? 200 : 4000; // speedup
+    const s3 = reduce ? 300 : 4800; // sprint
 
     stage = "arm";
     await wait(armMs);
-    if (!running) return;
+    if (!running || mySeq !== seqId) return;
 
     stopRealClock?.();
     startAudioBed();
@@ -370,12 +498,12 @@ export function createY2kTransition(ctx = {}) {
     // Stage 1 — drift (slightly fast)
     stage = "drift";
     virtual = await animateClock(virtual, s1, 4 * 60_000); // +4 min
-    if (!running) return;
+    if (!running || mySeq !== seqId) return;
 
     // Stage 2 — speed-up
     stage = "speedup";
     virtual = await animateClock(virtual, s2, 55 * 60_000); // +55 min
-    if (!running) return;
+    if (!running || mySeq !== seqId) return;
 
     // Stage 3 — sprint toward midnight + date rollover
     stage = "sprint";
@@ -392,42 +520,12 @@ export function createY2kTransition(ctx = {}) {
             clockEl.classList.add("is-y2k-rollover");
             clockEl.title = "Sat Jan 1, 2000";
           }
-          ctx.blip?.("updateUnlock");
         }
       },
     });
-    if (!running) return;
+    if (!running || mySeq !== seqId) return;
 
-    // Midnight snap
-    virtual = new Date(2000, 0, 1, 0, 0, 0, 0);
-    setClock(virtual);
-    if (clockEl) {
-      clockEl.textContent = "12:00:00 AM";
-      clockEl.title = "Sat Jan 1, 2000";
-      clockEl.classList.add("is-y2k-midnight");
-    }
-    showDateFlash("12:00 AM  ·  January 1, 2000");
-    stopAudioBed();
-    await wait(reduce ? 120 : 450);
-    if (!running) return;
-
-    // Scripted BSOD — cosmetic; never resets progress
-    showBsod();
-    await wait(bsodHold);
-    if (!running) return;
-
-    showReboot();
-    await wait(rebootHold);
-    if (!running) return;
-
-    hideTheatre();
-    stage = "install";
-    const cb = onInstallCb;
-    onInstallCb = null;
-    onTick = null;
-    running = false;
-    stage = "idle";
-    cb?.();
+    await runPostMidnightGates(mySeq);
   }
 
   /**
@@ -441,13 +539,16 @@ export function createY2kTransition(ctx = {}) {
   function start(opts = {}) {
     if (running) return false;
     running = true;
+    seqId += 1;
+    const mySeq = seqId;
     clockEl = opts.clockEl || null;
     stopRealClock = opts.stopRealClock || null;
     onInstallCb = opts.onInstall || null;
     onTick = opts.onTick || null;
     ensureOverlay();
     clearTimers();
-    void runSequence().catch(() => {
+    void runSequence(mySeq).catch(() => {
+      if (mySeq !== seqId) return;
       running = false;
       stage = "idle";
       stopAudioBed();
@@ -457,31 +558,55 @@ export function createY2kTransition(ctx = {}) {
     return true;
   }
 
-  /** Skip ahead to the install handoff (presenter Next). */
+  /**
+   * Presenter advance — one step at a time after midnight.
+   * · At a gate (BSOD / reboot): release that gate.
+   * · Still in the clock run-up: jump to BSOD gate (keep both click beats).
+   */
+  function advance() {
+    if (!running) return false;
+    if (releaseGate()) {
+      ctx.blip?.("press");
+      return true;
+    }
+    // Gate armed but resolver not set yet (same tick) — ignore.
+    if (stage === "bsod-gate" || stage === "reboot-gate") return true;
+
+    // Mid clock takeover — abandon run-up, land on BSOD gate.
+    if (
+      stage === "arm" ||
+      stage === "drift" ||
+      stage === "speedup" ||
+      stage === "sprint"
+    ) {
+      seqId += 1;
+      const mySeq = seqId;
+      clearTimers();
+      stopAudioBed();
+      void runPostMidnightGates(mySeq);
+      ctx.blip?.("press");
+      return true;
+    }
+    return skipToInstall();
+  }
+
+  /** Hard-skip straight to the install handoff (escape hatch). */
   function skipToInstall() {
     if (!running) return false;
+    seqId += 1;
     clearTimers();
+    releaseGate();
     stopAudioBed();
-    hideTheatre();
-    const midnight = new Date(2000, 0, 1, 0, 0, 0, 0);
-    if (clockEl) {
-      clockEl.textContent = "12:00:00 AM";
-      clockEl.title = "Sat Jan 1, 2000";
-      clockEl.classList.add("is-y2k-takeover", "is-y2k-midnight");
-    }
-    onTick?.(midnight);
-    const cb = onInstallCb;
-    onInstallCb = null;
-    onTick = null;
-    running = false;
-    stage = "idle";
-    cb?.();
+    snapToMidnight();
+    handOffInstall();
     return true;
   }
 
   function abort() {
     if (!running) return false;
+    seqId += 1;
     clearTimers();
+    releaseGate();
     stopAudioBed();
     hideTheatre();
     onInstallCb = null;
@@ -493,6 +618,7 @@ export function createY2kTransition(ctx = {}) {
 
   return {
     start,
+    advance,
     skipToInstall,
     abort,
     preloadXpAssets,
@@ -502,6 +628,10 @@ export function createY2kTransition(ctx = {}) {
     },
     get stage() {
       return stage;
+    },
+    /** True while paused on BSOD or reboot waiting for click/key. */
+    get isGated() {
+      return Boolean(gateResolve);
     },
   };
 }

@@ -14,7 +14,7 @@ The Sip'n'Splain deck does **not** load Bootstrap or jQuery from here.
 |---------|-----|--------|
 | 1 · `#win95` | Themesberg fonts + bevel tokens (`css/win95-kit.css`) | **Active** |
 | 2 · `#win98` | **ui-98 fonts** + classic tokens in `css/win98-kit.css` | **Active** |
-| 3 · XP | `Windows-XP-UI-Kit-main` / `assets/winxp-ui` | **Staged only** |
+| 3 · XP | `css/winxp-kit.css` + `assets/winxp-ui` (Figma kit = reference) | **Active** |
 
 Runtime assets:
 

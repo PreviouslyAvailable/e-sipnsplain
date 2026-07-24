@@ -1,0 +1,23 @@
+.ps2-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ps2-space-3);
+  padding: var(--ps2-space-3) var(--ps2-space-4);
+  border-bottom: 1px solid var(--ps2-line);
+}
+
+.ps2-panel__title {
+  color: var(--ps2-cyan);
+  text-shadow: var(--ps2-glow-text);
+}
+
+.ps2-panel__aside {
+  color: var(--ps2-text-secondary);
+  font-size: var(--ps2-text-caption);
+  letter-spacing: var(--ps2-tracking-wide);
+}
+
+.ps2-panel__body {
+  padding: var(--ps2-space-4);
+}

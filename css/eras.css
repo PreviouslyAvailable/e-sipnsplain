@@ -1617,7 +1617,7 @@ body[data-era="win98"] .era-badge {
   border-radius: 0;
 }
 
-/* —— Windows XP Section 3 stub —— */
+/* —— Windows XP Section 3 (Luna) —— */
 body[data-era="winxp"] {
   --era-surface: #245edc;
   --era-ink: #000;
@@ -1631,6 +1631,50 @@ body[data-era="winxp"]::before {
 }
 body[data-era="winxp"] .era-badge::before { content: "Era · Windows XP "; }
 body[data-era="winxp"] .era-badge {
+  font-family: var(--era-font);
+  background: linear-gradient(180deg, #0a246a, #245edc);
+  color: #fff;
+  border: 1px solid #003c74;
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+/* —— Living room consoles (after XP shut down) —— */
+body[data-era="consoles"] {
+  --era-surface: #0a0c10;
+  --era-ink: #e8e4dc;
+  --era-accent: #5b9fff;
+  --era-font: "Segoe UI", Tahoma, sans-serif;
+  --era-ui: "Segoe UI", Tahoma, sans-serif;
+}
+body[data-era="consoles"]::before {
+  background: transparent;
+  opacity: 0;
+}
+body[data-era="consoles"] .era-badge::before { content: "Era · PS2 "; }
+body[data-era="consoles"] .era-badge {
+  font-family: var(--era-font);
+  background: #141824;
+  color: #e8e4dc;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+/* —— Web 2.0 Mozilla Firefox (on XP desktop, 2004–2007) —— */
+body[data-era="web20"] {
+  --era-surface: #245edc;
+  --era-ink: #000000;
+  --era-accent: #e85d04;
+  --era-font: Tahoma, "Segoe UI", sans-serif;
+  --era-ui: Tahoma, "Segoe UI", sans-serif;
+}
+body[data-era="web20"]::before {
+  background: transparent;
+  opacity: 0;
+}
+body[data-era="web20"] .era-badge::before { content: "Era · Web 2.0 "; }
+body[data-era="web20"] .era-badge {
   font-family: var(--era-font);
   background: linear-gradient(180deg, #0a246a, #245edc);
   color: #fff;

@@ -1,0 +1,37 @@
+.ps2-menu {
+  position: relative;
+  min-height: 480px;
+  border-radius: var(--ps2-radius-lg);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: var(--ps2-space-6);
+}
+
+.ps2-menu__clock {
+  position: absolute;
+  top: var(--ps2-space-5);
+  right: var(--ps2-space-5);
+  z-index: 3;
+}
+
+.ps2-menu__tiles {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 5vw, 64px);
+}
+
+.ps2-menu__version {
+  position: absolute;
+  left: var(--ps2-space-5);
+  bottom: var(--ps2-space-5);
+  z-index: 3;
+  font-size: var(--ps2-text-caption);
+  letter-spacing: var(--ps2-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ps2-text-tertiary);
+}

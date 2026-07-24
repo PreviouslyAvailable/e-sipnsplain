@@ -1,0 +1,8 @@
+.ps2-mcb {
+  width: 100%;
+  max-width: 460px;
+}
+.ps2-mcb .ps2-row__icon {
+  width: 34px;
+  height: 34px;
+}

@@ -1,0 +1,50 @@
+.ps2-cube {
+  width: var(--cube-size, 96px);
+  height: var(--cube-size, 96px);
+  perspective: 900px;
+  display: inline-block;
+}
+
+.ps2-cube__box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateX(-24deg) rotateY(-32deg);
+}
+
+.ps2-cube--spin .ps2-cube__box {
+  animation: ps2-cube-tumble var(--cube-speed, 16s) linear infinite;
+}
+
+.ps2-cube__face {
+  position: absolute;
+  inset: 0;
+  background: var(--ps2-cube-fill);
+  border: 1px solid var(--ps2-cube-edge);
+  box-shadow: inset 0 0 24px rgba(150, 200, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  /* a faint diagonal sheen on each face */
+  background-image: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(255, 255, 255, 0) 45%
+  );
+}
+
+/* Half the edge length, used to push faces out. */
+.ps2-cube__face--front  { transform: translateZ(calc(var(--cube-size, 96px) / 2)); }
+.ps2-cube__face--back   { transform: rotateY(180deg) translateZ(calc(var(--cube-size, 96px) / 2)); }
+.ps2-cube__face--right  { transform: rotateY(90deg) translateZ(calc(var(--cube-size, 96px) / 2)); }
+.ps2-cube__face--left   { transform: rotateY(-90deg) translateZ(calc(var(--cube-size, 96px) / 2)); }
+.ps2-cube__face--top    { transform: rotateX(90deg) translateZ(calc(var(--cube-size, 96px) / 2)); }
+.ps2-cube__face--bottom { transform: rotateX(-90deg) translateZ(calc(var(--cube-size, 96px) / 2)); }
+
+@keyframes ps2-cube-tumble {
+  from { transform: rotateX(-24deg) rotateY(-32deg); }
+  to   { transform: rotateX(-24deg) rotateY(328deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps2-cube--spin .ps2-cube__box { animation: none; }
+}

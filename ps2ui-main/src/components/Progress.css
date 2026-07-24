@@ -1,0 +1,58 @@
+.ps2-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ps2-space-2);
+  width: 100%;
+}
+
+.ps2-progress__label {
+  font-size: var(--ps2-text-caption);
+  letter-spacing: var(--ps2-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ps2-text-secondary);
+}
+
+.ps2-progress__track {
+  position: relative;
+  height: 12px;
+  border-radius: var(--ps2-radius-pill);
+  background: var(--ps2-surface-sunken);
+  border: 1px solid var(--ps2-line);
+  box-shadow: inset 0 1px 4px rgba(0, 6, 30, 0.5);
+  overflow: hidden;
+}
+
+.ps2-progress__fill {
+  position: relative;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--ps2-cyan) 0%, var(--ps2-blue-bright) 60%, var(--ps2-blue) 100%);
+  box-shadow: 0 0 12px rgba(90, 160, 255, 0.6);
+  transition: width var(--ps2-dur-slow) var(--ps2-ease);
+}
+/* the lighter top-highlight streak — the "liquid" highlight */
+.ps2-progress__fill::before {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 4px;
+  right: 4px;
+  height: 3px;
+  border-radius: var(--ps2-radius-pill);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.1));
+}
+
+.ps2-progress__fill--indeterminate {
+  width: 40% !important;
+  animation: ps2-progress-sweep 1.4s var(--ps2-ease-soft) infinite;
+}
+
+@keyframes ps2-progress-sweep {
+  0%   { transform: translateX(-110%); }
+  100% { transform: translateX(280%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps2-progress__fill { transition: none; }
+  .ps2-progress__fill--indeterminate { animation-duration: 3s; }
+}

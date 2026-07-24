@@ -1,0 +1,693 @@
+/* Web 2.0 · Mozilla Firefox 1.0 chrome on Windows XP Luna (#winxp) */
+
+.wxp-firefox {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
+  width: min(920px, calc(100cqw - 28px));
+  height: min(640px, calc(100cqh - 48px));
+  max-height: calc(100cqh - 40px);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--wxp-face, #ece9d8);
+  border: 3px solid #0831d9;
+  border-radius: 8px 8px 0 0;
+  box-shadow:
+    0 0 0 1px #00137f,
+    3px 3px 12px rgba(0, 0, 0, 0.4);
+  font-family: Tahoma, "Segoe UI", "MS Sans Serif", sans-serif;
+  color: #000;
+  animation: ffIn 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.wxp-firefox:not(.is-closed):not([hidden]) {
+  display: flex;
+}
+
+.wxp-firefox.is-closed,
+.wxp-firefox[hidden] {
+  display: none !important;
+}
+
+/* Fill XP desktop client area (above taskbar) — not OS fullscreen. */
+.wxp-firefox.is-maximized {
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 30px;
+  transform: none;
+  width: auto;
+  height: auto;
+  max-height: none;
+  border-radius: 0;
+  animation: none;
+  box-shadow: none;
+}
+
+.wxp-desktop.is-win10pack .wxp-firefox.is-maximized {
+  bottom: 32px;
+}
+
+.wxp-firefox.is-maximized .ff-titlebar {
+  border-radius: 0;
+}
+
+@keyframes ffIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 8px)) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* —— Homage fox/globe (no trademarked asset) —— */
+.wxp-ff-glyph,
+.ff-app-ico,
+.wxp-start-ico--ff {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 40%, #5eb8ff 0 34%, transparent 36%),
+    radial-gradient(circle at 55% 55%, #ff7a18 0 52%, #e85d04 53% 70%, transparent 72%),
+    radial-gradient(circle at 50% 50%, #1e6fdc 0 48%, #0a3a8c 50% 100%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  flex: 0 0 32px;
+}
+
+.ff-app-ico {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin-right: 2px;
+}
+
+.wxp-start-ico--ff {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  background-size: cover;
+  box-shadow: inset 0 0 0 1px #7f9db9;
+}
+
+.ff-titlebar {
+  flex: 0 0 auto;
+  gap: 6px;
+  padding-right: 3px;
+}
+
+.ff-titlebar .wxp-title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ff-win-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.ff-win-btn {
+  width: 21px;
+  height: 21px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #3c9cf0 0%, #1a5ed0 55%, #0d3ea8 100%);
+  color: #fff;
+  font: 700 12px/1 Tahoma, sans-serif;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.35);
+  cursor: default;
+}
+
+button.ff-win-btn {
+  cursor: pointer;
+}
+
+button.ff-win-btn:hover {
+  filter: brightness(1.08);
+}
+
+button.ff-win-btn:active {
+  filter: brightness(0.95);
+}
+
+button.ff-win-btn:focus-visible {
+  outline: 1px dotted #fff;
+  outline-offset: -3px;
+}
+
+.wxp-firefox.is-maximized [data-wxp-firefox-maximize] {
+  font-size: 11px;
+  letter-spacing: -1px;
+}
+
+.ff-menubar {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 0;
+  padding: 1px 4px 2px;
+  background: var(--wxp-face, #ece9d8);
+  border-bottom: 1px solid var(--wxp-face-shadow, #aca899);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.ff-menubar span {
+  padding: 2px 7px;
+  color: #000;
+}
+
+.ff-menubar u {
+  text-decoration: underline;
+  text-underline-offset: 1px;
+}
+
+.ff-navtoolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px 4px;
+  background: linear-gradient(180deg, #fff 0%, #f3f1e7 40%, var(--wxp-face, #ece9d8) 100%);
+  border-bottom: 1px solid var(--wxp-face-shadow, #aca899);
+}
+
+.ff-nav-btns {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  flex: 0 0 auto;
+}
+
+.ff-nav-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1px;
+  min-width: 36px;
+  padding: 2px 4px 1px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: #333;
+  font: inherit;
+  font-size: 10px;
+  cursor: default;
+}
+
+.ff-nav-btn:disabled {
+  opacity: 0.85;
+}
+
+.ff-nav-ico {
+  width: 22px;
+  height: 22px;
+  display: block;
+  position: relative;
+}
+
+.ff-nav-btn--back .ff-nav-ico {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #7ec8ff, #1a66d8 55%, #0a3f9a);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.ff-nav-btn--back .ff-nav-ico::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 7px;
+  border: 7px solid transparent;
+  border-right-color: #fff;
+  border-left: 0;
+}
+
+.ff-nav-btn--fwd .ff-nav-ico {
+  border-radius: 50%;
+  background: linear-gradient(145deg, #c9c9c9, #8a8a8a);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.ff-nav-btn--fwd .ff-nav-ico::before {
+  content: "";
+  position: absolute;
+  left: 9px;
+  top: 5px;
+  border: 6px solid transparent;
+  border-left-color: #efefef;
+  border-right: 0;
+}
+
+.ff-nav-btn--reload .ff-nav-ico {
+  border-radius: 50%;
+  border: 3px solid #2a7de0;
+  border-top-color: transparent;
+  box-shadow: none;
+  transform: rotate(-35deg);
+}
+
+.ff-nav-btn--reload .ff-nav-ico::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  right: -1px;
+  border: 4px solid transparent;
+  border-bottom-color: #2a7de0;
+  transform: rotate(55deg);
+}
+
+.ff-nav-btn--stop .ff-nav-ico {
+  border-radius: 50%;
+  background: linear-gradient(180deg, #e8e8e8, #b0b0b0);
+  box-shadow: inset 1px 1px 0 #fff;
+}
+
+.ff-nav-btn--stop .ff-nav-ico::before,
+.ff-nav-btn--stop .ff-nav-ico::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 5px;
+  width: 2px;
+  height: 12px;
+  background: #666;
+}
+
+.ff-nav-btn--stop .ff-nav-ico::before {
+  transform: rotate(45deg);
+}
+
+.ff-nav-btn--stop .ff-nav-ico::after {
+  transform: rotate(-45deg);
+}
+
+.ff-nav-btn--home .ff-nav-ico {
+  background:
+    linear-gradient(180deg, #c45a2a 0 38%, transparent 38%),
+    linear-gradient(180deg, transparent 38%, #ddd 38% 100%);
+  clip-path: polygon(50% 8%, 92% 42%, 78% 42%, 78% 90%, 22% 90%, 22% 42%, 8% 42%);
+  background-color: #e8a060;
+}
+
+.ff-nav-label {
+  line-height: 1;
+}
+
+.ff-location {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ff-loc-label {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: #000;
+}
+
+.ff-loc-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 2px 6px;
+  background: #fff;
+  border: 1px solid #7f9db9;
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  box-shadow: inset 1px 1px 0 #dfdfdf;
+}
+
+.ff-go {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid #1a6b2a;
+  background: linear-gradient(180deg, #8ef06a 0%, #3cb54a 55%, #228a32 100%);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.ff-search {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: min(140px, 22%);
+  padding: 1px 6px 1px 4px;
+  background: #fff;
+  border: 1px solid #7f9db9;
+  font-size: 11px;
+  color: #666;
+  box-shadow: inset 1px 1px 0 #dfdfdf;
+}
+
+.ff-search-g {
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  background: #fff;
+  color: #4285f4;
+  font: 700 10px/1 Arial, sans-serif;
+  border: 1px solid #c8c8c8;
+}
+
+.ff-search-field {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ff-tabs.ie-tabs {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0;
+  padding: 3px 4px 0;
+  background: var(--wxp-face, #ece9d8);
+  border-bottom: 1px solid var(--wxp-face-shadow, #aca899);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ie-tab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0 1px 0 0;
+  padding: 5px 10px 4px;
+  border: 1px solid;
+  border-color: #fff #aca899 var(--wxp-face, #ece9d8) #fff;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  background: #dcd8c8;
+  color: #000;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  max-width: 11.5rem;
+}
+
+.ie-tab:hover {
+  background: #e8e4d4;
+}
+
+.ie-tab.is-active,
+.ie-tab[aria-selected="true"] {
+  background: #fff;
+  border-color: #fff #aca899 #fff #fff;
+  position: relative;
+  z-index: 1;
+  padding-bottom: 5px;
+  margin-bottom: -1px;
+}
+
+.ie-tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.ie-tab-year {
+  flex: 0 0 auto;
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+}
+
+.ff-page.ie-page {
+  margin: 0 2px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #7f9db9;
+  display: flex;
+  flex-direction: column;
+}
+
+.ie-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 14px 16px 18px;
+  background:
+    linear-gradient(180deg, #f7f7ff 0%, #ffffff 40%),
+    #fff;
+}
+
+.ie-panel[hidden] {
+  display: none !important;
+}
+
+/* Vertical scroll feed: 6-col grid — full=6, half=3, third=2. */
+.ie-ad-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px 16px;
+  align-content: start;
+  min-height: 100%;
+}
+
+.ie-ad-grid--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: min(320px, 100%);
+  grid-template-columns: 1fr;
+}
+
+.ie-ad-empty {
+  max-width: 22rem;
+  margin: 0;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.42);
+  border: 1px dashed rgba(0, 0, 0, 0.14);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.ie-ad-empty-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(0, 0, 0, 0.48);
+}
+
+.ie-ad-empty-hint {
+  margin: 0.45rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: rgba(0, 0, 0, 0.32);
+}
+
+.ie-ad-card {
+  margin: 0;
+  background: #f4f4f8;
+  border: 1px solid #c8c8d4;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.ie-ad-card[data-ie-size="full"] {
+  grid-column: span 6;
+  max-height: none;
+}
+
+.ie-ad-card[data-ie-size="half"] {
+  grid-column: span 3;
+  /* Let magazine halves fill the column (no letterbox padding). */
+  max-height: none;
+  align-items: stretch;
+  padding: 0;
+}
+
+.ie-ad-card[data-ie-size="third"] {
+  grid-column: span 2;
+  /* Let meme thirds grow with the column so they don't letterbox. */
+  max-height: none;
+  align-items: stretch;
+  padding: 0;
+}
+
+/* Plain string paths (no size) default to full-width stack. */
+.ie-ad-card:not([data-ie-size]) {
+  grid-column: span 6;
+  max-height: min(480px, 58cqh);
+}
+
+.ie-ad-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  background: #fff;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.ie-ad-card[data-ie-size="full"] .ie-ad-img {
+  /* Tall UI screenshots stay readable; panel scrolls vertically. */
+  max-height: min(780px, 92cqh);
+}
+
+.ie-ad-card[data-ie-size="half"] .ie-ad-img {
+  /* Always fill the half-column; panel scrolls if a cover is tall. */
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+}
+
+.ie-ad-card[data-ie-size="third"] .ie-ad-img {
+  /* Always fill the column; panel scrolls if a meme is tall. */
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+}
+
+.ie-ad-card:not([data-ie-size]) .ie-ad-img {
+  max-height: min(480px, 58cqh);
+}
+
+.ie-ad-placeholder {
+  min-height: 88px;
+  max-height: 120px;
+  max-width: 18rem;
+  background: transparent;
+  border-style: dashed;
+  border-color: rgba(0, 0, 0, 0.16);
+}
+
+.ie-ad-placeholder-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.65rem 0.75rem;
+  text-align: center;
+}
+
+.ie-ad-placeholder-hint {
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.ff-statusbar {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 96px;
+  gap: 2px;
+  padding: 2px;
+  background: var(--wxp-face, #ece9d8);
+  border-top: 1px solid #fff;
+  font-size: 11px;
+}
+
+.ff-statusbar > span {
+  padding: 2px 6px;
+  border: 1px solid;
+  border-color: #aca899 #fff #fff #aca899;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--wxp-face, #ece9d8);
+}
+
+.ff-status-zone {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .wxp-firefox {
+    width: calc(100cqw - 12px);
+    height: min(620px, calc(100cqh - 36px));
+  }
+
+  .wxp-firefox.is-maximized {
+    width: auto;
+    height: auto;
+  }
+
+  .ff-search {
+    display: none;
+  }
+
+  .ie-ad-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ie-ad-card[data-ie-size="full"],
+  .ie-ad-card[data-ie-size="half"],
+  .ie-ad-card[data-ie-size="third"],
+  .ie-ad-card:not([data-ie-size]) {
+    grid-column: 1 / -1;
+  }
+
+  .ie-ad-card[data-ie-size="full"] .ie-ad-img {
+    max-height: min(560px, 70cqh);
+  }
+
+  .ie-ad-card:not([data-ie-size]) .ie-ad-img {
+    max-height: min(360px, 50cqh);
+  }
+
+  /* Stacked halves/thirds: full row width, still uncapped so they don't shrink. */
+  .ie-ad-card[data-ie-size="half"] .ie-ad-img,
+  .ie-ad-card[data-ie-size="third"] .ie-ad-img {
+    max-height: none;
+  }
+
+  .ie-tab {
+    max-width: 9rem;
+    padding: 4px 7px 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wxp-firefox {
+    animation: none;
+  }
+}

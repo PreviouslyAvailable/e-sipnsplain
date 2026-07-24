@@ -48,7 +48,7 @@
 		</div>
 		<script>
 			function getBooleanSetting(settingName){try{var name = "pinballspacecadet" + settingName;var nameEQ = name + "=";var ca = document.cookie.split(";");for(var i=0;i < ca.length;i++){var c = ca[i];while (c.charAt(0)==" "){c = c.substring(1,c.length);}if (c.indexOf(nameEQ) == 0){if (c.substring(nameEQ.length,c.length)=="true"){return true;}else{return false;}}}}catch(err){}return true;}
-			function setBooleanSetting(settingName,settingValue){try{var name = "pinballspacecadet" + settingName;var value = String(settingValue);var days = 999;var expires = "";if (days){var date = new Date();date.setTime(date.getTime() + (days*24*60*60*1000));expires = "; expires=" + date.toUTCString() + "; SameSite=Lax";}document.cookie = name + "=" + (value || "")  + expires + "; Secure; path=/";}catch(err){}}
+			function setBooleanSetting(settingName,settingValue){try{var name = "pinballspacecadet" + settingName;var value = String(settingValue);var days = 999;var expires = "";if (days){var date = new Date();date.setTime(date.getTime() + (days*24*60*60*1000));expires = "; expires=" + date.toUTCString() + "; SameSite=Lax";}var secure=(location.protocol==="https:")?"; Secure":"";document.cookie = name + "=" + (value || "")  + expires + secure + "; path=/";}catch(err){}}
 
 			var Module={preRun:[],postRun:[],print:function(){}(),printErr:function(e){},canvas:function(){var e=document.getElementById("canvas");return e.addEventListener("webglcontextlost",(function(e){}),!1),e}(),setStatus:function(e){},totalDependencies:0,monitorRunDependencies:function(e){}};
 
@@ -91,14 +91,9 @@
 
 					try
 						{
-						if (!GAME_SOUND_ENABLED)
-							{
-							Module.SDL2.audioContext.suspend();
-							}
-						else
-							{
-							Module.SDL2.audioContext.resume();
-							}
+						if (typeof applyDeckMute === "function") applyDeckMute();
+						else if (!GAME_SOUND_ENABLED) Module.SDL2.audioContext.suspend();
+						else Module.SDL2.audioContext.resume();
 						} catch( err)
 						{
 						}
@@ -130,6 +125,44 @@
 				{
 				document.getElementById("canvas").style.height = (window.innerHeight + 20) + "px";
 				});
+
+			// Deck mute bridge — parent posts sipnsplain:pinball-mute; M relays to parent.
+			var deckMuted = false;
+			function applyDeckMute() {
+				if (!Module.SDL2 || !Module.SDL2.audioContext) return;
+				try {
+					if (deckMuted || !GAME_SOUND_ENABLED) Module.SDL2.audioContext.suspend();
+					else Module.SDL2.audioContext.resume();
+				} catch (err) {}
+			}
+			document.addEventListener("keydown", function(event) {
+				if (event.key.toLowerCase() !== "m") return;
+				event.preventDefault();
+				event.stopPropagation();
+				if (window.parent && window.parent !== window) {
+					window.parent.postMessage({ type: "sipnsplain:pinball-togglemute" }, window.location.origin);
+				}
+			}, true);
+			window.addEventListener("message", function(event) {
+				if (event.origin !== window.location.origin) return;
+				if (!event.data || event.data.type !== "sipnsplain:pinball-mute") return;
+				deckMuted = Boolean(event.data.muted);
+				applyDeckMute();
+			});
+			// After engine script inject, re-apply mute once SDL2 exists.
+			var _pinballPlay = document.getElementsByClassName("gui_start")[0];
+			if (_pinballPlay) {
+				_pinballPlay.addEventListener("click", function() {
+					var tries = 0;
+					var timer = setInterval(function() {
+						tries++;
+						if (Module.SDL2 && Module.SDL2.audioContext) {
+							applyDeckMute();
+							clearInterval(timer);
+						} else if (tries > 80) clearInterval(timer);
+					}, 50);
+				});
+			}
 		</script>
 	</body>
 </html>

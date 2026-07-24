@@ -1,0 +1,7 @@
+/*
+ * ps2ui/styles.css — the single stylesheet a consumer imports once.
+ * Loads the design tokens, then the base scene layer. Per-component CSS ships
+ * alongside each component and is pulled in automatically by the bundler.
+ */
+@import "../tokens/variables.css";
+@import "./globals.css";

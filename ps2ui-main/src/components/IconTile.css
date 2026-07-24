@@ -1,0 +1,92 @@
+.ps2-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ps2-space-4);
+  padding: var(--ps2-space-5) var(--ps2-space-6);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--ps2-text);
+  transition: transform var(--ps2-dur-slow) var(--ps2-ease);
+}
+
+.ps2-tile__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 152px;
+  height: 152px;
+  border-radius: var(--ps2-radius-lg);
+  background: var(--ps2-surface);
+  border: 1px solid var(--ps2-line);
+  box-shadow: var(--ps2-inset-edge), var(--ps2-shadow);
+  backdrop-filter: blur(var(--ps2-surface-blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--ps2-surface-blur)) saturate(150%);
+  isolation: isolate;
+  transition: box-shadow var(--ps2-dur-slow) var(--ps2-ease),
+    border-color var(--ps2-dur-slow) var(--ps2-ease);
+}
+.ps2-tile__stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--ps2-sheen);
+  pointer-events: none;
+}
+
+.ps2-tile__icon {
+  position: relative;
+  display: inline-flex;
+  filter: drop-shadow(var(--ps2-glow));
+  transition: transform var(--ps2-dur-slow) var(--ps2-ease);
+}
+
+.ps2-tile__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.ps2-tile__label {
+  font-family: var(--ps2-font-display);
+  font-size: var(--ps2-text-heading);
+  font-weight: var(--ps2-weight-thin);
+  letter-spacing: var(--ps2-tracking-wide);
+  text-transform: uppercase;
+}
+.ps2-tile__caption {
+  font-size: var(--ps2-text-caption);
+  letter-spacing: var(--ps2-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ps2-text-secondary);
+}
+
+/* hover + selected: the tile lifts, brightens, and blooms */
+.ps2-tile:hover .ps2-tile__stage,
+.ps2-tile:focus-visible .ps2-tile__stage,
+.ps2-tile--selected .ps2-tile__stage {
+  border-color: var(--ps2-cyan);
+  box-shadow: var(--ps2-inset-edge), var(--ps2-shadow), var(--ps2-glow-lg);
+}
+.ps2-tile:hover,
+.ps2-tile:focus-visible,
+.ps2-tile--selected {
+  outline: none;
+  transform: translateY(-6px);
+}
+.ps2-tile:hover .ps2-tile__icon,
+.ps2-tile--selected .ps2-tile__icon {
+  transform: scale(1.08);
+}
+.ps2-tile--selected .ps2-tile__label {
+  color: var(--ps2-ice);
+  text-shadow: var(--ps2-glow-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps2-tile,
+  .ps2-tile__stage,
+  .ps2-tile__icon { transition: none; }
+}

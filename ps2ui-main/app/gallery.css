@@ -1,0 +1,71 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; min-height: 100%; background: #000814; }
+
+.gallery {
+  min-height: 100vh;
+  padding: clamp(20px, 5vw, 64px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(36px, 6vw, 72px);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.gallery__hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ps2-space-3);
+  text-align: center;
+  align-items: center;
+}
+.gallery__kicker {
+  font-size: var(--ps2-text-caption);
+  letter-spacing: var(--ps2-tracking-mega);
+  text-transform: uppercase;
+  color: var(--ps2-cyan);
+  text-shadow: var(--ps2-glow-text);
+}
+
+.section { display: flex; flex-direction: column; gap: var(--ps2-space-4); }
+.section__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ps2-space-3);
+  border-bottom: 1px solid var(--ps2-line);
+  padding-bottom: var(--ps2-space-3);
+}
+.section__no {
+  font-family: var(--ps2-font-mono);
+  font-size: var(--ps2-text-label);
+  color: var(--ps2-text-tertiary);
+}
+
+.row-wrap { display: flex; flex-wrap: wrap; gap: var(--ps2-space-4); align-items: center; }
+.col-wrap { display: flex; flex-direction: column; gap: var(--ps2-space-4); }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ps2-space-5); }
+
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--ps2-space-3); }
+.swatch {
+  border-radius: var(--ps2-radius);
+  border: 1px solid var(--ps2-line);
+  padding: var(--ps2-space-3);
+  min-height: 76px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  font-size: var(--ps2-text-caption);
+  letter-spacing: var(--ps2-tracking);
+}
+.swatch code { font-family: var(--ps2-font-mono); color: var(--ps2-ice); font-size: 10px; }
+
+.gallery__foot {
+  text-align: center;
+  color: var(--ps2-text-tertiary);
+  font-size: var(--ps2-text-caption);
+  letter-spacing: var(--ps2-tracking-wide);
+  text-transform: uppercase;
+  padding-top: var(--ps2-space-5);
+  border-top: 1px solid var(--ps2-line);
+}
+.gallery__foot a { color: var(--ps2-cyan); text-decoration: none; }

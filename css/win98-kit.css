@@ -173,6 +173,113 @@ img.w98-icon-glyph {
   line-height: 1.45;
 }
 
+/* —— Gates Preview (COMDEX demo homage → cosmetic BSOD) —— */
+.w95-window.w98-gates {
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  width: min(440px, calc(100cqw - 36px));
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  background: var(--w98-face);
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #393939;
+  border-bottom: 2px solid #393939;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.w95-window.w98-gates.is-closed {
+  display: none;
+}
+
+.w98-gates-chrome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-top: 1px solid #fff;
+  border-bottom: 1px solid #808080;
+  background: var(--w98-face);
+  font-size: 11px;
+}
+
+.w98-gates-addr-label {
+  flex: 0 0 auto;
+  color: #000;
+}
+
+.w98-gates-addr {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 2px 4px;
+  border: 1px solid;
+  border-color: #808080 #fff #fff #808080;
+  background: #fff;
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.w98-gates-client {
+  padding: 12px 14px 14px;
+  background: #fff;
+  border-top: 1px solid #808080;
+}
+
+.w98-gates-kicker {
+  margin: 0 0 6px;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.w98-gates-headline {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.w98-gates-copy {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.w98-gates-copy.is-muted {
+  color: #666;
+  font-size: 11px;
+}
+
+.w98-gates-client .w98-kit-btn {
+  margin-top: 4px;
+}
+
+.w98-gates-bsod {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+}
+
+.w98-gates-bsod[hidden] {
+  display: none !important;
+}
+
+.w98-gates-bsod .bsod-screen {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
+
+.w98-gates-bsod .bsod-continue {
+  display: block;
+}
+
 .w98-welcome-meta {
   margin: 0 0 12px;
   font-size: 11px;
@@ -929,9 +1036,10 @@ img.w98-icon-glyph {
     linear-gradient(180deg, #05051a, #0a1030 60%, #000);
 }
 
-.w98-themes-swatch[data-theme="chris2000"] {
+.w98-themes-swatch[data-theme="chris1999"] {
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent 40%),
+    url("/assets/chris-1999.png") center/cover no-repeat,
     linear-gradient(180deg, #5a7a8a, #2a4050);
 }
 
@@ -1031,20 +1139,21 @@ img.w98-icon-glyph {
   filter: saturate(0.85) brightness(1.1);
 }
 
-.chapter.mode-win98 [data-w98][data-w98-theme="chris2000"] {
+.chapter.mode-win98 [data-w98][data-w98-theme="chris1999"] {
   --w98-desktop: #5a7a8a;
   --w98-desktop-kit: #5a7a8a;
   --w98-title: #203040;
   --w98-title-kit: #203040;
 }
 
-.chapter.mode-win98 [data-w98][data-w98-theme="chris2000"],
-.chapter.mode-win98[data-w98-theme="chris2000"] {
+.chapter.mode-win98 [data-w98][data-w98-theme="chris1999"],
+.chapter.mode-win98[data-w98-theme="chris1999"] {
   background: #5a7a8a;
 }
 
-.chapter.mode-win98 [data-w98][data-w98-theme="chris2000"].w98-desktop {
+.chapter.mode-win98 [data-w98][data-w98-theme="chris1999"].w98-desktop {
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent 45%),
+    linear-gradient(180deg, rgba(20, 30, 40, 0.28), rgba(20, 30, 40, 0.42)),
+    url("/assets/chris-1999.png") center/cover no-repeat,
     linear-gradient(180deg, #6a8a9a, #3a5060);
 }

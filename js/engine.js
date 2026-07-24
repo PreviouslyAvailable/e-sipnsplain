@@ -33,13 +33,21 @@ import { createPinball } from "./moments/pinball.js";
 import { createMinesweeper } from "./moments/minesweeper.js";
 import {
   W98_THEMES,
-  CHRIS_2000_PHOTO,
+  CHRIS_1999_PHOTO,
   applyW98Theme,
   getW98Theme,
 } from "./moments/w98-themes.js";
+import { mountGbcScrapbook } from "./moments/gbc-scrapbook.js";
+import { mountAtariStrip } from "./moments/atari-strip.js";
+import { ATARI_ADS, GBC_ADS, GAMECUBE_ADS, PS2_ADS, WEB20_TABS } from "./moments/ad-manifests.js";
 import { createProgress } from "./progress.js";
 import { createTransition } from "./transition.js";
 import { createY2kTransition } from "./moments/y2k-transition.js";
+import { mountXpPictures } from "./moments/xp-pictures.js";
+import { mountIeWeb20 } from "./moments/ie-web20.js";
+import { mountTimewarp } from "./moments/timewarp.js";
+import { TIMEWARP_ITEMS } from "./moments/timewarp-data.js";
+import { mountPs2 } from "./moments/ps2.js";
 
 export function createEngine(root = document) {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -52,12 +60,14 @@ export function createEngine(root = document) {
   const slideIndexEl = root.getElementById("slideIndex");
   const scoreVal = root.getElementById("scoreVal");
   const scorePill = root.getElementById("scorePill");
-  const eraBadge = root.getElementById("eraBadge");
+  const storyMenuEl = root.getElementById("storyMenu");
+  const storyMenuListEl = root.getElementById("storyMenuList");
 
   let index = 0;
   let chromeTimer;
   let score = 0;
   let muted = false;
+  let storyMenuOpen = false;
   try { muted = localStorage.getItem(MUTE_KEY) === "1"; } catch {}
   let currentEra = null;
   let veilEl = null;
@@ -112,6 +122,10 @@ export function createEngine(root = document) {
     },
     getActiveChapter: () => chapters[index],
     getSlideRef: () => slideIdentity(chapters[index], index, chapters.length),
+    /** Story-arc jump points for presenter menu / Sipnsplain.arc */
+    storyArc: () => storyArcPoints(),
+    goArc: (pointId) => goArc(pointId),
+    toggleStoryMenu: (force) => toggleStoryMenu(force),
     getFlags: () => ({
       audience: adaptive.getAudience(),
       score,
@@ -140,12 +154,12 @@ export function createEngine(root = document) {
   const boot = createBoot(api);
   const progress = createProgress({
     onUnlock: (sectionId) => {
+      // Section 3 has no next-OS gate — never toast / interstitial.
+      if (sectionId === "section3") return;
       syncSectionUpdateUi(sectionId);
       blip("updateUnlock");
       if (sectionId === "section2") {
-        api.toast?.("Y2K · clock takeover armed…");
-        // Auto-start so it “happens to” the room (Chris, 2000 typically last).
-        scheduleY2kTransition();
+        // Chris, 1999 unlock arms Y2K from commitTheme — no floppy toast.
       } else {
         api.toast?.(
           `Update available · ${progress.getSectionDef(sectionId)?.label || sectionId}`
@@ -193,8 +207,18 @@ export function createEngine(root = document) {
     if (!sectionId || sectionId === "section1") {
       syncHub("[data-w95]", "[data-w95-update]", "[data-w95-update-menu]", "section1");
     }
+    // Section 2: no XP floppy / tray update affordance — Y2K starts from
+    // Desktop Themes → Chris, 1999. Keep any leftover update UI hidden.
     if (!sectionId || sectionId === "section2") {
-      syncHub("[data-w98]", "[data-w98-update]", "[data-w98-update-menu]", "section2");
+      deck.querySelectorAll("[data-w98]").forEach((desktop) => {
+        desktop.classList.remove("has-update");
+        desktop.querySelectorAll("[data-w98-update]").forEach((btn) => {
+          btn.hidden = true;
+        });
+        desktop.querySelectorAll("[data-w98-update-menu]").forEach((li) => {
+          li.hidden = true;
+        });
+      });
     }
   }
 
@@ -241,6 +265,7 @@ export function createEngine(root = document) {
       onPreload: () => {
         y2k.preloadXpAssets();
         sfx.preloadUrl?.("/assets/audio/winxp/startup.wav");
+        sfx.preloadUrl?.("/assets/winxp-ui/win10pack/audio/notify.wav");
       },
       onContinue: () => finishSectionUpdate(sectionId),
     });
@@ -279,8 +304,23 @@ export function createEngine(root = document) {
     }, reduceMotion ? 200 : 1200);
   }
 
-  /** Presenter: force the 98→XP Y2K sequence when section2 is unlocked. */
-  api.startY2k = () => beginY2kTransition();
+  /**
+   * Presenter: force the 98→XP Y2K sequence.
+   * Rearms section2 so this works after a prior install consumed the update
+   * (Sipnsplain.go('y2k') already did; startY2k was a silent no-op).
+   */
+  api.startY2k = () => {
+    const required =
+      progress.getSectionDef("section2")?.unlock?.allOf || ["chris1999"];
+    for (const beatId of required) {
+      progress.completeBeat(beatId, { sectionId: "section2" });
+    }
+    progress.rearmUpdate("section2");
+    return beginY2kTransition();
+  };
+  /** Presenter: force / undo the Win10-on-XP pack gag on the live XP desktop. */
+  api.applyWin10Pack = () => applyWin10PackAll();
+  api.resetWin10Pack = () => resetWin10PackAll();
 
   function openSectionUpdate(sectionId = progress.getActiveSectionId()) {
     const def = progress.getSectionDef(sectionId);
@@ -457,7 +497,10 @@ export function createEngine(root = document) {
       ch.kind === "win95" ||
       ch.kind === "paint" ||
       ch.kind === "win98" ||
-      ch.kind === "winxp";
+      ch.kind === "winxp" ||
+      ch.kind === "consoles" ||
+      ch.kind === "ie" ||
+      ch.kind === "timewarp";
     if (animate && changed && !skipVeil) playEraTransition(currentEra, nextEra);
 
     currentEra = nextEra;
@@ -472,11 +515,6 @@ export function createEngine(root = document) {
     } else {
       delete document.body.dataset.age;
       delete document.body.dataset.year;
-    }
-
-    if (eraBadge) {
-      eraBadge.textContent = `${meta.years} · ${meta.label}`;
-      eraBadge.title = meta.evoke;
     }
 
     if (changed) hooks.onEraChange?.(nextEra, meta);
@@ -554,6 +592,9 @@ export function createEngine(root = document) {
     else if (ch.kind === "win95") el.className = "chapter mode-win95";
     else if (ch.kind === "win98") el.className = "chapter mode-win98";
     else if (ch.kind === "winxp") el.className = "chapter mode-winxp";
+    else if (ch.kind === "consoles") el.className = "chapter mode-consoles";
+    else if (ch.kind === "ie") el.className = "chapter mode-ie";
+    else if (ch.kind === "timewarp") el.className = "chapter mode-timewarp";
     else if (ch.kind === "finale" || ch.mode === "void") el.className = "chapter mode-void";
     else el.className = "chapter";
     el.dataset.id = ch.id;
@@ -740,30 +781,22 @@ export function createEngine(root = document) {
       const chapter = desktop.closest(".chapter");
       const win = desktop.querySelector("[data-w95-window]");
       const photoWin = desktop.querySelector("[data-w95-photo]");
-      const netWin = desktop.querySelector("[data-w95-net]");
+      const ep2Win = desktop.querySelector("[data-w95-ep2]");
+      const atariWin = desktop.querySelector("[data-w95-atari]");
       const mineWin = desktop.querySelector("[data-w95-mine]");
-      const paintWin = desktop.querySelector("[data-w95-paint]");
       const mcTask = desktop.querySelector('[data-w95-task="mc"]');
       const photoTask = desktop.querySelector('[data-w95-task="photo"]');
-      const netTask = desktop.querySelector('[data-w95-task="net"]');
+      const ep2Task = desktop.querySelector('[data-w95-task="ep2"]');
+      const atariTask = desktop.querySelector('[data-w95-task="atari"]');
       const mineTask = desktop.querySelector('[data-w95-task="mine"]');
-      const paintTask = desktop.querySelector('[data-w95-task="paint"]');
       const startBtn = desktop.querySelector("[data-w95-start]");
       const startMenu = desktop.querySelector("[data-w95-start-menu]");
       const mineCanvas = desktop.querySelector("[data-w95-mine-canvas]");
 
-      const page = desktop.querySelector("[data-g98-page]");
-      const googleLogo = desktop.querySelector("[data-g98-google]");
-      const backrub = desktop.querySelector("[data-g98-backrub]");
-      const earlyLogo = desktop.querySelector("[data-g98-early]");
-      const tag = desktop.querySelector("[data-g98-tag]");
-      const indexLine = desktop.querySelector("[data-g98-index]");
-      const titleEl = desktop.querySelector("[data-g98-title]");
-      const searchBtn = desktop.querySelector("[data-g98-search]");
-      const luckyBtn = desktop.querySelector("[data-g98-lucky]");
-
       /** @type {ReturnType<typeof createMinesweeper> | null} */
       let mineGame = null;
+      /** @type {ReturnType<typeof mountAtariStrip> | null} */
+      let atariStrip = null;
 
       const clockEl = desktop.querySelector(".w95-clock");
       /** @type {ReturnType<typeof setTimeout> | null} */
@@ -838,6 +871,19 @@ export function createEngine(root = document) {
 
       const syncRecycleIcon = () => syncRecycleBins();
 
+      const destroyAtariStrip = () => {
+        atariStrip?.destroy?.();
+        atariStrip = null;
+        desktop._w95AtariStrip = null;
+      };
+
+      const ensureAtariMounted = () => {
+        if (!atariWin) return;
+        destroyAtariStrip();
+        atariStrip = mountAtariStrip(atariWin, { images: ATARI_ADS });
+        desktop._w95AtariStrip = atariStrip;
+      };
+
       /**
        * Empty-bin completion sting — full → empty icon (+ trash SFX).
        * Pass closePhoto to dismiss the rescued photo window first (empties via setActive).
@@ -877,7 +923,7 @@ export function createEngine(root = document) {
       };
 
       /**
-       * @param {'mc'|'photo'|'net'|'mine'|'paint'|null} which — one active window at a time
+       * @param {'mc'|'photo'|'ep2'|'atari'|'mine'|null} which — one active window at a time
        * @param {{ silent?: boolean }} [opts]
        */
       const setActive = (which, opts = {}) => {
@@ -897,9 +943,9 @@ export function createEngine(root = document) {
 
         const mcOpen = which === "mc";
         const photoOpen = which === "photo";
-        const netOpen = which === "net";
+        const ep2Open = which === "ep2";
+        const atariOpen = which === "atari";
         const mineOpen = which === "mine";
-        const paintOpen = which === "paint";
 
         if (win) {
           win.classList.toggle("is-closed", !mcOpen);
@@ -909,20 +955,17 @@ export function createEngine(root = document) {
           photoWin.classList.toggle("is-closed", !photoOpen);
           photoWin.setAttribute("aria-hidden", photoOpen ? "false" : "true");
         }
-        if (netWin) {
-          netWin.classList.toggle("is-closed", !netOpen);
-          netWin.setAttribute("aria-hidden", netOpen ? "false" : "true");
+        if (ep2Win) {
+          ep2Win.classList.toggle("is-closed", !ep2Open);
+          ep2Win.setAttribute("aria-hidden", ep2Open ? "false" : "true");
+        }
+        if (atariWin) {
+          atariWin.classList.toggle("is-closed", !atariOpen);
+          atariWin.setAttribute("aria-hidden", atariOpen ? "false" : "true");
         }
         if (mineWin) {
           mineWin.classList.toggle("is-closed", !mineOpen);
           mineWin.setAttribute("aria-hidden", mineOpen ? "false" : "true");
-        }
-        if (paintWin) {
-          paintWin.classList.toggle("is-closed", !paintOpen);
-          paintWin.setAttribute("aria-hidden", paintOpen ? "false" : "true");
-          if (paintOpen) {
-            paintWin.querySelector("[data-paint]")?._paintOnOpen?.();
-          }
         }
 
         if (mcTask) {
@@ -933,17 +976,17 @@ export function createEngine(root = document) {
           photoTask.hidden = !photoOpen;
           photoTask.classList.toggle("is-pressed", photoOpen);
         }
-        if (netTask) {
-          netTask.hidden = !netOpen;
-          netTask.classList.toggle("is-pressed", netOpen);
+        if (ep2Task) {
+          ep2Task.hidden = !ep2Open;
+          ep2Task.classList.toggle("is-pressed", ep2Open);
+        }
+        if (atariTask) {
+          atariTask.hidden = !atariOpen;
+          atariTask.classList.toggle("is-pressed", atariOpen);
         }
         if (mineTask) {
           mineTask.hidden = !mineOpen;
           mineTask.classList.toggle("is-pressed", mineOpen);
-        }
-        if (paintTask) {
-          paintTask.hidden = !paintOpen;
-          paintTask.classList.toggle("is-pressed", paintOpen);
         }
 
         if (mineGame) {
@@ -954,13 +997,20 @@ export function createEngine(root = document) {
           }
         }
 
+        if (atariOpen) {
+          ensureAtariMounted();
+        } else if (prev === "atari") {
+          destroyAtariStrip();
+        }
+
         desktop.classList.toggle(
           "is-window-closed",
-          !mcOpen && !photoOpen && !netOpen && !mineOpen && !paintOpen
+          !mcOpen && !photoOpen && !ep2Open && !atariOpen && !mineOpen
         );
         desktop.dataset.w95Active = which || "none";
         desktop._w95MineActive = mineOpen;
-        desktop._w95PaintActive = paintOpen;
+        desktop._w95AtariActive = atariOpen;
+        desktop._w95Ep2Active = ep2Open;
 
         // Leaving the rescued photo empties the bin (×, another app, or Empty).
         if (willEmptyBin) emptyRecycleBin({ animate: true });
@@ -973,75 +1023,29 @@ export function createEngine(root = document) {
 
       mineGame = mineCanvas
         ? createMinesweeper(mineCanvas, {
+            // Clear still shows the reward photo for fun; unlock is on open.
             onWin: () => {
-              completeSectionBeat("minesweeper", { photo: true, meta: { via: "clear" } });
+              completeSectionBeat("minesweeper", {
+                photo: true,
+                meta: { via: "clear" },
+              });
             },
-            onReward: () => blip("beat"),
+            onReward: () => {
+              blip("beat");
+              // Reward image reveals ~480ms after the win (see minesweeper.js
+              // REWARD_DELAY_MS) — if the window got closed in that window,
+              // force it back open so the photo still surfaces instead of
+              // silently drawing to a hidden canvas (mirrors pinball/ski's
+              // forced setActive on reveal).
+              closeStartMenu();
+              setActive("mine");
+            },
             onFlag: () => blip("mineFlag"),
           })
         : null;
       desktop._w95MineGame = mineGame;
 
       const canAdvance = () => Boolean(chapter?.classList.contains("w95-unlocked"));
-
-      const revealBackRub = () => {
-        if (!page || page.classList.contains("is-backrub")) return false;
-        page.classList.add("is-backrub");
-        page.classList.remove("is-early");
-        if (googleLogo) googleLogo.hidden = true;
-        if (earlyLogo) earlyLogo.hidden = true;
-        if (backrub) {
-          backrub.hidden = false;
-          backrub.setAttribute("aria-hidden", "false");
-        }
-        if (tag) tag.textContent = "Before it was Google, it was BackRub.";
-        if (indexLine) {
-          indexLine.innerHTML = "<em>Answer found · ~1 result that mattered</em>";
-        }
-        if (titleEl) titleEl.textContent = "The Internet — BackRub";
-        blip("correct");
-        return true;
-      };
-
-      /** Click BackRub → classic Google! (loop; Search reveals BackRub again) */
-      const restoreClassicGoogle = () => {
-        if (!page || !page.classList.contains("is-backrub")) return false;
-        page.classList.remove("is-backrub", "is-early");
-        if (backrub) {
-          backrub.hidden = true;
-          backrub.setAttribute("aria-hidden", "true");
-        }
-        if (earlyLogo) earlyLogo.hidden = true;
-        if (googleLogo) googleLogo.hidden = false;
-        if (tag) tag.textContent = "Search the web using Google!";
-        if (indexLine) {
-          indexLine.innerHTML =
-            "<em>Index contains ~25 million pages (soon to be much bigger)</em>";
-        }
-        if (titleEl) titleEl.textContent = "The Internet — Google!";
-        blip("press");
-        return true;
-      };
-
-      /** Lucky gag — early 3D logo; never advances past Section 1 gate */
-      const revealFeelingLucky = () => {
-        if (!page) return false;
-        page.classList.add("is-early");
-        page.classList.remove("is-backrub");
-        if (googleLogo) googleLogo.hidden = true;
-        if (backrub) {
-          backrub.hidden = true;
-          backrub.setAttribute("aria-hidden", "true");
-        }
-        if (earlyLogo) earlyLogo.hidden = false;
-        if (tag) tag.textContent = "I'm Feeling Lucky took you somewhere older.";
-        if (indexLine) {
-          indexLine.innerHTML = "<em>Lucky result · still not Windows Update</em>";
-        }
-        if (titleEl) titleEl.textContent = "The Internet — Feeling Lucky";
-        blip("correct");
-        return true;
-      };
 
       const nudge = (el) => {
         if (!el) return;
@@ -1061,17 +1065,19 @@ export function createEngine(root = document) {
           );
           return true;
         }
-        const netOpen = netWin && !netWin.classList.contains("is-closed");
-        if (!netOpen) {
-          nudge(desktop.querySelector("[data-w95-internet]"));
-          return true;
+        // Point at whichever required open is still missing
+        if (!progress.isBeatComplete("atari", "section1")) {
+          nudge(desktop.querySelector("[data-w95-atari-open]"));
+        } else {
+          nudge(
+            desktop.querySelector("[data-w95-start]") ||
+              desktop.querySelector("[data-w95-mine-open]")
+          );
         }
-        // Internet is a room gag — nudge Search, not Lucky-as-exit
-        nudge(searchBtn);
         return true;
       };
 
-      /** Esc / arrows when Minesweeper, Paint, or Start menu is active */
+      /** Esc / arrows when Minesweeper, Atari, EP2, or Start menu is active */
       desktop._w95HandleKey = (e) => {
         if (!startMenu?.hidden && e.key === "Escape") {
           e.preventDefault();
@@ -1090,7 +1096,24 @@ export function createEngine(root = document) {
           blip("windowClose");
           return true;
         }
-        if (desktop._w95PaintActive && e.key === "Escape") {
+        if (desktop._w95AtariActive) {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            setActive(null);
+            return true;
+          }
+          if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            atariStrip?.scrollByPage?.(-1);
+            return true;
+          }
+          if (e.key === "ArrowRight") {
+            e.preventDefault();
+            atariStrip?.scrollByPage?.(1);
+            return true;
+          }
+        }
+        if (desktop._w95Ep2Active && e.key === "Escape") {
           e.preventDefault();
           setActive(null);
           return true;
@@ -1103,10 +1126,10 @@ export function createEngine(root = document) {
           }
           if (mineGame?.handleDeckKey?.(e)) return true;
         }
-        // Paint / Minesweeper open — never let deck ←/→/↑/↓/PageUp/PageDown/Space
-        // fall through to next()/prev() while playing.
+        // Minesweeper / Atari open — never let deck ←/→/↑/↓/PageUp/PageDown/Space
+        // fall through to next()/prev() while playing / scrolling ads.
         if (
-          (desktop._w95PaintActive || desktop._w95MineActive) &&
+          (desktop._w95MineActive || desktop._w95AtariActive) &&
           [
             "ArrowLeft",
             "ArrowRight",
@@ -1126,43 +1149,45 @@ export function createEngine(root = document) {
 
       /** Hard reload to first-entry window state (clean desktop). Section progress untouched. */
       const resetWin95 = () => {
-        // Keep w95-unlocked only after Section 1 update was consumed (not Lucky)
+        // Keep w95-unlocked only after Section 1 update was consumed
         const keepUnlock = progress.isUpdateConsumed("section1");
         chapter?.classList.toggle("w95-unlocked", keepUnlock);
         chapter?.classList.toggle("quiz-solved", keepUnlock);
-        page?.classList.remove("is-backrub", "is-early");
-        if (googleLogo) googleLogo.hidden = false;
-        if (backrub) {
-          backrub.hidden = true;
-          backrub.setAttribute("aria-hidden", "true");
-          backrub.classList.remove("is-nudge");
-        }
-        if (earlyLogo) earlyLogo.hidden = true;
-        if (tag) tag.textContent = "Search the web using Google!";
-        if (indexLine) {
-          indexLine.innerHTML =
-            "<em>Index contains ~25 million pages (soon to be much bigger)</em>";
-        }
-        if (titleEl) titleEl.textContent = "The Internet — Google!";
-        searchBtn?.classList.remove("is-nudge");
-        luckyBtn?.classList.remove("is-nudge");
         desktop.querySelectorAll(".is-wrong, .is-nudge").forEach((el) => {
           el.classList.remove("is-wrong", "is-nudge");
         });
         closeStartMenu();
+        destroyAtariStrip();
         setActive(null, { silent: true });
         const shutdownDlg = desktop.querySelector("[data-w95-shutdown-dlg]");
         if (shutdownDlg) {
           shutdownDlg.classList.add("is-closed");
           shutdownDlg.setAttribute("aria-hidden", "true");
         }
-        paintWin?.querySelector("[data-paint]")?._paintReset?.();
         mineGame?.reset();
         syncSectionUpdateUi("section1");
         syncRecycleIcon();
       };
 
+      /**
+       * Soft enter on hub revisit — sync progress chrome; close Atari/EP2
+       * and destroy the strip. Preserve Minesweeper / readme / photo mid-beat.
+       */
+      const enterWin95 = () => {
+        const keepUnlock = progress.isUpdateConsumed("section1");
+        chapter?.classList.toggle("w95-unlocked", keepUnlock);
+        chapter?.classList.toggle("quiz-solved", keepUnlock);
+        destroyAtariStrip();
+        const cur = desktop.dataset.w95Active;
+        if (cur === "atari" || cur === "ep2") {
+          setActive(null, { silent: true });
+        }
+        syncSectionUpdateUi("section1");
+        syncRecycleIcon();
+      };
+
       desktop._resetWin95 = resetWin95;
+      desktop._w95Enter = enterWin95;
 
       // Initial: clean desktop — all windows closed; bin empty if beat already done
       resetWin95();
@@ -1185,11 +1210,18 @@ export function createEngine(root = document) {
         });
       });
 
-      desktop.querySelectorAll("[data-w95-net-close]").forEach((btn) => {
+      desktop.querySelectorAll("[data-w95-ep2-close]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-          // Close only — never advance (Lucky is the sole exit)
+          setActive(null);
+        });
+      });
+
+      desktop.querySelectorAll("[data-w95-atari-close]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
           setActive(null);
         });
       });
@@ -1202,10 +1234,6 @@ export function createEngine(root = document) {
         });
       });
 
-      desktop._w95ClosePaint = () => {
-        setActive(null);
-      };
-
       desktop.querySelectorAll("[data-w95-open]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
@@ -1215,12 +1243,12 @@ export function createEngine(root = document) {
         });
       });
 
-      desktop.querySelectorAll("[data-w95-muted]").forEach((btn) => {
+      desktop.querySelectorAll("[data-w95-my-computer]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
           closeStartMenu();
-          blip("wrong");
+          setActive("ep2");
         });
       });
 
@@ -1231,12 +1259,14 @@ export function createEngine(root = document) {
         setActive("photo");
       });
 
-      desktop.querySelectorAll("[data-w95-internet]").forEach((btn) => {
+      desktop.querySelectorAll("[data-w95-atari-open]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
           closeStartMenu();
-          setActive("net");
+          setActive("atari");
+          completeSectionBeat("atari", { meta: { via: "open" } });
+          syncSectionUpdateUi("section1");
         });
       });
 
@@ -1276,16 +1306,10 @@ export function createEngine(root = document) {
           e.preventDefault();
           e.stopPropagation();
           closeStartMenu();
+          // Prefer close EP2 when Mine opens (setActive is single-window)
           setActive("mine");
-        });
-      });
-
-      desktop.querySelectorAll("[data-w95-paint-open]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          closeStartMenu();
-          setActive("paint");
+          completeSectionBeat("minesweeper", { meta: { via: "open" } });
+          syncSectionUpdateUi("section1");
         });
       });
 
@@ -1377,41 +1401,6 @@ export function createEngine(root = document) {
       // Restore floppy + tray if Section 1 already unlocked (session resume)
       syncSectionUpdateUi("section1");
       syncRecycleIcon();
-
-      searchBtn?.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        // Google Search NEVER advances — toggles Google! → BackRub only
-        if (page?.classList.contains("is-backrub")) {
-          blip("press");
-          return;
-        }
-        revealBackRub();
-      });
-
-      luckyBtn?.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        // Gag only — never skip Section 1 required beats / land on #win98
-        if (progress.isUpdateConsumed("section1")) {
-          chapter?.classList.add("w95-unlocked", "quiz-solved");
-          blip("correct");
-          next();
-          return;
-        }
-        revealFeelingLucky();
-      });
-
-      backrub?.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        restoreClassicGoogle();
-      });
-      backrub?.addEventListener("keydown", (e) => {
-        if (e.key !== "Enter" && e.key !== " ") return;
-        e.preventDefault();
-        restoreClassicGoogle();
-      });
     });
   }
 
@@ -1431,9 +1420,88 @@ export function createEngine(root = document) {
     );
   }
 
+  function winxpBlocksAdvance() {
+    const active = deck.querySelectorAll(".chapter")[index];
+    if (!active?.classList.contains("mode-winxp")) return false;
+    // Power-off beat is ready — Next should leave to #consoles.
+    if (active.classList.contains("wxp-powering-off")) return false;
+    return true;
+  }
+
+  function consolesBlocksAdvance() {
+    const active = deck.querySelectorAll(".chapter")[index];
+    return Boolean(
+      active?.classList.contains("mode-consoles") &&
+        !active.classList.contains("consoles-done")
+    );
+  }
+
+  function timewarpBlocksAdvance() {
+    const active = deck.querySelectorAll(".chapter")[index];
+    return Boolean(
+      active?.classList.contains("mode-timewarp") &&
+        !active.classList.contains("timewarp-done")
+    );
+  }
+
+  /**
+   * @param {{ startSystem?: boolean }} [opts]
+   * startSystem — after XP Space on static, kick PS2 splash → boot.
+   */
+  function goToConsoles(opts = {}) {
+    const startSystem = Boolean(opts.startSystem);
+    const i = chapters.findIndex((c) => c.id === "consoles");
+    if (i >= 0) show(i);
+    else show(index + 1);
+    if (!startSystem) return;
+    requestAnimationFrame(() => {
+      deck.querySelectorAll(".chapter.active [data-consoles]").forEach((room) => {
+        room._consolesStartSystem?.();
+      });
+    });
+  }
+
+  /** Deep-link / Story · Web 2.0 → XP Bliss + open Mozilla Firefox. */
+  function goToWeb20() {
+    const i = chapters.findIndex((c) => c.id === "winxp");
+    if (i < 0) return;
+    show(i);
+    requestAnimationFrame(() => {
+      deck.querySelectorAll("[data-wxp]").forEach((desktop) => {
+        desktop._wxpOpenFirefox?.();
+      });
+    });
+  }
+
+  function goToTimewarp() {
+    const i = chapters.findIndex((c) => c.id === "timewarp");
+    if (i >= 0) show(i);
+    else show(index + 1);
+  }
+
+  function goToFinale() {
+    const i = chapters.findIndex((c) => c.id === "make-impossible");
+    if (i >= 0) show(i);
+    else show(index + 1);
+  }
+
+  function goToSourceReveal() {
+    const i = chapters.findIndex((c) => c.id === "source-reveal");
+    if (i >= 0) show(i);
+    else show(index + 1);
+  }
+
   function resetWin95Desktop() {
     deck.querySelectorAll("[data-w95]").forEach((desktop) => {
       desktop._resetWin95?.();
+    });
+  }
+
+  /** Soft hub enter — preserve open windows / in-progress games. */
+  function enterWin95Desktop() {
+    deck.querySelectorAll("[data-w95]").forEach((desktop) => {
+      if (typeof desktop._w95Enter === "function") desktop._w95Enter();
+      else desktop._resetWin95?.();
     });
   }
 
@@ -1443,17 +1511,28 @@ export function createEngine(root = document) {
     });
   }
 
-  /** Section 2 hub — kit-styled desktop + Desktop Themes + Space Cadet + SkiFree. */
+  function enterWin98Desktop() {
+    deck.querySelectorAll("[data-w98]").forEach((desktop) => {
+      if (typeof desktop._w98Enter === "function") desktop._w98Enter();
+      else desktop._resetWin98?.();
+    });
+  }
+
+  /** Section 2 hub — kit-styled desktop + GBC (required) + optional Ski/Pinball/Themes. */
   function wireWin98Desktop() {
     deck.querySelectorAll("[data-w98]").forEach((desktop) => {
-      const welcomeWin = desktop.querySelector("[data-w98-welcome]");
+      const chapter = desktop.closest(".chapter");
+      const gbcWin = desktop.querySelector("[data-w98-gbc]");
+      const gatesWin = desktop.querySelector("[data-w98-gates]");
+      const gatesBsod = desktop.querySelector("[data-w98-gates-bsod]");
       const themesWin = desktop.querySelector("[data-w98-themes]");
       const chrisPhotoWin = desktop.querySelector("[data-w98-chris-photo]");
       const pinballWin = desktop.querySelector("[data-pinball]");
       const pinballPhotoWin = desktop.querySelector("[data-pinball-photo]");
       const skiWin = desktop.querySelector("[data-w98-ski]");
       const skiPhotoWin = desktop.querySelector("[data-w98-ski-photo]");
-      const welcomeTask = desktop.querySelector('[data-w98-task="welcome"]');
+      const gbcTask = desktop.querySelector('[data-w98-task="gbc"]');
+      const gatesTask = desktop.querySelector('[data-w98-task="gates"]');
       const themesTask = desktop.querySelector('[data-w98-task="themes"]');
       const chrisPhotoTask = desktop.querySelector('[data-w98-task="chrisphoto"]');
       const pinballTask = desktop.querySelector('[data-w98-task="pinball"]');
@@ -1472,6 +1551,9 @@ export function createEngine(root = document) {
       const clockEl = desktop.querySelector("[data-w98-clock]") || desktop.querySelector(".w98-clock");
       const datetimeWin = desktop.querySelector("[data-w98-datetime]");
       const datetimeTask = desktop.querySelector('[data-w98-task="datetime"]');
+
+      /** @type {{ destroy: () => void } | null} */
+      let gbcScrapbook = null;
 
       /** Virtual “OS time” for Date/Time Properties — Dec 31 1999 until Y2K rolls. */
       /** @type {Date} */
@@ -1684,15 +1766,97 @@ export function createEngine(root = document) {
         startBtn?.classList.add("is-pressed");
       };
 
+      const destroyGbcScrapbook = () => {
+        gbcScrapbook?.destroy?.();
+        gbcScrapbook = null;
+      };
+
+      const mountGbcWindow = () => {
+        if (!gbcWin) return;
+        destroyGbcScrapbook();
+        gbcScrapbook = mountGbcScrapbook(gbcWin, {
+          images: GBC_ADS,
+          // Continue is optional alias — beat already completes on open.
+          onContinue: () => {
+            completeSectionBeat("gbc", {
+              sectionId: "section2",
+              meta: { via: "scrapbook" },
+            });
+            syncWin98ContinueGate();
+            syncSectionUpdateUi("section2");
+            destroyGbcScrapbook();
+            closeStartMenu();
+            setActive(null);
+            blip("correct");
+          },
+        });
+      };
+
+      /** @type {((e: KeyboardEvent) => void) | null} */
+      let gatesBsodKeyHandler = null;
+
+      const hideGatesBsod = () => {
+        if (!gatesBsod) return;
+        gatesBsod.hidden = true;
+        gatesBsod.setAttribute("aria-hidden", "true");
+        if (gatesBsodKeyHandler) {
+          window.removeEventListener("keydown", gatesBsodKeyHandler, true);
+          gatesBsodKeyHandler = null;
+        }
+      };
+
+      const dismissGatesBsod = () => {
+        if (!gatesBsod || gatesBsod.hidden) return;
+        hideGatesBsod();
+        completeSectionBeat("gates", {
+          sectionId: "section2",
+          meta: { via: "bsod-dismiss" },
+        });
+        closeStartMenu();
+        setActive(null);
+        blip("press");
+      };
+
+      const crashGatesDemo = () => {
+        if (!gatesBsod) return;
+        // Close the fake IE window; BSOD sits on the desktop as flavour only.
+        if (gatesWin) {
+          gatesWin.classList.add("is-closed");
+          gatesWin.setAttribute("aria-hidden", "true");
+        }
+        if (gatesTask) {
+          gatesTask.hidden = true;
+          gatesTask.classList.remove("is-pressed");
+        }
+        desktop.classList.add("is-window-closed");
+        desktop.dataset.w98Active = "gates-bsod";
+        gatesBsod.hidden = false;
+        gatesBsod.setAttribute("aria-hidden", "false");
+        const focusEl = gatesBsod.querySelector("[data-w98-gates-dismiss]");
+        if (focusEl instanceof HTMLElement) focusEl.focus?.();
+        blip("wrong");
+        if (gatesBsodKeyHandler) {
+          window.removeEventListener("keydown", gatesBsodKeyHandler, true);
+        }
+        gatesBsodKeyHandler = (e) => {
+          if (gatesBsod.hidden) return;
+          e.preventDefault();
+          e.stopPropagation();
+          dismissGatesBsod();
+        };
+        window.addEventListener("keydown", gatesBsodKeyHandler, true);
+      };
+
       /**
-       * @param {'welcome'|'themes'|'chrisphoto'|'datetime'|'pinball'|'pinballphoto'|'ski'|'skiphoto'|null} which
+       * @param {'gbc'|'gates'|'themes'|'chrisphoto'|'datetime'|'pinball'|'pinballphoto'|'ski'|'skiphoto'|null} which
        * Era photo stacks on top of Space Cadet — pinball chrome stays open so
        * the reveal → Continue gate remains reachable (not buried under is-closed).
        * SkiFree reward is a full-bleed cover inside the Ski client (skiphoto),
        * not a separate offset photo window.
        */
       const setActive = (which) => {
-        const welcomeOpen = which === "welcome";
+        const gbcOpen = which === "gbc";
+        const gatesOpen = which === "gates";
         const themesOpen = which === "themes";
         const chrisPhotoOpen = which === "chrisphoto";
         const datetimeOpen = which === "datetime";
@@ -1701,9 +1865,16 @@ export function createEngine(root = document) {
         const skiPhotoOpen = which === "skiphoto";
         const skiOpen = which === "ski" || skiPhotoOpen;
 
-        if (welcomeWin) {
-          welcomeWin.classList.toggle("is-closed", !welcomeOpen);
-          welcomeWin.setAttribute("aria-hidden", welcomeOpen ? "false" : "true");
+        if (!gbcOpen) destroyGbcScrapbook();
+        if (!gatesOpen) hideGatesBsod();
+
+        if (gbcWin) {
+          gbcWin.classList.toggle("is-closed", !gbcOpen);
+          gbcWin.setAttribute("aria-hidden", gbcOpen ? "false" : "true");
+        }
+        if (gatesWin) {
+          gatesWin.classList.toggle("is-closed", !gatesOpen);
+          gatesWin.setAttribute("aria-hidden", gatesOpen ? "false" : "true");
         }
         if (themesWin) {
           themesWin.classList.toggle("is-closed", !themesOpen);
@@ -1752,9 +1923,13 @@ export function createEngine(root = document) {
           skiPhotoWin.classList.add("is-closed");
           skiPhotoWin.setAttribute("aria-hidden", "true");
         }
-        if (welcomeTask) {
-          welcomeTask.hidden = !welcomeOpen;
-          welcomeTask.classList.toggle("is-pressed", welcomeOpen);
+        if (gbcTask) {
+          gbcTask.hidden = !gbcOpen;
+          gbcTask.classList.toggle("is-pressed", gbcOpen);
+        }
+        if (gatesTask) {
+          gatesTask.hidden = !gatesOpen;
+          gatesTask.classList.toggle("is-pressed", gatesOpen);
         }
         if (themesTask) {
           themesTask.hidden = !themesOpen;
@@ -1812,7 +1987,8 @@ export function createEngine(root = document) {
 
         desktop.classList.toggle(
           "is-window-closed",
-          !welcomeOpen &&
+          !gbcOpen &&
+            !gatesOpen &&
             !themesOpen &&
             !chrisPhotoOpen &&
             !datetimeOpen &&
@@ -1827,20 +2003,37 @@ export function createEngine(root = document) {
         desktop._w98SkiActive = which === "ski";
       };
 
-      const syncWin98ContinueGate = () => {
-        const unlocked = progress.isUpdateUnlocked("section2");
-        const st = progress.requiredStatus("section2");
-        const missing = [
-          ...(st?.allOf || []).filter((b) => !b.complete).map((b) => b.label),
-        ];
-        desktop.querySelectorAll("[data-w98-continue]").forEach((btn) => {
-          btn.disabled = !unlocked;
-          btn.title = unlocked
-            ? "Y2K → Install Windows XP…"
-            : missing.length
-              ? `Still need: ${missing.join(" · ")}`
-              : "SkiFree · Pinball · Chris, 2000";
+      const openGbc = () => {
+        closeStartMenu();
+        setActive("gbc");
+        mountGbcWindow();
+        completeSectionBeat("gbc", {
+          sectionId: "section2",
+          meta: { via: "open" },
         });
+        syncWin98ContinueGate();
+        syncSectionUpdateUi("section2");
+        blip("windowOpen");
+      };
+
+      const syncWin98ContinueGate = () => {
+        // Continue… removed from Win98 chrome — Y2K is Chris, 1999 only.
+        // Keep this as a no-op so older call sites stay safe.
+      };
+
+      const nudge = (el) => {
+        if (!el) return;
+        el.classList.remove("is-nudge");
+        void el.offsetWidth;
+        el.classList.add("is-nudge");
+        setTimeout(() => el.classList.remove("is-nudge"), 600);
+      };
+
+      // → / Space blocked until Section 2 update consumed; nudge Desktop Themes
+      desktop._w98NudgeAdvance = () => {
+        if (chapter?.classList.contains("w98-unlocked")) return false;
+        nudge(desktop.querySelector("[data-w98-themes-open]"));
+        return true;
       };
 
       const syncThemesListUi = () => {
@@ -1887,8 +2080,8 @@ export function createEngine(root = document) {
         blip(theme.sfx || "press");
 
         if (theme.exitReveal) {
-          if (chrisPhotoImg) chrisPhotoImg.src = CHRIS_2000_PHOTO;
-          completeSectionBeat("chris2000", {
+          if (chrisPhotoImg) chrisPhotoImg.src = CHRIS_1999_PHOTO;
+          completeSectionBeat("chris1999", {
             sectionId: "section2",
             photo: true,
             meta: { via: "desktop-themes" },
@@ -1896,8 +2089,14 @@ export function createEngine(root = document) {
           syncWin98ContinueGate();
           syncSectionUpdateUi("section2");
           closeStartMenu();
-          setActive("chrisphoto");
-          blip("photo");
+          // Theme paints first — then Y2K clock takeover (not XP floppy).
+          // Rearm so re-applying Chris, 1999 still starts Y2K after a prior
+          // XP install consumed section2 (common mid-rehearsal / pinball revisit).
+          setActive(null);
+          if (!y2k.isRunning) {
+            progress.rearmUpdate("section2");
+            scheduleY2kTransition();
+          }
           return theme;
         }
 
@@ -1931,7 +2130,7 @@ export function createEngine(root = document) {
               closeStartMenu();
               setActive(null);
               blip("correct");
-              // Stay on hub — Chris, 2000 / Desktop Themes is the Section 2 exit.
+              // Stay on hub — Pinball is optional flavour (unlock is Chris, 1999).
             },
           })
         : null;
@@ -1941,10 +2140,10 @@ export function createEngine(root = document) {
             scoreEl: skiScore,
             statusEl: skiStatus,
             onEsc: () => {
-              setActive("welcome");
+              setActive(null);
               blip("press");
             },
-            // Finish → yeti → Game Over panel; beat completes only on confirm → photo.
+            // Finish → yeti → Game Over → photo is optional reward (Ski is flavour only).
             onFinish: () => {
               blip("press");
             },
@@ -1975,7 +2174,7 @@ export function createEngine(root = document) {
         if (desktop._w98PinballActive) {
           if (e.key === "Escape") {
             e.preventDefault();
-            setActive("welcome");
+            setActive(null);
             blip("press");
             return true;
           }
@@ -1984,13 +2183,13 @@ export function createEngine(root = document) {
         if (desktop._w98SkiActive) {
           if (e.key === "Escape") {
             e.preventDefault();
-            setActive("welcome");
+            setActive(null);
             blip("press");
             return true;
           }
           if (skiGame?.handleDeckKey(e)) return true;
         }
-        const escClosable = ["welcome", "themes", "chrisphoto"];
+        const escClosable = ["gbc", "gates", "themes", "chrisphoto"];
         if (
           escClosable.includes(desktop.dataset.w98Active || "") &&
           e.key === "Escape"
@@ -2004,7 +2203,12 @@ export function createEngine(root = document) {
           blip("press");
           return true;
         }
-        // Any modal window open (welcome / themes / chrisphoto / datetime / photo
+        // Gates BSOD overlay — Esc / any key handled by gatesBsodKeyHandler
+        if (desktop.dataset.w98Active === "gates-bsod") {
+          e.preventDefault();
+          return true;
+        }
+        // Any modal window open (gbc / themes / chrisphoto / datetime / photo
         // stages) — keep deck ←/→/↑/↓/PageUp/PageDown/Space from stealing focus.
         // Games (pinball/ski) already consumed their own keys above.
         const activeWin = desktop.dataset.w98Active || "none";
@@ -2028,12 +2232,18 @@ export function createEngine(root = document) {
       };
 
       const resetWin98 = () => {
+        // Keep w98-unlocked only after Section 2 update was consumed
+        const keepUnlock = progress.isUpdateConsumed("section2");
+        chapter?.classList.toggle("w98-unlocked", keepUnlock);
+        chapter?.classList.toggle("quiz-solved", keepUnlock);
         closeStartMenu();
+        destroyGbcScrapbook();
+        hideGatesBsod();
         applyW98Theme(desktop, appliedThemeId || "default");
         selectedThemeId = appliedThemeId;
         buildThemesList();
         syncThemesListUi();
-        setActive("welcome");
+        setActive(null);
         pinballGame?.reset();
         skiGame?.stop();
         syncWin98ContinueGate();
@@ -2042,29 +2252,83 @@ export function createEngine(root = document) {
           pinballGame?.triggerPinballEraReveal?.();
       };
 
+      /**
+       * Soft enter on hub revisit — keep theme, open windows, pinball/Ski
+       * iframes. Restore w98-unlocked from consumed update (same pattern as
+       * Win95). Re-sync gates + update UI.
+       */
+      const enterWin98 = () => {
+        const keepUnlock = progress.isUpdateConsumed("section2");
+        chapter?.classList.toggle("w98-unlocked", keepUnlock);
+        chapter?.classList.toggle("quiz-solved", keepUnlock);
+        applyW98Theme(desktop, appliedThemeId || "default");
+        selectedThemeId = appliedThemeId;
+        syncThemesListUi();
+        syncWin98ContinueGate();
+        syncSectionUpdateUi("section2");
+      };
+
       desktop._resetWin98 = resetWin98;
+      desktop._w98Enter = enterWin98;
       buildThemesList();
       resetWin98();
 
-      desktop.querySelectorAll("[data-w98-welcome-close]").forEach((btn) => {
+      desktop.querySelectorAll("[data-w98-gbc-open]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-          setActive(null);
-          blip("press");
+          openGbc();
         });
       });
 
-      desktop.querySelectorAll("[data-w98-welcome-open]").forEach((btn) => {
+      desktop.querySelectorAll("[data-w98-gbc-close]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          destroyGbcScrapbook();
+          setActive(null);
+          blip("windowClose");
+        });
+      });
+
+      desktop.querySelectorAll("[data-w98-gates-open]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
           closeStartMenu();
-          setActive("welcome");
-          blip("press");
+          hideGatesBsod();
+          setActive("gates");
+          blip("windowOpen");
         });
       });
 
+      desktop.querySelectorAll("[data-w98-gates-close]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          hideGatesBsod();
+          setActive(null);
+          blip("windowClose");
+        });
+      });
+
+      desktop.querySelectorAll("[data-w98-gates-run]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          crashGatesDemo();
+        });
+      });
+
+      desktop.querySelectorAll("[data-w98-gates-dismiss]").forEach((btn) => {
+        btn.addEventListener("pointerdown", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dismissGatesBsod();
+        });
+      });
+
+      // Desktop Themes — Chris, 1999 is the required Y2K trigger.
       desktop.querySelectorAll("[data-w98-themes-open]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
@@ -2154,7 +2418,7 @@ export function createEngine(root = document) {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-          setActive("welcome");
+          setActive(null);
           blip("press");
         });
       });
@@ -2164,7 +2428,7 @@ export function createEngine(root = document) {
           e.preventDefault();
           e.stopPropagation();
           // Return to Space Cadet so Continue stays one click away after reveal.
-          setActive(pinballGame?.hasRevealed?.() ? "pinball" : "welcome");
+          setActive(pinballGame?.hasRevealed?.() ? "pinball" : null);
           blip("press");
         });
       });
@@ -2175,6 +2439,12 @@ export function createEngine(root = document) {
           e.stopPropagation();
           closeStartMenu();
           setActive("pinball");
+          completeSectionBeat("pinball", {
+            sectionId: "section2",
+            meta: { via: "open" },
+          });
+          syncWin98ContinueGate();
+          syncSectionUpdateUi("section2");
           blip("press");
         });
       });
@@ -2192,6 +2462,12 @@ export function createEngine(root = document) {
           } else {
             setActive("ski");
           }
+          completeSectionBeat("skifree", {
+            sectionId: "section2",
+            meta: { via: "open" },
+          });
+          syncWin98ContinueGate();
+          syncSectionUpdateUi("section2");
           blip("press");
         });
       });
@@ -2200,7 +2476,7 @@ export function createEngine(root = document) {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-          setActive("welcome");
+          setActive(null);
           blip("press");
         });
       });
@@ -2240,16 +2516,6 @@ export function createEngine(root = document) {
         });
       });
 
-      desktop.querySelectorAll("[data-w98-update]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          closeStartMenu();
-          if (!openSectionUpdate("section2")) return;
-          blip(btn.hasAttribute("data-w98-boot-disk") ? "windowOpen" : "transition");
-        });
-      });
-
       startBtn?.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -2284,27 +2550,6 @@ export function createEngine(root = document) {
         });
       });
 
-      desktop.querySelectorAll("[data-w98-continue]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          closeStartMenu();
-          if (!progress.isUpdateUnlocked("section2")) {
-            setActive("themes");
-            selectedThemeId = appliedThemeId;
-            buildThemesList();
-            syncThemesListUi();
-            blip("press");
-            return;
-          }
-          if (!openSectionUpdate("section2")) {
-            blip("press");
-            return;
-          }
-          blip("transition");
-        });
-      });
-
       desktop.addEventListener("pointerdown", (e) => {
         if (startMenu?.hidden) return;
         if (e.target.closest("[data-w98-start-menu], [data-w98-start]")) return;
@@ -2313,15 +2558,112 @@ export function createEngine(root = document) {
     });
   }
 
-  /** Section 3 stub hub — Bliss desktop + tray clock (Luna kit later). */
+  /** Section 3 hub — Bliss desktop + tray clock + My Pictures + Firefox (Web 2.0). */
   function wireWinXpDesktop() {
     deck.querySelectorAll("[data-wxp]").forEach((desktop) => {
-      const welcome = desktop.querySelector("[data-wxp-welcome]");
+      const picturesWin = desktop.querySelector("[data-wxp-pictures-window]");
+      const picturesRoot = desktop.querySelector("[data-wxp-pictures]");
+      const picturesTask = desktop.querySelector("[data-wxp-pictures-task]");
+      const firefoxWin = desktop.querySelector("[data-wxp-firefox-window]");
+      const firefoxTask = desktop.querySelector("[data-wxp-firefox-task]");
+      const startBtn = desktop.querySelector("[data-wxp-start]");
+      const startMenu = desktop.querySelector("[data-wxp-start-menu]");
+      const shutdownDlg = desktop.querySelector("[data-wxp-shutdown-dlg]");
+      const powerOff = desktop.querySelector("[data-wxp-poweroff]");
+      const chapter = desktop.closest(".chapter");
       const clockEl = desktop.querySelector(".wxp-clock");
       /** @type {ReturnType<typeof setTimeout> | null} */
       let clockTimeout = null;
       /** @type {ReturnType<typeof setInterval> | null} */
       let clockTimer = null;
+      /** @type {ReturnType<typeof setTimeout> | null} */
+      let win10PackTimeout = null;
+      /** @type {ReturnType<typeof setTimeout>[]} */
+      let powerOffTimers = [];
+      /** @type {{ destroy: () => void } | null} */
+      let picturesMount = null;
+      /** @type {ReturnType<typeof mountIeWeb20> | null} */
+      let firefoxMount = null;
+      let win10PackApplied = false;
+      let poweringOff = false;
+
+      /** Win10 UI Pack gag — MIT curated assets under assets/winxp-ui/win10pack/. */
+      const syncWin10PackVisibility = (on) => {
+        desktop.querySelectorAll(".wxp-icon--classic, .wxp-label--classic, .wxp-meta--classic, .wxp-path--classic").forEach((el) => {
+          el.hidden = on;
+        });
+        desktop.querySelectorAll(".wxp-icon--w10, .wxp-label--w10, .wxp-meta--w10, .wxp-path--w10").forEach((el) => {
+          el.hidden = !on;
+        });
+        desktop.querySelectorAll("[data-wxp-w10-title]").forEach((el) => {
+          const classic = el.getAttribute("title");
+          const w10 = el.getAttribute("data-wxp-w10-title");
+          if (!w10) return;
+          if (on) {
+            if (!el.hasAttribute("data-wxp-classic-title") && classic != null) {
+              el.setAttribute("data-wxp-classic-title", classic);
+            }
+            el.setAttribute("title", w10);
+          } else {
+            const restore = el.getAttribute("data-wxp-classic-title");
+            if (restore != null) el.setAttribute("title", restore);
+          }
+        });
+      };
+
+      const applyWin10Pack = ({ playSound = true } = {}) => {
+        if (win10PackApplied) return;
+        win10PackApplied = true;
+        if (win10PackTimeout != null) {
+          clearTimeout(win10PackTimeout);
+          win10PackTimeout = null;
+        }
+        desktop.classList.remove("is-bliss");
+        desktop.classList.add("is-win10pack");
+        syncWin10PackVisibility(true);
+        if (playSound) blip("win10Notify");
+      };
+
+      const resetWin10Pack = () => {
+        win10PackApplied = false;
+        if (win10PackTimeout != null) {
+          clearTimeout(win10PackTimeout);
+          win10PackTimeout = null;
+        }
+        desktop.classList.remove("is-win10pack");
+        desktop.classList.add("is-bliss");
+        syncWin10PackVisibility(false);
+      };
+
+      const scheduleWin10Pack = () => {
+        if (win10PackApplied) return;
+        if (win10PackTimeout != null) {
+          clearTimeout(win10PackTimeout);
+          win10PackTimeout = null;
+        }
+        sfx.preloadUrl?.("/assets/winxp-ui/win10pack/audio/notify.wav");
+        // Prefetch Hero wallpaper so the gag doesn't flash empty.
+        const warm = new Image();
+        warm.src = "/assets/winxp-ui/win10pack/wallpaper-hero.jpg";
+        // Talk beat: always land on classic Bliss first, then apply the gag.
+        // Do NOT collapse to 0 under prefers-reduced-motion — that skipped Bliss
+        // entirely and made XP look like it loaded the "wrong" (Win10) screen.
+        const delay = 2200;
+        win10PackTimeout = setTimeout(() => {
+          win10PackTimeout = null;
+          applyWin10Pack({ playSound: true });
+        }, delay);
+      };
+
+      desktop._wxpApplyWin10Pack = () => applyWin10Pack({ playSound: true });
+      desktop._wxpResetWin10Pack = resetWin10Pack;
+      desktop._wxpScheduleWin10Pack = scheduleWin10Pack;
+      desktop._wxpCancelWin10Pack = () => {
+        if (win10PackTimeout != null) {
+          clearTimeout(win10PackTimeout);
+          win10PackTimeout = null;
+        }
+      };
 
       const formatTrayTime = (date = new Date()) =>
         date.toLocaleTimeString("en-US", {
@@ -2364,677 +2706,513 @@ export function createEngine(root = document) {
       desktop._wxpStopClock = stopClock;
       desktop.classList.add("is-bliss");
 
-      const setWelcome = (open) => {
-        if (!welcome) return;
-        welcome.classList.toggle("is-closed", !open);
-        welcome.setAttribute("aria-hidden", open ? "false" : "true");
-      };
-      desktop.querySelectorAll("[data-wxp-welcome-close]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          setWelcome(false);
-          blip("press");
-        });
-      });
-      desktop.querySelectorAll("[data-wxp-welcome-open]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          setWelcome(true);
-          blip("press");
-        });
-      });
-      setWelcome(true);
-    });
-  }
-
-  function wirePaintTitle() {
-    deck.querySelectorAll("[data-paint]").forEach((paintRoot) => {
-      const surface = paintRoot.querySelector("[data-paint-surface]");
-      const canvas = paintRoot.querySelector("[data-paint-draw]");
-      if (!surface || !canvas) return;
-
-      const ctx2d = canvas.getContext("2d", { willReadFrequently: true });
-      const chapter = paintRoot.closest(".chapter");
-      const w95Desktop = paintRoot.closest("[data-w95]");
-      const fgEl = paintRoot.querySelector("[data-paint-fg]");
-      const coordsEl = paintRoot.querySelector("[data-paint-coords]");
-      const statusEl = paintRoot.querySelector("[data-paint-status]");
-      const helpDlg = paintRoot.querySelector("[data-paint-help]");
-      const optsEl = paintRoot.querySelector("[data-paint-opts]");
-
-      /** @type {string} */
-      let tool = "eraser";
-      let color = "#000000";
-      let toolSize = 14;
-      let drawing = false;
-      let lastX = 0;
-      let lastY = 0;
-      let startX = 0;
-      let startY = 0;
-      let sprayTimer = null;
-      /** @type {ImageData | null} */
-      let snap = null;
-      let dpr = 1;
-      let cssW = 0;
-      let cssH = 0;
-      let coverReady = false;
-      let paintBeatDone = progress.isBeatComplete("paint");
-      /** Erased alpha sample ratio that counts as “photo meaningfully revealed”. */
-      const PAINT_REVEAL_THRESHOLD = 0.08;
-
-      const TOOL_STATUS = {
-        spray: "Airbrush — paint on the white cover (or over the reveal).",
-        pencil: "Pencil — drag to draw.",
-        brush: "Brush — thicker freehand.",
-        eraser: "Eraser — drag to reveal the photo under the white.",
-        fill: "Fill — click a region to flood-fill the cover.",
-        drop: "Pick Color — click the canvas to sample.",
-        text: "Text — click to type. Enter commits · Esc cancels.",
-        line: "Line — click and drag.",
-        rect: "Rectangle — click and drag.",
-        oval: "Ellipse — click and drag.",
-        round: "Rounded rectangle — click and drag.",
-        select: "Select — drag a marquee (visual only).",
-        lasso: "Free-form select — visual only.",
-        zoom: "Magnifier — visual only (stub).",
-        curve: "Curve — stub (use Line).",
-        poly: "Polygon — stub (use Rectangle).",
+      const closeStartMenu = () => {
+        if (!startMenu) return;
+        startMenu.hidden = true;
+        startMenu.setAttribute("aria-hidden", "true");
+        startBtn?.setAttribute("aria-expanded", "false");
       };
 
-      const fillWhiteCover = () => {
-        if (cssW < 8 || cssH < 8) return;
-        ctx2d.save();
-        ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx2d.globalCompositeOperation = "source-over";
-        ctx2d.fillStyle = "#ffffff";
-        ctx2d.fillRect(0, 0, cssW, cssH);
-        ctx2d.restore();
-        coverReady = true;
+      const openStartMenu = () => {
+        if (!startMenu) return;
+        startMenu.hidden = false;
+        startMenu.setAttribute("aria-hidden", "false");
+        startBtn?.setAttribute("aria-expanded", "true");
       };
 
-      // Match bitmap to the surface. Init often runs while the window is
-      // display:none (0×0) — never lock a tiny inline size like 320×240.
-      const resizeCanvas = () => {
-        const rect = surface.getBoundingClientRect();
-        const w = Math.floor(rect.width);
-        const h = Math.floor(rect.height);
-        if (w < 8 || h < 8) return;
+      const setShutdownDlg = (open) => {
+        if (!shutdownDlg) return;
+        shutdownDlg.classList.toggle("is-closed", !open);
+        shutdownDlg.hidden = !open;
+        shutdownDlg.setAttribute("aria-hidden", open ? "false" : "true");
+      };
 
-        dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const bw = Math.floor(w * dpr);
-        const bh = Math.floor(h * dpr);
-        cssW = w;
-        cssH = h;
-        if (canvas.width === bw && canvas.height === bh) {
-          canvas.style.width = "100%";
-          canvas.style.height = "100%";
-          ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-          if (!coverReady) fillWhiteCover();
-          return;
+      const clearPowerOffTimers = () => {
+        powerOffTimers.splice(0).forEach((t) => clearTimeout(t));
+      };
+
+      const afterPowerOff = (ms, fn) => {
+        const t = setTimeout(() => {
+          powerOffTimers = powerOffTimers.filter((x) => x !== t);
+          if (poweringOff) fn();
+        }, ms);
+        powerOffTimers.push(t);
+      };
+
+      /** Shut Down OK → pure black → slow static fade. Space / Next → PS2 load. */
+      const setPowerOff = (on) => {
+        poweringOff = on;
+        clearPowerOffTimers();
+        chapter?.classList.toggle("wxp-powering-off", on);
+        if (powerOff) {
+          powerOff.hidden = !on;
+          powerOff.setAttribute("aria-hidden", on ? "false" : "true");
+          powerOff.classList.remove("is-static-in");
         }
-
-        const prev = document.createElement("canvas");
-        prev.width = canvas.width;
-        prev.height = canvas.height;
-        const hadPrev = prev.width > 0 && prev.height > 0 && coverReady;
-        if (hadPrev) {
-          prev.getContext("2d").drawImage(canvas, 0, 0);
-        }
-        canvas.width = bw;
-        canvas.height = bh;
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-        if (hadPrev) {
-          ctx2d.drawImage(prev, 0, 0, w, h);
-        } else {
-          fillWhiteCover();
-        }
-      };
-      resizeCanvas();
-      window.addEventListener("resize", resizeCanvas);
-      if (typeof ResizeObserver !== "undefined") {
-        const ro = new ResizeObserver(() => resizeCanvas());
-        ro.observe(surface);
-      }
-      if (chapter && typeof MutationObserver !== "undefined") {
-        const mo = new MutationObserver(() => {
-          if (chapter.classList.contains("active")) {
-            requestAnimationFrame(resizeCanvas);
-          }
-        });
-        mo.observe(chapter, { attributes: true, attributeFilter: ["class"] });
-      }
-
-      const setStatus = (msg) => {
-        if (statusEl) statusEl.textContent = msg;
-      };
-
-      const setTool = (name) => {
-        tool = name;
-        paintRoot.querySelectorAll("[data-paint-tool]").forEach((btn) => {
-          btn.classList.toggle("is-on", btn.dataset.paintTool === name);
-        });
-        surface.dataset.tool = name;
-        if (optsEl) {
-          optsEl.title =
-            name === "spray" ? "Spray size"
-              : name === "brush" || name === "eraser" ? "Brush / eraser size"
-                : "Size";
-        }
-        setStatus(TOOL_STATUS[name] || "Tool selected.");
-        commitTextEditor(true);
-      };
-
-      const setColor = (c) => {
-        color = c;
-        if (fgEl) fgEl.style.background = c;
-      };
-
-      const localPos = (e) => {
-        const rect = surface.getBoundingClientRect();
-        return {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        };
-      };
-
-      const saveSnap = () => {
-        ctx2d.save();
-        ctx2d.setTransform(1, 0, 0, 1, 0, 0);
-        snap = ctx2d.getImageData(0, 0, canvas.width, canvas.height);
-        ctx2d.restore();
-      };
-
-      const restoreSnap = () => {
-        if (!snap) return;
-        ctx2d.save();
-        ctx2d.setTransform(1, 0, 0, 1, 0, 0);
-        ctx2d.putImageData(snap, 0, 0);
-        ctx2d.restore();
-      };
-
-      const strokeStyle = () => {
-        ctx2d.strokeStyle = color;
-        ctx2d.fillStyle = color;
-        ctx2d.lineCap = "round";
-        ctx2d.lineJoin = "round";
-      };
-
-      const sprayAt = (x, y) => {
-        const count = Math.max(8, Math.floor(toolSize * 1.2));
-        ctx2d.fillStyle = color;
-        for (let i = 0; i < count; i++) {
-          const a = Math.random() * Math.PI * 2;
-          const r = Math.random() * toolSize;
-          const px = x + Math.cos(a) * r;
-          const py = y + Math.sin(a) * r;
-          const s = Math.random() < 0.35 ? 1.5 : 1;
-          ctx2d.fillRect(px, py, s, s);
-        }
-      };
-
-      const freehandTo = (x, y, width, erase = false) => {
-        ctx2d.save();
-        if (erase) {
-          // Punch holes in the white cover → photo underneath shows through
-          ctx2d.globalCompositeOperation = "destination-out";
-          ctx2d.strokeStyle = "#000";
-        } else {
-          ctx2d.globalCompositeOperation = "source-over";
-          ctx2d.strokeStyle = color;
-        }
-        ctx2d.lineWidth = width;
-        ctx2d.lineCap = "round";
-        ctx2d.lineJoin = "round";
-        ctx2d.beginPath();
-        ctx2d.moveTo(lastX, lastY);
-        ctx2d.lineTo(x, y);
-        ctx2d.stroke();
-        ctx2d.restore();
-        lastX = x;
-        lastY = y;
-      };
-
-      const eraseAt = (x, y) => {
-        ctx2d.save();
-        ctx2d.globalCompositeOperation = "destination-out";
-        ctx2d.fillStyle = "#000";
-        ctx2d.beginPath();
-        ctx2d.arc(x, y, Math.max(4, toolSize * 0.55), 0, Math.PI * 2);
-        ctx2d.fill();
-        ctx2d.restore();
-      };
-
-      /** Sample canvas alpha — destination-out punches transparency for the photo. */
-      const measureRevealRatio = () => {
-        if (!coverReady || canvas.width < 8 || canvas.height < 8) return 0;
-        ctx2d.save();
-        ctx2d.setTransform(1, 0, 0, 1, 0, 0);
-        const img = ctx2d.getImageData(0, 0, canvas.width, canvas.height);
-        ctx2d.restore();
-        const data = img.data;
-        let erased = 0;
-        let samples = 0;
-        // Stride sample for perf (every 4th pixel)
-        for (let i = 3; i < data.length; i += 16) {
-          samples++;
-          if (data[i] < 128) erased++;
-        }
-        return samples ? erased / samples : 0;
-      };
-
-      const maybeCompletePaint = () => {
-        if (paintBeatDone) return;
-        const ratio = measureRevealRatio();
-        if (ratio < PAINT_REVEAL_THRESHOLD) return;
-        paintBeatDone = true;
-        completeSectionBeat("paint", {
-          photo: true,
-          meta: { via: "erase", ratio: Number(ratio.toFixed(3)) },
-        });
-        setStatus("Photo revealed — nice.");
-        blip("beat");
-      };
-
-      const drawShape = (x0, y0, x1, y1, kind, preview = false) => {
-        const left = Math.min(x0, x1);
-        const top = Math.min(y0, y1);
-        const w = Math.abs(x1 - x0);
-        const h = Math.abs(y1 - y0);
-        strokeStyle();
-        ctx2d.lineWidth = kind === "select" ? 1 : Math.max(1.5, toolSize * 0.12);
-        if (kind === "select") {
-          ctx2d.save();
-          ctx2d.strokeStyle = "#000080";
-          ctx2d.setLineDash([4, 3]);
-          ctx2d.strokeRect(left + 0.5, top + 0.5, w, h);
-          ctx2d.restore();
-          return;
-        }
-        if (kind === "line") {
-          ctx2d.beginPath();
-          ctx2d.moveTo(x0, y0);
-          ctx2d.lineTo(x1, y1);
-          ctx2d.stroke();
-          return;
-        }
-        if (kind === "oval") {
-          ctx2d.beginPath();
-          ctx2d.ellipse(left + w / 2, top + h / 2, Math.max(0.5, w / 2), Math.max(0.5, h / 2), 0, 0, Math.PI * 2);
-          ctx2d.stroke();
-          return;
-        }
-        if (kind === "round") {
-          const r = Math.min(12, w / 4, h / 4);
-          ctx2d.beginPath();
-          ctx2d.moveTo(left + r, top);
-          ctx2d.arcTo(left + w, top, left + w, top + h, r);
-          ctx2d.arcTo(left + w, top + h, left, top + h, r);
-          ctx2d.arcTo(left, top + h, left, top, r);
-          ctx2d.arcTo(left, top, left + w, top, r);
-          ctx2d.closePath();
-          ctx2d.stroke();
-          return;
-        }
-        // rect
-        ctx2d.strokeRect(left + 0.5, top + 0.5, w, h);
-        if (preview) { /* keep lint quiet */ }
-      };
-
-      const hexToRgba = (hex) => {
-        let h = (hex || "#000000").replace("#", "");
-        if (h.length === 3) h = h.split("").map((c) => c + c).join("");
-        const n = parseInt(h, 16);
-        return [(n >> 16) & 255, (n >> 8) & 255, n & 255, 255];
-      };
-
-      const floodFill = (cssX, cssY, fillHex) => {
-        const bx = Math.floor(cssX * dpr);
-        const by = Math.floor(cssY * dpr);
-        if (bx < 0 || by < 0 || bx >= canvas.width || by >= canvas.height) return;
-
-        ctx2d.save();
-        ctx2d.setTransform(1, 0, 0, 1, 0, 0);
-        const img = ctx2d.getImageData(0, 0, canvas.width, canvas.height);
-        const data = img.data;
-        const w = img.width;
-        const h = img.height;
-        const i0 = (by * w + bx) * 4;
-        const tr = data[i0];
-        const tg = data[i0 + 1];
-        const tb = data[i0 + 2];
-        const ta = data[i0 + 3];
-        const [fr, fg, fb, fa] = hexToRgba(fillHex);
-
-        // Treat fully transparent as white canvas bg
-        const sr = ta === 0 ? 255 : tr;
-        const sg = ta === 0 ? 255 : tg;
-        const sb = ta === 0 ? 255 : tb;
-        const sa = ta === 0 ? 255 : ta;
-
-        if (sr === fr && sg === fg && sb === fb && sa === fa) {
-          ctx2d.restore();
-          return;
-        }
-
-        const match = (i) => {
-          const a = data[i + 3];
-          if (a === 0) return sa === 255 && sr === 255 && sg === 255 && sb === 255;
-          return data[i] === sr && data[i + 1] === sg && data[i + 2] === sb && a === sa;
-        };
-
-        const stack = [bx, by];
-        const seen = new Uint8Array(w * h);
-        let guard = 0;
-        const max = w * h;
-
-        while (stack.length && guard < max) {
-          const y = stack.pop();
-          const x = stack.pop();
-          if (x < 0 || y < 0 || x >= w || y >= h) continue;
-          const idx = y * w + x;
-          if (seen[idx]) continue;
-          let lx = x;
-          while (lx >= 0 && match((y * w + lx) * 4) && !seen[y * w + lx]) lx--;
-          lx++;
-          let spanUp = false;
-          let spanDown = false;
-          while (lx < w && match((y * w + lx) * 4) && !seen[y * w + lx]) {
-            const pi = (y * w + lx) * 4;
-            data[pi] = fr;
-            data[pi + 1] = fg;
-            data[pi + 2] = fb;
-            data[pi + 3] = fa;
-            seen[y * w + lx] = 1;
-            guard++;
-            if (y > 0) {
-              const up = match(((y - 1) * w + lx) * 4) && !seen[(y - 1) * w + lx];
-              if (up && !spanUp) {
-                stack.push(lx, y - 1);
-                spanUp = true;
-              } else if (!up) spanUp = false;
-            }
-            if (y < h - 1) {
-              const dn = match(((y + 1) * w + lx) * 4) && !seen[(y + 1) * w + lx];
-              if (dn && !spanDown) {
-                stack.push(lx, y + 1);
-                spanDown = true;
-              } else if (!dn) spanDown = false;
-            }
-            lx++;
-          }
-        }
-
-        ctx2d.putImageData(img, 0, 0);
-        ctx2d.restore();
-      };
-
-      const pickColor = (cssX, cssY) => {
-        const bx = Math.floor(cssX * dpr);
-        const by = Math.floor(cssY * dpr);
-        if (bx < 0 || by < 0 || bx >= canvas.width || by >= canvas.height) return;
-        ctx2d.save();
-        ctx2d.setTransform(1, 0, 0, 1, 0, 0);
-        const [r, g, b, a] = ctx2d.getImageData(bx, by, 1, 1).data;
-        ctx2d.restore();
-        if (a === 0) {
-          setColor("#ffffff");
-          return;
-        }
-        const hex = `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
-        setColor(hex);
-      };
-
-      /** @type {HTMLTextAreaElement | null} */
-      let textEditor = null;
-
-      const removeTextEditor = () => {
-        if (textEditor) {
-          textEditor.remove();
-          textEditor = null;
-        }
-      };
-
-      const commitTextEditor = (discard = false) => {
-        if (!textEditor) return;
-        const val = (textEditor.value || "").trim();
-        const x = parseFloat(textEditor.dataset.x || "0");
-        const y = parseFloat(textEditor.dataset.y || "0");
-        if (!discard && val) {
-          ctx2d.save();
-          ctx2d.fillStyle = color;
-          ctx2d.font = `bold ${Math.max(16, toolSize + 10)}px "Comic Sans MS", "Trebuchet MS", sans-serif`;
-          ctx2d.textBaseline = "top";
-          const lines = val.split("\n");
-          lines.forEach((line, i) => {
-            ctx2d.fillText(line, x, y + i * (Math.max(16, toolSize + 10) * 1.2));
+        if (on) {
+          closeStartMenu();
+          setShutdownDlg(false);
+          setPictures(false);
+          setFirefox(false);
+          desktop.classList.add("is-powering-off");
+          // Black hold, then fade static in. No logo / buttons — Space when ready.
+          const blackMs = reduceMotion ? 0 : 800;
+          afterPowerOff(blackMs, () => {
+            powerOff?.classList.add("is-static-in");
           });
-          ctx2d.restore();
-          blip("press");
+        } else {
+          desktop.classList.remove("is-powering-off");
         }
-        removeTextEditor();
       };
 
-      const placeTextEditor = (x, y) => {
-        commitTextEditor(true);
-        const el = document.createElement("textarea");
-        el.className = "paint-text-editor";
-        el.rows = 2;
-        el.placeholder = "Type… Enter to stamp";
-        el.style.left = `${x}px`;
-        el.style.top = `${y}px`;
-        el.style.color = color;
-        el.dataset.x = String(x);
-        el.dataset.y = String(y);
-        el.addEventListener("keydown", (ev) => {
-          if (ev.key === "Escape") {
-            ev.preventDefault();
-            commitTextEditor(true);
-          } else if (ev.key === "Enter" && !ev.shiftKey) {
-            ev.preventDefault();
-            commitTextEditor(false);
-          }
-        });
-        el.addEventListener("blur", () => commitTextEditor(false));
-        surface.appendChild(el);
-        textEditor = el;
-        requestAnimationFrame(() => el.focus());
+      const leavePowerOffToConsoles = () => {
+        if (!poweringOff) return false;
+        clearPowerOffTimers();
+        blip("press");
+        // Space hand-off starts the PS2 splash → boot (logo lives there, once).
+        goToConsoles({ startSystem: true });
+        return true;
       };
 
-      const stopDrawing = (e) => {
-        if (!drawing) return;
-        const { x, y } = e ? localPos(e) : { x: lastX, y: lastY };
-        if (tool === "line" || tool === "rect" || tool === "oval" || tool === "round") {
-          restoreSnap();
-          drawShape(startX, startY, x, y, tool, false);
-          snap = null;
-        } else if (tool === "select" || tool === "lasso") {
-          restoreSnap();
-          snap = null;
-          setStatus("Select — visual only (no cut/copy).");
-        }
-        const wasErase = tool === "eraser";
-        drawing = false;
-        if (sprayTimer) {
-          clearInterval(sprayTimer);
-          sprayTimer = null;
-        }
-        if (wasErase) maybeCompletePaint();
+      const destroyPicturesMount = () => {
+        picturesMount?.destroy?.();
+        picturesMount = null;
       };
 
-      paintRoot.querySelectorAll("[data-paint-tool]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          setTool(btn.dataset.paintTool || "eraser");
-          blip("paintTool");
-        });
-      });
+      const destroyFirefoxMount = () => {
+        firefoxMount?.destroy?.();
+        firefoxMount = null;
+      };
 
-      paintRoot.querySelectorAll("[data-paint-color]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          setColor(btn.dataset.paintColor || "#000000");
-          blip("press");
-        });
-      });
+      const setWeb20Era = (on) => {
+        if (on) {
+          document.body.dataset.era = "web20";
+          document.body.dataset.themeFamily = "firefox";
+          document.body.dataset.year = "2004";
+          return;
+        }
+        // Only restore XP era while this hub is still the active chapter
+        if (chapter?.classList.contains("active")) {
+          document.body.dataset.era = "winxp";
+          document.body.dataset.themeFamily = "winxp";
+          document.body.dataset.year = "2001";
+        }
+      };
 
-      paintRoot.querySelectorAll("[data-spray-size]").forEach((el) => {
-        el.addEventListener("click", (e) => {
-          e.preventDefault();
-          toolSize = parseInt(el.dataset.spraySize || "14", 10);
-          paintRoot.querySelectorAll("[data-spray-size]").forEach((n) => {
-            n.classList.toggle("is-on", n === el);
+      const setPictures = (open) => {
+        if (!picturesWin) return;
+        // Allow close during power-off; block only new opens.
+        if (open && poweringOff) return;
+        picturesWin.classList.toggle("is-closed", !open);
+        picturesWin.hidden = !open;
+        picturesWin.style.display = open ? "flex" : "none";
+        picturesWin.setAttribute("aria-hidden", open ? "false" : "true");
+        if (picturesTask) {
+          picturesTask.hidden = !open;
+          picturesTask.classList.toggle("is-pressed", open);
+        }
+        desktop._wxpPicturesActive = open;
+
+        if (open && picturesRoot && !picturesMount) {
+          picturesMount = mountXpPictures(picturesRoot, {
+            images: GAMECUBE_ADS,
+            onReady: () => {
+              // Progress only — section3 unlock is empty (no next-OS interstitial).
+              completeSectionBeat("gamecube", {
+                sectionId: "section3",
+                meta: { via: "pictures" },
+              });
+            },
           });
-        });
-      });
-
-      // Hit the full white surface — canvas may lag resize; title art is pointer-events:none
-      surface.addEventListener("pointerdown", (e) => {
-        if (e.target.closest(".paint-text-editor")) return;
-        if (tool === "zoom" || tool === "curve" || tool === "poly") {
-          setStatus(TOOL_STATUS[tool]);
-          return;
+        } else if (!open) {
+          destroyPicturesMount();
         }
-        e.preventDefault();
-        surface.setPointerCapture?.(e.pointerId);
-        resizeCanvas();
-        const { x, y } = localPos(e);
-        startX = lastX = x;
-        startY = lastY = y;
-
-        if (tool === "text") {
-          placeTextEditor(x, y);
-          return;
-        }
-        if (tool === "fill") {
-          floodFill(x, y, color);
-          blip("press");
-          return;
-        }
-        if (tool === "drop") {
-          pickColor(x, y);
-          blip("press");
-          setTool("spray");
-          return;
-        }
-
-        drawing = true;
-        if (tool === "spray") {
-          sprayAt(x, y);
-          sprayTimer = setInterval(() => {
-            if (drawing) sprayAt(lastX, lastY);
-          }, 32);
-        } else if (tool === "pencil") {
-          ctx2d.fillStyle = color;
-          ctx2d.fillRect(x, y, 1.5, 1.5);
-        } else if (tool === "brush") {
-          ctx2d.fillStyle = color;
-          ctx2d.beginPath();
-          ctx2d.arc(x, y, Math.max(2, toolSize * 0.35), 0, Math.PI * 2);
-          ctx2d.fill();
-        } else if (tool === "eraser") {
-          eraseAt(x, y);
-        } else if (
-          tool === "line" || tool === "rect" || tool === "oval" ||
-          tool === "round" || tool === "select" || tool === "lasso"
-        ) {
-          saveSnap();
-        }
-      });
-
-      surface.addEventListener("pointermove", (e) => {
-        const { x, y } = localPos(e);
-        if (coordsEl) coordsEl.textContent = `${Math.round(x)}, ${Math.round(y)}`;
-        if (!drawing) {
-          lastX = x;
-          lastY = y;
-          return;
-        }
-        if (tool === "spray") {
-          lastX = x;
-          lastY = y;
-          sprayAt(x, y);
-        } else if (tool === "pencil") {
-          freehandTo(x, y, 1.5, false);
-        } else if (tool === "brush") {
-          freehandTo(x, y, Math.max(3, toolSize * 0.7), false);
-        } else if (tool === "eraser") {
-          freehandTo(x, y, Math.max(6, toolSize * 1.1), true);
-        } else if (
-          tool === "line" || tool === "rect" || tool === "oval" ||
-          tool === "round" || tool === "select" || tool === "lasso"
-        ) {
-          lastX = x;
-          lastY = y;
-          restoreSnap();
-          drawShape(startX, startY, x, y, tool === "lasso" ? "select" : tool, true);
-        }
-      });
-
-      surface.addEventListener("pointerup", stopDrawing);
-      surface.addEventListener("pointercancel", stopDrawing);
-      surface.addEventListener("pointerleave", () => {
-        if (coordsEl) coordsEl.textContent = "";
-      });
-
-      const setHelpOpen = (open) => {
-        if (!helpDlg) return;
-        helpDlg.classList.toggle("is-closed", !open);
-        helpDlg.setAttribute("aria-hidden", open ? "false" : "true");
       };
 
-      paintRoot.querySelectorAll("[data-paint-help-open]").forEach((btn) => {
+      const firefoxMaxBtn = desktop.querySelector("[data-wxp-firefox-maximize]");
+
+      const syncFirefoxMaximizeUi = (maximized) => {
+        if (!firefoxMaxBtn) return;
+        firefoxMaxBtn.setAttribute("aria-pressed", maximized ? "true" : "false");
+        firefoxMaxBtn.setAttribute(
+          "title",
+          maximized ? "Restore Down" : "Maximize"
+        );
+        firefoxMaxBtn.setAttribute(
+          "aria-label",
+          maximized ? "Restore Down" : "Maximize"
+        );
+        firefoxMaxBtn.textContent = maximized ? "❐" : "□";
+      };
+
+      const setFirefoxMaximized = (maximized) => {
+        if (!firefoxWin) return;
+        const on = !!maximized;
+        firefoxWin.classList.toggle("is-maximized", on);
+        syncFirefoxMaximizeUi(on);
+      };
+
+      const setFirefox = (open) => {
+        if (!firefoxWin) return;
+        if (open && poweringOff) return;
+        firefoxWin.classList.toggle("is-closed", !open);
+        firefoxWin.hidden = !open;
+        firefoxWin.setAttribute("aria-hidden", open ? "false" : "true");
+        if (firefoxTask) {
+          firefoxTask.hidden = !open;
+          firefoxTask.classList.toggle("is-pressed", open);
+        }
+        desktop._wxpFirefoxActive = open;
+        setWeb20Era(open);
+
+        if (open && !firefoxMount) {
+          firefoxMount = mountIeWeb20(firefoxWin, {
+            tabs: WEB20_TABS,
+          });
+          completeSectionBeat("firefox", {
+            sectionId: "section3",
+            meta: { via: "firefox" },
+          });
+        } else if (!open) {
+          setFirefoxMaximized(false);
+          destroyFirefoxMount();
+        }
+      };
+
+      /** Arrows: Firefox tabs, else My Pictures filmstrip — swallow before deck nav. */
+      desktop._wxpHandleKey = (e) => {
+        if (desktop._wxpFirefoxActive && firefoxMount) {
+          if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            const before = firefoxMount.activeIndex();
+            firefoxMount.cycleTab(-1);
+            if (firefoxMount.activeIndex() !== before) blip("windowOpen");
+            else blip("press");
+            return true;
+          }
+          if (e.key === "ArrowRight" || e.key === " " || e.key === "Spacebar") {
+            e.preventDefault();
+            const before = firefoxMount.activeIndex();
+            firefoxMount.cycleTab(1);
+            if (firefoxMount.activeIndex() !== before) blip("windowOpen");
+            else blip("press");
+            return true;
+          }
+          if (e.key === "Escape") {
+            e.preventDefault();
+            if (firefoxWin.classList.contains("is-maximized")) {
+              setFirefoxMaximized(false);
+              blip("press");
+              return true;
+            }
+            setFirefox(false);
+            blip("windowClose");
+            return true;
+          }
+        }
+        if (!desktop._wxpPicturesActive) return false;
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          picturesMount?.prev?.();
+          return true;
+        }
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          picturesMount?.next?.();
+          return true;
+        }
+        return false;
+      };
+
+      desktop.querySelectorAll("[data-wxp-pictures-open]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
-          setHelpOpen(true);
+          if (poweringOff) return;
+          closeStartMenu();
+          setPictures(true);
+          blip("press");
+        });
+      });
+      desktop.querySelectorAll("[data-wxp-pictures-close]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          setPictures(false);
           blip("press");
         });
       });
 
-      paintRoot.querySelectorAll("[data-paint-help-close]").forEach((btn) => {
+      desktop.querySelectorAll("[data-wxp-firefox-open]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
-          setHelpOpen(false);
-          blip("press");
+          if (poweringOff) return;
+          closeStartMenu();
+          setFirefox(true);
+          blip("windowOpen");
         });
       });
-
-      paintRoot.querySelectorAll("[data-paint-close]").forEach((btn) => {
+      desktop.querySelectorAll("[data-wxp-firefox-close]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          setFirefox(false);
+          blip("windowClose");
+        });
+      });
+      desktop.querySelectorAll("[data-wxp-firefox-maximize]").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-          commitTextEditor(true);
-          setHelpOpen(false);
-          // App close — return to desktop; do not advance the talk
-          if (w95Desktop?._w95ClosePaint) {
-            w95Desktop._w95ClosePaint();
-          } else {
-            blip("press");
-          }
+          if (poweringOff || !desktop._wxpFirefoxActive) return;
+          const next = !firefoxWin.classList.contains("is-maximized");
+          setFirefoxMaximized(next);
+          blip("press");
         });
       });
 
-      paintRoot._paintOnOpen = () => {
-        requestAnimationFrame(() => {
-          resizeCanvas();
-          if (!coverReady) fillWhiteCover();
+      startBtn?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (poweringOff) return;
+        if (startMenu && !startMenu.hidden) {
+          closeStartMenu();
+          blip("press");
+        } else {
+          openStartMenu();
+          blip("windowOpen");
+        }
+      });
+
+      desktop.addEventListener("pointerdown", (e) => {
+        if (!startMenu || startMenu.hidden) return;
+        if (e.target.closest("[data-wxp-start-menu], [data-wxp-start]")) return;
+        closeStartMenu();
+      });
+
+      desktop.querySelectorAll("[data-wxp-shutdown]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (poweringOff) return;
+          closeStartMenu();
+          setShutdownDlg(true);
+          blip("windowOpen");
         });
+      });
+
+      desktop.querySelectorAll("[data-wxp-shutdown-close]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setShutdownDlg(false);
+          blip("windowClose");
+        });
+      });
+
+      desktop.querySelectorAll("[data-wxp-shutdown-ok]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setPowerOff(true);
+          blip("transition");
+        });
+      });
+
+      desktop._wxpDestroyPictures = () => setPictures(false);
+      desktop._wxpDestroyFirefox = () => setFirefox(false);
+      desktop._wxpOpenFirefox = () => {
+        if (poweringOff) return;
+        closeStartMenu();
+        setFirefox(true);
       };
-      paintRoot._paintReset = () => {
-        coverReady = false;
-        // Keep section progress; only reset the canvas cover for a fresh scribble
-        paintBeatDone = progress.isBeatComplete("paint");
-        requestAnimationFrame(() => {
-          resizeCanvas();
-          fillWhiteCover();
-          setTool("eraser");
-          setHelpOpen(false);
-        });
+      desktop._wxpIsPoweringOff = () => poweringOff;
+      desktop._wxpLeavePowerOff = leavePowerOffToConsoles;
+      desktop._wxpNudgeAdvance = () => {
+        if (poweringOff) {
+          // Soft-gate: Space / Next during static (or black hold) starts PS2.
+          leavePowerOffToConsoles();
+          return true;
+        }
+        if (shutdownDlg && !shutdownDlg.classList.contains("is-closed") && !shutdownDlg.hidden) {
+          setPowerOff(true);
+          blip("transition");
+          return true;
+        }
+        openStartMenu();
+        const shut = desktop.querySelector("[data-wxp-shutdown]");
+        if (shut) {
+          shut.classList.remove("is-nudge");
+          void shut.offsetWidth;
+          shut.classList.add("is-nudge");
+          setTimeout(() => shut.classList.remove("is-nudge"), 700);
+        }
+        return true;
+      };
+      desktop._wxpResetPowerOff = () => setPowerOff(false);
+
+      /** Soft enter — classic Bliss desktop (Pictures + Firefox closed). */
+      desktop._wxpEnter = () => {
+        setPowerOff(false);
+        setShutdownDlg(false);
+        setPictures(false);
+        setFirefox(false);
+        closeStartMenu();
+        resetWin10Pack();
+        startClock();
+        // No auto Win10-pack swap — that read as a glitchy double-load after Y2K.
+        // Presenter can still force: Sipnsplain.applyWin10Pack().
       };
 
-      setTool("eraser");
-      setColor("#000000");
+      setPictures(false);
+      setFirefox(false);
+      setShutdownDlg(false);
+      setPowerOff(false);
+      closeStartMenu();
+    });
+  }
+
+  /** Living-room PS2 — splash → boot → Browser menu → shutdown → Timewarp. */
+  function wireConsolesChapter() {
+    deck.querySelectorAll("[data-consoles]").forEach((room) => {
+      const chapter = room.closest(".chapter");
+
+      /** @type {ReturnType<typeof mountPs2> | null} */
+      let mount = null;
+
+      const leave = () => {
+        chapter?.classList.add("consoles-done");
+        blip("correct");
+        goToTimewarp();
+        return true;
+      };
+
+      const ensureMount = () => {
+        if (mount) return mount;
+        mount = mountPs2(room, {
+          images: PS2_ADS,
+          reduceMotion,
+          getMuted: () => muted,
+          onContinue: leave,
+          onBrowserOpen: () => blip("windowOpen"),
+        });
+        return mount;
+      };
+
+      room._consolesReset = () => {
+        chapter?.classList.remove("consoles-done");
+        ensureMount().reset();
+      };
+      room._consolesStartSystem = () => {
+        ensureMount().startSystem();
+        return true;
+      };
+      room._consolesAdvance = () => {
+        const m = ensureMount();
+        // On menu, Next should leave (not force Browser) so the talk can skip ads.
+        if (m.phase() === "menu") {
+          blip("press");
+          return leave();
+        }
+        const moved = m.advance();
+        if (moved) blip("press");
+        return moved;
+      };
+      /** ←/→ / ↑/↓ stay in hub; scrub Browser strip when open. */
+      room._consolesHandleArrow = (delta) => {
+        const m = ensureMount();
+        if (m.phase() === "browser" && m.nudgeBrowser?.(delta)) {
+          blip("press");
+          return true;
+        }
+        blip("press");
+        return true;
+      };
+      room._consolesDestroy = () => {
+        mount?.destroy?.();
+        mount = null;
+      };
+    });
+  }
+
+  /** Timewarp — empty OS X desktop + dock; dock year (09…) opens the card track.
+   * Soft gate: while idle, ←/→/Space stay on desktop; after start, cycle cards.
+   * Only Continue leaves. Hold ←/→ to scrub. Shift+Arrow still escapes. */
+  function wireTimewarpChapter() {
+    deck.querySelectorAll("[data-timewarp]").forEach((root) => {
+      const chapter = root.closest(".chapter");
+
+      /** @type {ReturnType<typeof mountTimewarp> | null} */
+      let mount = null;
+
+      const leave = () => {
+        chapter?.classList.add("timewarp-done");
+        blip("correct");
+        // Continue → Switch 2 cue ("time to play a game") → then source-reveal.
+        goToFinale();
+        return true;
+      };
+
+      const ensureMount = () => {
+        if (mount) return mount;
+        mount = mountTimewarp(root, {
+          items: TIMEWARP_ITEMS,
+          onContinue: leave,
+          reduceMotion,
+        });
+        return mount;
+      };
+
+      ensureMount();
+
+      root._timewarpReset = () => {
+        chapter?.classList.remove("timewarp-done");
+        ensureMount().reset();
+      };
+      root._timewarpAdvance = () => {
+        const m = ensureMount();
+        if (!m.isStarted?.()) {
+          blip("press");
+          return true;
+        }
+        const before = m.activeIndex();
+        m.cycle(1);
+        if (m.activeIndex() !== before) blip("windowOpen");
+        else blip("press");
+        return true;
+      };
+      root._timewarpPrev = () => {
+        const m = ensureMount();
+        if (!m.isStarted?.()) {
+          blip("press");
+          return true;
+        }
+        const before = m.activeIndex();
+        m.cycle(-1);
+        if (m.activeIndex() !== before) blip("windowOpen");
+        else blip("press");
+        return true;
+      };
+      root._timewarpStartHold = (delta) => {
+        ensureMount().startHold?.(delta);
+        return true;
+      };
+      root._timewarpStopHold = () => {
+        ensureMount().stopHold?.();
+      };
+      root._timewarpDestroy = () => {
+        mount?.destroy();
+        mount = null;
+      };
+    });
+  }
+
+  function applyWin10PackAll() {
+    deck.querySelectorAll("[data-wxp]").forEach((desktop) => {
+      desktop._wxpApplyWin10Pack?.();
+    });
+  }
+
+  function resetWin10PackAll() {
+    deck.querySelectorAll("[data-wxp]").forEach((desktop) => {
+      desktop._wxpResetWin10Pack?.();
     });
   }
 
@@ -3093,36 +3271,10 @@ export function createEngine(root = document) {
     });
 
     // Standalone continue buttons (e.g. drifting thesis-3)
-    // Win98 hub uses [data-w98-continue] with its own themes/XP gate — skip those roots
+    // Win98 hub gates advance via Chris, 1999 / w98-unlocked — skip those roots
     deck.querySelectorAll("[data-continue]").forEach((btn) => {
       if (btn.closest("[data-quiz], [data-audience-poll], [data-w98]")) return;
       btn.addEventListener("click", () => next());
-    });
-  }
-
-  function wirePlayAgain() {
-    deck.querySelectorAll("[data-play-again]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        deck.querySelectorAll("[data-result]").forEach((b) => {
-          b.disabled = false;
-          b.classList.remove("is-correct", "is-wrong");
-        });
-        deck.querySelectorAll("[data-audience]").forEach((b) => {
-          b.disabled = false;
-          b.classList.remove("is-correct");
-        });
-        deck.querySelectorAll("[data-feedback]").forEach((f) => {
-          f.textContent = "";
-          f.classList.remove("show", "ok");
-        });
-        deck.querySelectorAll("[data-continue]").forEach((c) => {
-          if (!c.hasAttribute("data-drift")) c.classList.remove("show");
-        });
-        deck.querySelectorAll(".chapter").forEach((s) => s.classList.remove("quiz-solved"));
-        const win95 = chapters.findIndex((c) => c.id === "win95");
-        show(win95 >= 0 ? win95 : 0);
-        boot.run({ reason: "restart" });
-      });
     });
   }
 
@@ -3152,7 +3304,14 @@ export function createEngine(root = document) {
     ambient.stop();
 
     const nodes = deck.querySelectorAll(".chapter");
-    index = Math.max(0, Math.min(nodes.length - 1, i));
+    const nextIndex = Math.max(0, Math.min(nodes.length - 1, i));
+    const previous = nodes[index];
+    if (nextIndex !== index && previous?.classList.contains("mode-consoles")) {
+      previous.querySelectorAll("[data-consoles]").forEach((room) => {
+        room._consolesDestroy?.();
+      });
+    }
+    index = nextIndex;
     nodes.forEach((n, nIndex) => n.classList.toggle("active", nIndex === index));
 
     const ch = chapters[index];
@@ -3165,6 +3324,7 @@ export function createEngine(root = document) {
     notesEl.textContent = notesBody(ch, eraNote);
     history.replaceState(null, "", `#${ch.id}`);
     syncMissionUI();
+    syncStoryMenuActive();
     document.body.dataset.energy = energyForChapter(ch);
 
     const active = nodes[index];
@@ -3175,7 +3335,10 @@ export function createEngine(root = document) {
         active?.classList.contains("mode-paint") ||
         active?.classList.contains("mode-win95") ||
         active?.classList.contains("mode-win98") ||
-        active?.classList.contains("mode-winxp")) &&
+        active?.classList.contains("mode-winxp") ||
+        active?.classList.contains("mode-consoles") ||
+        active?.classList.contains("mode-ie") ||
+        active?.classList.contains("mode-timewarp")) &&
       !reduceMotion
     ) {
       const soft =
@@ -3183,7 +3346,10 @@ export function createEngine(root = document) {
         active.classList.contains("mode-paint") ||
         active.classList.contains("mode-win95") ||
         active.classList.contains("mode-win98") ||
-        active.classList.contains("mode-winxp");
+        active.classList.contains("mode-winxp") ||
+        active.classList.contains("mode-consoles") ||
+        active.classList.contains("mode-ie") ||
+        active.classList.contains("mode-timewarp");
       blip(soft ? "correct" : "slam");
     }
 
@@ -3199,12 +3365,17 @@ export function createEngine(root = document) {
     });
     deck.querySelectorAll("[data-wxp]").forEach((desktop) => {
       desktop._wxpStopClock?.();
+      desktop._wxpDestroyPictures?.();
+      desktop._wxpDestroyFirefox?.();
+      desktop._wxpCancelWin10Pack?.();
     });
 
-    // Hard-reload Win95 desktop whenever this chapter becomes active again
+    // Soft-enter hubs on revisit — preserve Mine/pinball/Ski mid-beat
+    // (Win95 closes Atari/EP2 + destroys ad strip on enter).
+    // Hard reset still available via desktop._resetWin95 / _resetWin98.
     if (ch.id === "win95" || active?.classList.contains("mode-win95")) {
       progress.setActiveSection("section1");
-      resetWin95Desktop();
+      enterWin95Desktop();
       active.querySelectorAll("[data-w95]").forEach((desktop) => {
         desktop._w95StartClock?.();
       });
@@ -3215,7 +3386,7 @@ export function createEngine(root = document) {
     if (ch.id === "win98" || active?.classList.contains("mode-win98")) {
       progress.setActiveSection("section2");
       progress.setCheckpointChapterId("win98");
-      resetWin98Desktop();
+      enterWin98Desktop();
       active.querySelectorAll("[data-w98]").forEach((desktop) => {
         desktop._w98StartClock?.();
       });
@@ -3230,9 +3401,29 @@ export function createEngine(root = document) {
         progress.setActiveSection("section3");
         progress.setCheckpointChapterId("winxp");
       }
+      // Re-enter / jump: Bliss desktop; Pictures closed (no auto Win10 swap).
       active.querySelectorAll("[data-wxp]").forEach((desktop) => {
-        desktop.classList.add("is-bliss");
-        desktop._wxpStartClock?.();
+        if (typeof desktop._wxpEnter === "function") desktop._wxpEnter();
+        else {
+          desktop._wxpResetPowerOff?.();
+          desktop._wxpResetWin10Pack?.();
+          desktop.classList.add("is-bliss");
+          desktop._wxpStartClock?.();
+        }
+      });
+    }
+
+    if (ch.id === "consoles" || active?.classList.contains("mode-consoles")) {
+      active?.classList.remove("consoles-done");
+      active?.querySelectorAll("[data-consoles]").forEach((room) => {
+        room._consolesReset?.();
+      });
+    }
+
+    if (ch.id === "timewarp" || active?.classList.contains("mode-timewarp")) {
+      active?.classList.remove("timewarp-done");
+      active?.querySelectorAll("[data-timewarp]").forEach((root) => {
+        root._timewarpReset?.();
       });
     }
 
@@ -3242,7 +3433,7 @@ export function createEngine(root = document) {
 
   function next() {
     if (y2k.isRunning) {
-      y2k.skipToInstall();
+      y2k.advance();
       return;
     }
     if (transition.isOpen) {
@@ -3263,7 +3454,9 @@ export function createEngine(root = document) {
         blip("press");
         return;
       }
-      const hot = deck.querySelector(".chapter.active [data-w95-internet]");
+      const hot =
+        deck.querySelector(".chapter.active [data-w95-start]") ||
+        deck.querySelector(".chapter.active [data-w95-mine-open]");
       if (hot) {
         hot.classList.remove("is-nudge");
         void hot.offsetWidth;
@@ -3279,15 +3472,44 @@ export function createEngine(root = document) {
         blip("press");
         return;
       }
-      const updateEl = deck.querySelector(
-        ".chapter.active [data-w98-update]:not([hidden])"
+      const themesEl = deck.querySelector(
+        ".chapter.active [data-w98-themes-open]"
       );
-      if (updateEl) {
-        updateEl.classList.remove("is-nudge");
-        void updateEl.offsetWidth;
-        updateEl.classList.add("is-nudge");
-        setTimeout(() => updateEl.classList.remove("is-nudge"), 600);
+      if (themesEl) {
+        themesEl.classList.remove("is-nudge");
+        void themesEl.offsetWidth;
+        themesEl.classList.add("is-nudge");
+        setTimeout(() => themesEl.classList.remove("is-nudge"), 600);
       }
+      blip("press");
+      return;
+    }
+    if (winxpBlocksAdvance()) {
+      const desktop = deck.querySelector(".chapter.active [data-wxp]");
+      if (desktop?._wxpNudgeAdvance?.()) {
+        blip("press");
+        return;
+      }
+      blip("press");
+      return;
+    }
+    // Power-off beat: Next leaves XP → living room (soft-gate; skips black/static hold)
+    const xpActive = deck.querySelector(".chapter.active.mode-winxp");
+    if (xpActive?.classList.contains("wxp-powering-off")) {
+      const desktop = xpActive.querySelector("[data-wxp]");
+      if (desktop?._wxpLeavePowerOff?.()) return;
+      goToConsoles();
+      return;
+    }
+    if (consolesBlocksAdvance()) {
+      const room = deck.querySelector(".chapter.active [data-consoles]");
+      if (room?._consolesAdvance?.()) return;
+      blip("press");
+      return;
+    }
+    if (timewarpBlocksAdvance()) {
+      const root = deck.querySelector(".chapter.active [data-timewarp]");
+      if (root?._timewarpAdvance?.()) return;
       blip("press");
       return;
     }
@@ -3314,13 +3536,172 @@ export function createEngine(root = document) {
       crtBoot.skip();
       return;
     }
+    if (timewarpBlocksAdvance()) {
+      const root = deck.querySelector(".chapter.active [data-timewarp]");
+      if (root?._timewarpPrev?.()) return;
+    }
     show(index - 1);
   }
 
   function flashChrome() {
     document.body.classList.add("show-chrome");
     clearTimeout(chromeTimer);
+    // Keep chrome visible while Story menu is open
+    if (storyMenuOpen) return;
     chromeTimer = setTimeout(() => document.body.classList.remove("show-chrome"), 1600);
+  }
+
+  /**
+   * Presenter story-arc beats (labels → destinations).
+   * Optional points (e.g. consoles) only appear when that chapter exists.
+   */
+  function storyArcPoints() {
+    /** @type {{ id:string, label:string, hotkey:string, chapterId?:string, kind:string }[]} */
+    const points = [
+      { id: "win95", label: "Win95", hotkey: "1", chapterId: "win95", kind: "chapter" },
+      { id: "win98", label: "Win98", hotkey: "2", chapterId: "win98", kind: "chapter" },
+      { id: "y2k", label: "Y2K (start)", hotkey: "3", chapterId: "win98", kind: "y2k" },
+      { id: "winxp", label: "WinXP", hotkey: "4", chapterId: "winxp", kind: "chapter" },
+      { id: "consoles", label: "PS2", hotkey: "5", chapterId: "consoles", kind: "chapter" },
+      { id: "web20", label: "Firefox", hotkey: "6", chapterId: "winxp", kind: "firefox" },
+      { id: "timewarp", label: "Timewarp", hotkey: "7", chapterId: "timewarp", kind: "chapter" },
+      { id: "finale", label: "Switch 2 cue", hotkey: "8", chapterId: "make-impossible", kind: "chapter" },
+    ];
+    return points.filter((p) => {
+      if (!p.chapterId) return true;
+      return chapters.some((c) => c.id === p.chapterId);
+    });
+  }
+
+  function chapterIndexById(id) {
+    return chapters.findIndex((c) => c.id === id);
+  }
+
+  function clearPresenterOverlays() {
+    if (boot.isRunning) boot.skip();
+    if (crtBoot.isRunning) crtBoot.skip();
+    if (y2k.isRunning) {
+      y2k.abort();
+      deck.querySelectorAll("[data-w98]").forEach((desktop) => {
+        desktop._w98StartClock?.();
+      });
+    }
+    if (transition.isOpen) transition.hide();
+  }
+
+  function goArc(pointId) {
+    const points = storyArcPoints();
+    const point =
+      points.find((p) => p.id === pointId) ||
+      points.find((p) => p.hotkey === String(pointId));
+    if (!point) return false;
+
+    clearPresenterOverlays();
+
+    if (point.kind === "y2k") {
+      const i = chapterIndexById("win98");
+      if (i < 0) return false;
+      show(i);
+      progress.setActiveSection("section2");
+      // Cheat-complete whatever section2.unlock.allOf requires (Chris, 1999).
+      const required =
+        progress.getSectionDef("section2")?.unlock?.allOf || ["chris1999"];
+      for (const beatId of required) {
+        progress.completeBeat(beatId, { sectionId: "section2" });
+      }
+      progress.rearmUpdate("section2");
+      // Defer so win98 enter / clocks settle before theatre starts
+      requestAnimationFrame(() => {
+        beginY2kTransition();
+      });
+      setStoryMenuOpen(false);
+      flashChrome();
+      blip("press");
+      return true;
+    }
+
+    if (point.kind === "firefox") {
+      goToWeb20();
+      setStoryMenuOpen(false);
+      flashChrome();
+      blip("press");
+      return true;
+    }
+
+    const i = chapterIndexById(point.chapterId);
+    if (i < 0) return false;
+    show(i);
+    setStoryMenuOpen(false);
+    flashChrome();
+    blip("press");
+    return true;
+  }
+
+  function syncStoryMenuActive() {
+    if (!storyMenuListEl) return;
+    const chId = chapters[index]?.id;
+    storyMenuListEl.querySelectorAll("[data-arc]").forEach((btn) => {
+      const arcId = btn.getAttribute("data-arc");
+      const xp = deck.querySelector(".chapter.active [data-wxp]");
+      const firefoxOpen = Boolean(xp?._wxpFirefoxActive);
+      const active =
+        (arcId === "y2k" && y2k.isRunning && chId === "win98") ||
+        (arcId === "finale" && (chId === "make-impossible" || chId === "source-reveal")) ||
+        (arcId === "web20" && chId === "winxp" && firefoxOpen) ||
+        (arcId === "winxp" && chId === "winxp" && !firefoxOpen) ||
+        (arcId !== "y2k" &&
+          arcId !== "finale" &&
+          arcId !== "web20" &&
+          arcId !== "winxp" &&
+          arcId === chId);
+      btn.classList.toggle("is-active", active);
+      btn.setAttribute("aria-current", active ? "true" : "false");
+    });
+  }
+
+  function buildStoryMenu() {
+    if (!storyMenuListEl) return;
+    const points = storyArcPoints();
+    storyMenuListEl.innerHTML = points
+      .map(
+        (p) => `
+      <li>
+        <button type="button" class="story-menu-item" data-arc="${p.id}" data-hotkey="${p.hotkey}">
+          <kbd>${p.hotkey}</kbd>
+          <span>${p.label}</span>
+        </button>
+      </li>`
+      )
+      .join("");
+    storyMenuListEl.querySelectorAll("[data-arc]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        goArc(btn.getAttribute("data-arc"));
+      });
+    });
+    syncStoryMenuActive();
+  }
+
+  function setStoryMenuOpen(open) {
+    storyMenuOpen = Boolean(open);
+    document.body.classList.toggle("show-story-menu", storyMenuOpen);
+    if (storyMenuEl) {
+      if (storyMenuOpen) storyMenuEl.removeAttribute("hidden");
+      else storyMenuEl.setAttribute("hidden", "");
+    }
+    if (storyMenuOpen) {
+      clearTimeout(chromeTimer);
+      document.body.classList.add("show-chrome");
+      syncStoryMenuActive();
+    } else {
+      flashChrome();
+    }
+  }
+
+  function toggleStoryMenu(force) {
+    if (typeof force === "boolean") setStoryMenuOpen(force);
+    else setStoryMenuOpen(!storyMenuOpen);
+    if (storyMenuOpen) blip("press");
+    return storyMenuOpen;
   }
 
   function toggleMission() {
@@ -3344,9 +3725,9 @@ export function createEngine(root = document) {
     wireWin95Desktop();
     wireWin98Desktop();
     wireWinXpDesktop();
-    wirePaintTitle();
+    wireConsolesChapter();
+    wireTimewarpChapter();
     adaptive.wire(deck);
-    wirePlayAgain();
 
     for (const ch of chapters) {
       for (const src of ch.images || []) {
@@ -3363,9 +3744,33 @@ export function createEngine(root = document) {
     applyMuteUI();
 
     const hash = location.hash.replace("#", "");
-    const start = hash ? chapters.findIndex((s) => s.id === hash) : 0;
-    const startIndex = start >= 0 ? start : 0;
+    // #web20 is no longer a chapter — land on XP + open Firefox
+    const web20DeepLink = hash === "web20" || hash === "ie" || hash === "firefox";
+    // #y2k is a story-arc beat (not a chapter id) — land win98 + start theatre
+    const y2kDeepLink = hash === "y2k" || hash === "y2k-start";
+    const start = hash && !web20DeepLink && !y2kDeepLink
+      ? chapters.findIndex((s) => s.id === hash)
+      : 0;
+    const startIndex = web20DeepLink
+      ? Math.max(0, chapters.findIndex((s) => s.id === "winxp"))
+      : y2kDeepLink
+        ? Math.max(0, chapters.findIndex((s) => s.id === "win98"))
+        : start >= 0
+          ? start
+          : 0;
     show(startIndex);
+    if (web20DeepLink) {
+      requestAnimationFrame(() => {
+        deck.querySelectorAll("[data-wxp]").forEach((desktop) => {
+          desktop._wxpOpenFirefox?.();
+        });
+      });
+    }
+    if (y2kDeepLink) {
+      requestAnimationFrame(() => {
+        goArc("y2k");
+      });
+    }
 
     // Cold open: boot overlay → Win95 hub (skip when deep-linking past #win95)
     const startCh = chapters[startIndex];
@@ -3378,6 +3783,10 @@ export function createEngine(root = document) {
     root.getElementById("toggleNotes")?.addEventListener("click", () => {
       document.body.classList.toggle("show-notes");
     });
+    root.getElementById("toggleStory")?.addEventListener("click", () => {
+      toggleStoryMenu();
+    });
+    buildStoryMenu();
 
     window.addEventListener("keydown", onKey);
     window.addEventListener("mousemove", flashChrome);
@@ -3387,6 +3796,38 @@ export function createEngine(root = document) {
   function onKey(e) {
     const tag = (e.target && e.target.tagName) || "";
     const typing = tag === "INPUT" || tag === "TEXTAREA";
+    const keyLower = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    const isStoryToggle = !typing && (e.key === "`" || keyLower === "g");
+
+    // Story menu — G / ` always available for presenter (even mid Y2K / boot)
+    if (isStoryToggle) {
+      e.preventDefault();
+      toggleStoryMenu();
+      flashChrome();
+      return;
+    }
+    if (storyMenuOpen) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setStoryMenuOpen(false);
+        flashChrome();
+        return;
+      }
+      if (/^[1-9]$/.test(e.key)) {
+        e.preventDefault();
+        if (goArc(e.key)) return;
+        flashChrome();
+        return;
+      }
+      if (
+        ["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "PageDown", "PageUp", " ", "Spacebar", "Enter"].includes(
+          e.key
+        )
+      ) {
+        e.preventDefault();
+        return;
+      }
+    }
 
     // Boot opener — after load lines, key/click continues to desktop
     if (boot.isRunning) {
@@ -3397,7 +3838,7 @@ export function createEngine(root = document) {
       return;
     }
 
-    // Y2K theatre — Next skips to CD install; Esc aborts (cosmetic only)
+    // Y2K theatre — Next/Space/click steps BSOD → reboot → install; Esc aborts
     if (y2k.isRunning) {
       if (["Escape"].includes(e.key)) {
         e.preventDefault();
@@ -3410,9 +3851,15 @@ export function createEngine(root = document) {
       }
       if (["Enter", " ", "Spacebar", "ArrowRight", "ArrowDown"].includes(e.key)) {
         e.preventDefault();
-        y2k.skipToInstall();
+        y2k.advance();
         flashChrome();
         return;
+      }
+      // Any other key also advances a gate (BSOD copy says "Press any key")
+      if (y2k.isGated && e.key.length === 1) {
+        e.preventDefault();
+        y2k.advance();
+        flashChrome();
       }
       return;
     }
@@ -3443,7 +3890,7 @@ export function createEngine(root = document) {
       }
     }
 
-    // Win95 Start / Minesweeper / Paint — Esc + game keys before deck nav
+    // Win95 Start / Minesweeper / Atari — Esc + game keys before deck nav
     {
       const w95 = deck.querySelector(".chapter.active [data-w95]");
       if (w95?._w95HandleKey?.(e)) {
@@ -3456,6 +3903,15 @@ export function createEngine(root = document) {
     {
       const w98 = deck.querySelector(".chapter.active [data-w98]");
       if (w98?._w98HandleKey?.(e)) {
+        flashChrome();
+        return;
+      }
+    }
+
+    // WinXP My Pictures — ←/→ before deck nav
+    {
+      const wxp = deck.querySelector(".chapter.active [data-wxp]");
+      if (wxp?._wxpHandleKey?.(e)) {
         flashChrome();
         return;
       }
@@ -3485,6 +3941,9 @@ export function createEngine(root = document) {
     if (!typing && e.key.toLowerCase() === "m") {
       muted = !muted;
       applyMuteUI();
+      window.dispatchEvent(
+        new CustomEvent("sipnsplain:mutechange", { detail: { muted } })
+      );
       if (!muted) blip("press");
       flashChrome();
       return;
@@ -3547,13 +4006,49 @@ export function createEngine(root = document) {
     // Shift+Arrow — presenter escape nav (never trapped; no shame)
     if (e.shiftKey && ["ArrowRight", "ArrowDown", "PageDown"].includes(e.key)) {
       e.preventDefault();
+      stopTimewarpHold();
+      const consoles = deck.querySelector(".chapter.active [data-consoles][data-ps2]");
+      if (consoles?.dataset.ps2Phase === "shutdown") {
+        consoles._consolesAdvance?.();
+        flashChrome();
+        return;
+      }
       show(index + 1);
       flashChrome();
       return;
     }
     if (e.shiftKey && ["ArrowLeft", "ArrowUp", "PageUp"].includes(e.key)) {
       e.preventDefault();
+      stopTimewarpHold();
       show(index - 1);
+      flashChrome();
+      return;
+    }
+
+    // Timewarp hold-to-scrub (keydown repeat suppressed; custom interval)
+    if (
+      timewarpBlocksAdvance() &&
+      !e.repeat &&
+      (e.key === "ArrowRight" || e.key === "ArrowLeft")
+    ) {
+      e.preventDefault();
+      const root = deck.querySelector(".chapter.active [data-timewarp]");
+      const delta = e.key === "ArrowRight" ? 1 : -1;
+      root?._timewarpStartHold?.(delta);
+      flashChrome();
+      return;
+    }
+
+    // PS2 / consoles — arrows stay in hub (scrub Browser strip when open).
+    // Space / Next still soft-skip via next(); Shift+Arrow escapes above.
+    if (
+      consolesBlocksAdvance() &&
+      ["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"].includes(e.key)
+    ) {
+      e.preventDefault();
+      const room = deck.querySelector(".chapter.active [data-consoles]");
+      const delta = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : -1;
+      room?._consolesHandleArrow?.(delta);
       flashChrome();
       return;
     }
@@ -3580,6 +4075,17 @@ export function createEngine(root = document) {
     }
     flashChrome();
   }
+
+  function stopTimewarpHold() {
+    deck.querySelectorAll("[data-timewarp]").forEach((root) => {
+      root._timewarpStopHold?.();
+    });
+  }
+
+  window.addEventListener("keyup", (e) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") stopTimewarpHold();
+  });
+  window.addEventListener("blur", stopTimewarpHold);
 
   mount();
   return api;

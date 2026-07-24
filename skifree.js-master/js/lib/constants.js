@@ -26,7 +26,7 @@ export const SKI_LIFT_STANDARD_SPEED = 6;
 // Game world
 export const PIXELS_PER_METRE = 18;
 /** Deck photo beat: finish line / yeti chase trigger (metres). */
-export const FINISH_LINE_METRES = 1000;
+export const FINISH_LINE_METRES = 200;
 /** How far ahead (m) to plant the finish signs so the skier can see them. */
 export const FINISH_LINE_WARN_METRES = 80;
 /** Random yeti spawns only after this (keep above finish so deck chase is forced). */

@@ -5,10 +5,11 @@
  * Dial-up WAV stays in moments/boot.js; everything else routes through here.
  */
 
-/** @typedef {'press'|'windowOpen'|'windowClose'|'startMenu'|'recycleEmpty'|'beat'|'photo'|'correct'|'score'|'updateUnlock'|'transition'|'wrong'|'error'|'slam'|'mineFlag'|'paintTool'|'xpStartup'} SfxKind */
+/** @typedef {'press'|'windowOpen'|'windowClose'|'startMenu'|'recycleEmpty'|'beat'|'photo'|'correct'|'score'|'updateUnlock'|'transition'|'wrong'|'error'|'slam'|'crash'|'mineFlag'|'paintTool'|'xpStartup'|'win10Notify'} SfxKind */
 
 /**
  * Curated Microsoft WAVs under assets/audio/win95|win98|winxp (gitignored — see README).
+ * Win10 pack notify is MIT-licensed (WinXP655/Win10UIforXP) under assets/winxp-ui/win10pack/.
  * Missing / failed decode → procedural path for that kind.
  * @type {Partial<Record<SfxKind, { url: string, gain?: number }>>}
  */
@@ -25,6 +26,10 @@ const WAV_BY_KIND = {
   error: { url: "/assets/audio/win95/chord.wav", gain: 0.55 },
   wrong: { url: "/assets/audio/win95/chord.wav", gain: 0.42 },
   xpStartup: { url: "/assets/audio/winxp/startup.wav", gain: 0.78 },
+  win10Notify: {
+    url: "/assets/winxp-ui/win10pack/audio/notify.wav",
+    gain: 0.55,
+  },
 };
 
 /**
@@ -211,8 +216,8 @@ export function createSfx(opts = {}) {
     osc.stop(now + toneOpts.d + 0.02);
   }
 
-  /** Soft noise burst (recycle empty / trash-ish). */
-  function noiseBurst({ d = 0.12, v = 0.04, hp = 800 } = {}) {
+  /** Soft noise burst (recycle empty / trash-ish / shatter layers). */
+  function noiseBurst({ d = 0.12, v = 0.04, hp = 800, delay = 0, q = 0.7 } = {}) {
     const ctx = ensure();
     if (!ctx || !master) return;
     const len = Math.max(1, Math.floor(ctx.sampleRate * d));
@@ -227,10 +232,10 @@ export function createSfx(opts = {}) {
     const filter = ctx.createBiquadFilter();
     filter.type = "bandpass";
     filter.frequency.value = hp;
-    filter.Q.value = 0.7;
+    filter.Q.value = q;
     const gain = ctx.createGain();
-    const now = ctx.currentTime;
-    gain.gain.setValueAtTime(v * volume, now);
+    const now = ctx.currentTime + delay;
+    gain.gain.setValueAtTime(Math.max(0.0001, v * volume), now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + d);
     src.connect(filter);
     filter.connect(gain);
@@ -285,6 +290,11 @@ export function createSfx(opts = {}) {
         tone({ f: 659, d: 0.35, type: "triangle", v: 0.034, delay: 0.3 });
         tone({ f: 784, d: 0.5, type: "sine", v: 0.028, delay: 0.5 });
         break;
+      case "win10Notify":
+        // Short glass-ping stand-in for Win10 notify.wav
+        tone({ f: 880, d: 0.08, type: "sine", v: 0.036 });
+        tone({ f: 1175, d: 0.14, type: "triangle", v: 0.03, delay: 0.07 });
+        break;
       case "wrong":
         tone({ f: 140, d: 0.18, type: "sawtooth", v: 0.045, slide: 90 });
         break;
@@ -293,6 +303,16 @@ export function createSfx(opts = {}) {
         break;
       case "slam":
         tone({ f: 90, d: 0.15, type: "sine", v: 0.055 });
+        break;
+      case "crash":
+        // Glass shatter + body impact (Y2K midnight / break beat)
+        noiseBurst({ d: 0.07, v: 0.1, hp: 5200, q: 1.4 });
+        noiseBurst({ d: 0.16, v: 0.08, hp: 2400, delay: 0.02, q: 0.9 });
+        noiseBurst({ d: 0.28, v: 0.055, hp: 900, delay: 0.05, q: 0.5 });
+        tone({ f: 180, d: 0.14, type: "sawtooth", v: 0.055, slide: 55 });
+        tone({ f: 70, d: 0.28, type: "sine", v: 0.07, delay: 0.015 });
+        tone({ f: 1600, d: 0.08, type: "square", v: 0.035, slide: 280, delay: 0.03 });
+        tone({ f: 920, d: 0.1, type: "triangle", v: 0.028, slide: 180, delay: 0.08 });
         break;
       case "mineFlag":
         tone({ f: 480, d: 0.035, type: "square", v: 0.028 });

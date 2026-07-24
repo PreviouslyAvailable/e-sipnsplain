@@ -28,6 +28,7 @@ MAP = [
     ("w98/recycle-empty.png", "w98_recycle_bin_empty.ico", 32),
     ("w98/control-panel.png", "w98_directory_control_panel.ico", 32),
     ("w98/floppy.png", "w98_floppy_drive_3-5.ico", 32),
+    ("w98/cd-drive.png", "w98_cd_drive.ico", 32),
     ("w98/start-games.png", "w98_joystick.ico", 16),
     ("w98/start-settings.png", "w98_settings_gear.ico", 16),
     ("w98/start-themes.png", "w98_themes.ico", 16),
@@ -37,6 +38,8 @@ MAP = [
     ("wxp/my-computer.png", "wxp_16.ico", 32),
     ("wxp/recycle-empty.png", "wxp_32.ico", 32),
     ("wxp/recycle-full.png", "wxp_33.ico", 32),
+    ("wxp/start-flag.png", "wxp_239.ico", 16),
+    ("wxp/start-flag-22.png", "wxp_239.ico", 22),
 ]
 
 
