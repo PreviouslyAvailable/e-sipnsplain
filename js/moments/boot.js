@@ -4,13 +4,14 @@
  * Staged funny lines, then click / key to land on the desktop (no auto-advance).
  *
  * Audio: assets/audio/dialup-handshake.wav (procedural 56k homage).
- * Plays ~10s after boot overlay starts (cleared if the presenter continues earlier).
- * Autoplay may be blocked until the first user gesture — we retry on pointerdown.
+ * Plays when boot overlay starts, then again ~10s later (timers cleared on skip/continue).
+ * Autoplay may be blocked until the first user gesture — we retry on pointerdown/keydown;
+ * the 10s replay still runs after unlock if boot is still running.
  */
 
 const DIALUP_SRC = "/assets/audio/dialup-handshake.wav";
-/** Delay from boot `run()` before dial-up starts (opening-screen beat). */
-const DIALUP_DELAY_MS = 10000;
+/** Second dial-up play, measured from boot `run()`. */
+const DIALUP_REPEAT_MS = 10000;
 
 /** Staged log under the lead line (lead itself is “Loading Windows 95…”). */
 const BOOT_LINES = [
@@ -59,15 +60,26 @@ export function createBoot(ctx) {
     if (ctx.muted || reduceMotion) return;
     const el = ensureAudio();
     el.volume = 0.55;
+    try {
+      el.currentTime = 0;
+    } catch {
+      /* ignore */
+    }
     const attempt = () => {
       const p = el.play();
       if (p && typeof p.catch === "function") {
         p.catch(() => {
-          // Autoplay blocked — retry on first gesture
+          // Autoplay blocked — retry on first gesture (once).
+          // Later scheduled plays call playDialup again; after unlock they succeed.
           if (unlockBound) return;
           unlockBound = true;
           const unlock = () => {
             if (!running || ctx.muted) return;
+            try {
+              el.currentTime = 0;
+            } catch {
+              /* ignore */
+            }
             el.play().catch(() => {});
           };
           window.addEventListener("pointerdown", unlock, { once: true });
@@ -200,13 +212,14 @@ export function createBoot(ctx) {
     el.classList.add("is-live");
     document.body.classList.add("is-booting");
 
-    // Atmosphere: wait on the opening screen, then dial-up (mute / reduced-motion skip in playDialup).
+    // Atmosphere: dial-up on load, then again at 10s (mute / reduced-motion skip in playDialup).
     if (!reduceMotion) {
+      playDialup();
       timers.push(
         setTimeout(() => {
           if (!running) return;
           playDialup();
-        }, DIALUP_DELAY_MS)
+        }, DIALUP_REPEAT_MS)
       );
     }
 
