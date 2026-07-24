@@ -3739,17 +3739,15 @@ body.is-booting .story-menu {
   .paint-app { animation: none; }
 }
 
+/* Immersive hubs own the stage — hide presenter chrome (slide HUD, Story/Notes).
+   Keyboard still works: G/` Story · N Notes · I slide index (when chrome returns). */
 body:has(.chapter.mode-paint.active) .chrome,
 body:has(.chapter.mode-win95.active) .chrome,
 body:has(.chapter.mode-win98.active) .chrome,
 body:has(.chapter.mode-winxp.active) .chrome,
 body:has(.chapter.mode-consoles.active) .chrome,
 body:has(.chapter.mode-ie.active) .chrome,
-body:has(.chapter.mode-google98.active) .chrome {
-  bottom: 36px;
-}
-
-/* Mountain Lion shell owns its chrome (menu bar + dock). */
+body:has(.chapter.mode-google98.active) .chrome,
 body:has(.chapter.mode-timewarp.active) .chrome {
   display: none;
 }
