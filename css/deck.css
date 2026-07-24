@@ -5127,7 +5127,7 @@ body.is-crt-live { cursor: none; }
 }
 
 .source-scroll__photo {
-  margin: 2.8rem 0 12vh;
+  margin: 2.8rem auto 12vh;
   padding: 0;
   max-width: min(28rem, 100%);
 }
